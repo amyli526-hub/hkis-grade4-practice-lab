@@ -144,6 +144,8 @@ button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-
 .choice:disabled{cursor:default}
 .feedback{border-radius:12px;padding:14px 16px;margin-top:18px;font-size:14px;line-height:1.55}
 .feedback.good{background:var(--goodbg);border:1px solid #bfe3cd}
+.feedback.hint{background:#fff9e9;border:1px solid #f0ddac}
+.feedback.hint b{color:#8a5a00}
 .feedback.bad{background:var(--badbg);border:1px solid #f0c6c1}
 .feedback b{display:block;font-size:15px;margin-bottom:5px}
 .feedback.good b{color:var(--good)} .feedback.bad b{color:var(--bad)}
@@ -241,7 +243,9 @@ function defaultState(){
     streak:{last:null,count:0},
     plan:{date:null,items:[],done:{}},
     writingDone:0,
-    writingLog:{}
+    writingLog:{},
+    mistakes:{},
+    writingScores:{}
   };
 }
 function loadState(){
@@ -255,6 +259,8 @@ function loadState(){
     s.history = s.history || [];
     s.writingLog = s.writingLog || {};
     s.oralNotes = s.oralNotes || [];
+    s.mistakes = s.mistakes || {};
+    s.writingScores = s.writingScores || {};
     return s;
   }catch(e){ return defaultState(); }
 }
@@ -266,6 +272,62 @@ const SECTIONS = {
   language:{name:"Language Usage", short:"Language", color:"#7c3aed"},
   math:{name:"Mathematics", short:"Math", color:"#059669"}
 };
+
+/* v2: long passages shared by several questions */
+const P_OTTER = `THE KEEPER OF THE KELP FOREST
+
+Along the rocky coast of the northern Pacific Ocean, forests grow underwater. They are made of kelp, a giant seaweed that can stretch thirty meters from the sea floor to the surface. Fish hide among the swaying blades, crabs crawl along the stems, and seals hunt in the green shade. A kelp forest is one of the busiest neighborhoods in the ocean.
+
+A small animal with thick fur protects this neighborhood: the sea otter. Sea otters eat sea urchins, spiny creatures that chew through the base of kelp plants. When otters are nearby, urchins stay hidden in cracks in the rocks and nibble only on loose scraps. The kelp grows tall.
+
+About two hundred years ago, hunters killed most of the sea otters for their fur. Without otters, the number of urchins exploded. The urchins marched across the sea floor and ate the kelp down to bare rock. Fish and crabs lost their shelter and moved away. Scientists call these empty places "urchin barrens."
+
+Later, laws were passed to protect sea otters, and in some bays they slowly returned. As the otters ate urchins again, the kelp grew back, and many other animals came back with it. Scientists describe the sea otter as a keystone species. Like the top stone in an arch, it is small, but if it is removed, everything around it can fall.`;
+
+const P_BRIDGE = `THE BRIDGE
+
+Noor had spent three weeks building her bridge out of craft sticks. It was not pretty. Glue had dried in yellow lumps, and one side leaned a little, like a tired old man. On the morning of the engineering fair, she carried it into the gym and set it down next to Daniel's bridge. His was painted silver, with tiny paper flags along the top.
+
+"Wow," said Noor, and she meant it.
+
+Daniel shrugged, but he was smiling. "Yours looks... strong," he said, after a pause that was slightly too long.
+
+Noor's ears felt hot. She pulled her sleeves over her hands and wished she had painted something, anything.
+
+Then the judge arrived with a bucket and a bag of sand. One by one, she hung the bucket from each bridge and poured. Daniel's silver bridge held two cups of sand, then three. At four, there was a sharp crack, and the flags fluttered to the floor. Daniel stared at the pieces.
+
+Noor's bridge held four cups. Then six. Then nine. The lumpy glue did not let go. By the time the judge ran out of sand, a small crowd had gathered.
+
+Noor looked at Daniel. He was still holding one silver stick. She thought about the long pause before the word "strong."
+
+"Your flags were the best part of the whole fair," she said. "Next year, do you want to build one together? I'll do the glue."`;
+
+const P_LEAP = `WHY FEBRUARY SOMETIMES GROWS
+
+A calendar year has 365 days, but Earth does not finish its trip around the Sun in exactly 365 days. The journey takes about 365 and one-quarter days. That extra quarter of a day seems tiny, but it adds up. After four years, the calendar would be a whole day behind the Sun.
+
+One day does not sound like a problem. But imagine the mistake repeating for hundreds of years. The calendar would slowly drift away from the seasons. In the northern half of the world, July would eventually arrive in the middle of winter, and farmers who planted by the calendar would lose their crops.
+
+More than two thousand years ago, the Roman leader Julius Caesar asked astronomers for a solution. Their answer was simple: add one extra day every fourth year. We still follow this plan. The extra day is February 29, and a year that includes it is called a leap year.
+
+The Roman fix was close, but not perfect, because the real journey is slightly shorter than 365 and one-quarter days. So in 1582 a small adjustment was made: years that end in two zeros, such as 1900, are leap years only if they can be divided evenly by 400. That is why 1900 was not a leap year but 2000 was. With this rule, the calendar will stay in step with the Sun for thousands of years.`;
+
+const P_TIDE = `THE TIDE POOL
+
+At noon the sea goes out to lunch
+and leaves its pockets on the shore:
+a dozen bowls of captured sky,
+each one a tiny world, or more.
+
+A crab patrols his kingdom's edge,
+one armored knight on eight thin legs.
+A starfish reads the rock by touch.
+A limpet holds its place and begs
+
+the sun to hurry on its way.
+Then, slow at first, a silver seam
+of water climbs the sand again;
+the sea returns to wake its dream.`;
 
 const DB = [
 {id:`r1`,s:`reading`,k:`Vocabulary`,r:188,q:`What does the prefix un- mean in the word unhappy?`,ch:[`before`,`not`,`again`,`wrongly`],a:1,exp:`The prefix un- means "not." Unhappy means not happy.`},
@@ -446,7 +508,104 @@ Who intimately lives with rain.`,q:`What is the theme of this poem?`,ch:[`Apprec
 {id:`m64`,s:`math`,k:`Data & Probability`,r:197,q:`A bar graph shows books read: Monday 4, Tuesday 6, Wednesday 5, Thursday 8. How many more books were read on Thursday than on Monday?`,ch:[`2`,`3`,`4`,`8`],a:2,exp:`8 - 4 = 4 more books on Thursday.`},
 {id:`m65`,s:`math`,k:`Data & Probability`,r:207,q:`You roll a fair six-sided die. What is the probability of rolling an even number?`,ch:[`1/6`,`1/3`,`1/2`,`2/3`],a:2,exp:`The even numbers are 2, 4, and 6, so 3 out of 6 outcomes, which is 1/2.`},
 {id:`m66`,s:`math`,k:`Data & Probability`,r:199,q:`A spinner has 3 red sections and 1 blue section. Which color are you most likely to land on?`,ch:[`red`,`blue`,`both equally likely`,`neither`],a:0,exp:`Red covers more of the spinner, so it is more likely.`},
-{id:`m67`,s:`math`,k:`Data & Probability`,r:214,q:`A line plot shows the values 2, 3, 3, 4, 4, 4, and 5. What is the difference between the greatest and least values?`,ch:[`2`,`3`,`4`,`5`],a:1,exp:`Greatest is 5 and least is 2, so 5 - 2 = 3.`}
+{id:`m67`,s:`math`,k:`Data & Probability`,r:214,q:`A line plot shows the values 2, 3, 3, 4, 4, 4, and 5. What is the difference between the greatest and least values?`,ch:[`2`,`3`,`4`,`5`],a:1,exp:`Greatest is 5 and least is 2, so 5 - 2 = 3.`},
+/* ---------- v2 additions: long passages (several questions each) ---------- */
+{id:`r51`,s:`reading`,k:`Informational Text`,r:210,p:P_OTTER,q:`What is the main idea of the passage?`,ch:[`Sea otters keep kelp forests healthy by controlling sea urchins.`,`Kelp is the tallest seaweed in the ocean.`,`Hunters once sold sea otter fur for high prices.`,`Sea urchins are dangerous animals that should be removed.`],a:0,exp:`Every paragraph connects otters, urchins, and kelp. The other choices are small details or are not stated.`},
+{id:`r52`,s:`reading`,k:`Informational Text`,r:214,p:P_OTTER,q:`What happened FIRST after most of the sea otters were killed?`,ch:[`Fish and crabs moved away.`,`The number of sea urchins grew quickly.`,`Laws were passed to protect otters.`,`The kelp grew tall again.`],a:1,exp:`Paragraph 3 says the number of urchins exploded first. Only then did they eat the kelp and the other animals leave.`},
+{id:`r53`,s:`reading`,k:`Vocabulary`,r:222,p:P_OTTER,q:`In paragraph 3, what does the word barrens most likely mean?`,ch:[`protected parts of the ocean`,`deep cracks in the rocks`,`places where almost nothing grows`,`piles of empty urchin shells`],a:2,exp:`The passage calls them "empty places" where the kelp was eaten "down to bare rock," so barrens are places where almost nothing grows.`},
+{id:`r54`,s:`reading`,k:`Informational Text`,r:228,p:P_OTTER,q:`Why does the author compare the sea otter to the top stone in an arch?`,ch:[`to show that otters live among rocks`,`to explain how hunters trapped otters`,`to prove that kelp is as strong as stone`,`to show that one small part can hold a whole system together`],a:3,exp:`The last sentence explains the comparison: the stone is small, but if it is removed everything can fall. The otter does the same job in the kelp forest.`},
+
+{id:`r55`,s:`reading`,k:`Literary Text`,r:212,p:P_BRIDGE,q:`Why did Noor's ears feel hot?`,ch:[`She felt embarrassed about how her bridge looked.`,`The gym was crowded and warm.`,`She was angry that Daniel had copied her idea.`,`She was excited because she knew she would win.`],a:0,exp:`Right after Daniel's slow compliment, she hides her hands and wishes she had painted something. Those clues show embarrassment.`},
+{id:`r56`,s:`reading`,k:`Literary Text`,r:216,p:P_BRIDGE,q:`"One side leaned a little, like a tired old man." What kind of figurative language is this?`,ch:[`alliteration`,`simile`,`exaggeration`,`rhyme`],a:1,exp:`A simile compares two things using like or as. Here the leaning bridge is compared to a tired old man using "like."`},
+{id:`r57`,s:`reading`,k:`Literary Text`,r:226,p:P_BRIDGE,q:`Daniel says "strong" after "a pause that was slightly too long." What does the pause suggest?`,ch:[`He had forgotten what he wanted to say.`,`He was worried that his own bridge would break.`,`He did not really admire Noor's bridge and was searching for something polite to say.`,`He wanted the judge to hear him.`],a:2,exp:`A pause that is "too long" before a compliment shows he had to hunt for something nice to say. Noor notices it too.`},
+{id:`r58`,s:`reading`,k:`Literary Text`,r:224,p:P_BRIDGE,q:`What does Noor's comment at the end of the story show about her?`,ch:[`She believes decorations matter more than strength.`,`She is still upset and wants Daniel to feel worse.`,`She does not understand why her bridge held more sand.`,`She chooses to be kind instead of showing off.`],a:3,exp:`She remembers the pause, but she praises his flags and invites him to work with her. She chooses kindness when she could have boasted.`},
+{id:`r59`,s:`reading`,k:`Literary Text`,r:220,p:P_BRIDGE,q:`Which sentence best states a theme of this story?`,ch:[`What something can do matters more than how it looks.`,`Working alone is always better than working in a team.`,`Winning is the most important part of a contest.`,`Judges should explain their decisions.`],a:0,exp:`The plain, lumpy bridge is the one that holds the most sand. The story shows that appearance is not the same as strength.`},
+
+{id:`r60`,s:`reading`,k:`Informational Text`,r:218,p:P_LEAP,q:`How is this passage mainly organized?`,ch:[`It lists events from the life of Julius Caesar.`,`It describes a problem and explains how the problem was solved.`,`It gives steps for making a calendar at home.`,`It compares summer and winter in two parts of the world.`],a:1,exp:`The first two paragraphs describe the problem (the calendar drifting). The last two explain the solutions.`},
+{id:`r61`,s:`reading`,k:`Informational Text`,r:219,p:P_LEAP,q:`Why does the author describe July arriving in the middle of winter?`,ch:[`to explain why February is the shortest month`,`to show that the Romans did not understand the seasons`,`to show how a small error would grow into a serious problem`,`to suggest that farmers should not use calendars`],a:2,exp:`Paragraph 2 begins by saying one day "does not sound like a problem." The July example shows what happens when the small mistake repeats for hundreds of years.`},
+{id:`r62`,s:`reading`,k:`Informational Text`,r:230,p:P_LEAP,q:`Using the rule in the last paragraph, which of these years is NOT a leap year?`,ch:[`2000`,`2024`,`2400`,`2100`],a:3,exp:`2100 ends in two zeros, so it must divide evenly by 400. It does not, so it is not a leap year. 2000 and 2400 divide by 400, and 2024 is an ordinary fourth year.`},
+{id:`r63`,s:`reading`,k:`Vocabulary`,r:214,p:P_LEAP,q:`In paragraph 2, what does the word drift mean?`,ch:[`move slowly away`,`stop suddenly`,`grow longer`,`become colder`],a:0,exp:`The calendar would "slowly drift away from the seasons," so drift means to move away little by little.`},
+
+{id:`r64`,s:`reading`,k:`Literary Text`,r:215,poem:true,p:P_TIDE,q:`What is happening when "the sea goes out to lunch"?`,ch:[`A storm is beginning.`,`The tide is going out, away from the shore.`,`Fishing boats are leaving the harbor.`,`The sun is setting.`],a:1,exp:`The sea "goes out" and leaves pools behind on the shore. That describes low tide.`},
+{id:`r65`,s:`reading`,k:`Literary Text`,r:222,poem:true,p:P_TIDE,q:`What are the "dozen bowls of captured sky"?`,ch:[`buckets that children left on the beach`,`clouds shaped like bowls`,`pools of sea water that reflect the sky`,`shells turned upside down`],a:2,exp:`The sea leaves its "pockets" on the shore: tide pools. Still water reflects the sky, so each pool looks like a bowl holding sky.`},
+{id:`r66`,s:`reading`,k:`Literary Text`,r:221,poem:true,p:P_TIDE,q:`Which lines give a human action to something that is not human?`,ch:[`"each one a tiny world, or more"`,`"one armored knight on eight thin legs"`,`"Then, slow at first, a silver seam"`,`"A limpet holds its place and begs the sun to hurry on its way"`],a:3,exp:`Begging is something people do. Giving that action to a limpet is personification.`},
+{id:`r67`,s:`reading`,k:`Literary Text`,r:226,poem:true,p:P_TIDE,q:`What happens in the last stanza of the poem?`,ch:[`The tide comes back in and covers the pools.`,`The crab leaves the pool to find food.`,`The sun dries up the tide pools.`,`Night falls and the animals go to sleep.`],a:0,exp:`A "silver seam of water climbs the sand again" and "the sea returns." The tide is coming back in.`},
+
+/* ---------- v2 additions: harder single items ---------- */
+{id:`r68`,s:`reading`,k:`Vocabulary`,r:224,q:`Read the sentence. The teacher's directions were ambiguous, so half the class did one thing and half did another. What does ambiguous mean?`,ch:[`too long to remember`,`able to be understood in more than one way`,`written in small letters`,`easy to follow`],a:1,exp:`The class understood the directions in two different ways, so ambiguous means having more than one possible meaning.`},
+{id:`r69`,s:`reading`,k:`Vocabulary`,r:216,q:`Read the sentence. After the long drought, water was scarce, and families were asked to use less. What does scarce mean?`,ch:[`dirty`,`expensive`,`in short supply`,`frozen`],a:2,exp:`A drought means little rain, and families must use less, so scarce means there is not much of it.`},
+{id:`r70`,s:`reading`,k:`Vocabulary`,r:222,q:`Read the sentence. Although she was nervous inside, her composed expression never changed. What does composed mean?`,ch:[`worried`,`angry`,`surprised`,`calm`],a:3,exp:`"Although" signals a contrast with nervous. Her face stayed the same, so composed means calm and in control.`},
+{id:`r71`,s:`reading`,k:`Vocabulary`,r:226,q:`Read the sentence. The two rivers converge just north of the town, forming one wide river. What does converge mean?`,ch:[`come together`,`dry up`,`flow backward`,`split apart`],a:0,exp:`Two rivers form one river, so converge means to come together.`},
+{id:`r72`,s:`reading`,k:`Vocabulary`,r:230,q:`Read the sentence. The coach was skeptical of the excuse and asked to see proof. What does skeptical mean?`,ch:[`pleased`,`doubtful`,`confused`,`proud`],a:1,exp:`Asking for proof shows the coach did not fully believe the excuse. Skeptical means doubtful.`},
+{id:`r73`,s:`reading`,k:`Vocabulary`,r:220,q:`Which word is an antonym (opposite) of expand?`,ch:[`enlarge`,`extend`,`contract`,`explain`],a:2,exp:`Expand means to get bigger. Contract means to get smaller, so it is the opposite.`},
+{id:`r74`,s:`reading`,k:`Vocabulary`,r:218,q:`In which sentence does the word current mean "a flow of water"?`,ch:[`Our current teacher joined the school in August.`,`Please check that your address is current.`,`She reads the news to learn about current events.`,`The strong current carried the canoe downstream.`],a:3,exp:`Only the canoe sentence is about moving water. In the other sentences, current means "happening now."`},
+{id:`r75`,s:`reading`,k:`Vocabulary`,r:221,q:`Chapter is to book as scene is to ____.`,ch:[`play`,`actor`,`stage`,`ticket`],a:0,exp:`A chapter is one part of a book. A scene is one part of a play.`},
+{id:`r76`,s:`reading`,k:`Informational Text`,r:212,q:`Which sentence is an opinion?`,ch:[`Sharks have skeletons made of cartilage.`,`Sharks are the most frightening animals in the sea.`,`Some sharks can grow thousands of teeth in a lifetime.`,`Whale sharks eat tiny plants and animals.`],a:1,exp:`"Most frightening" is a feeling that people can disagree about. The other sentences can be checked and proven.`},
+{id:`r77`,s:`reading`,k:`Informational Text`,r:218,p:`JOIN THE RIVERSIDE CLEANUP THIS SATURDAY!\nIn just two hours, you can help remove litter that harms fish and birds. Gloves, bags, and snacks are provided. Bring a friend, because every pair of hands makes our river cleaner.`,q:`What is the author's main purpose in this notice?`,ch:[`to entertain readers with a story about a river`,`to explain how litter is recycled`,`to persuade readers to take part in an event`,`to describe the birds that live near rivers`],a:2,exp:`The notice invites, gives reasons, and says "bring a friend." It is trying to convince people to come.`},
+{id:`r78`,s:`reading`,k:`Informational Text`,r:211,q:`You are reading a science book and want to find every page that mentions volcanoes. Which part of the book is most helpful?`,ch:[`the title page`,`the glossary`,`the front cover`,`the index`],a:3,exp:`An index lists topics in alphabetical order with all the page numbers where they appear. A glossary only gives meanings.`},
+{id:`r79`,s:`reading`,k:`Literary Text`,r:214,q:`Read the sentence from a story. "I could hardly breathe as Mom lifted the lid of the box." From which point of view is the story told?`,ch:[`first person`,`second person`,`third person`,`no point of view`],a:0,exp:`The narrator uses "I," so a character inside the story is telling it. That is first person.`},
+
+{id:`l44`,s:`language`,k:`Mechanics`,r:215,q:`Which sentence is punctuated correctly?`,ch:[`We wanted to swim but, the pool was closed.`,`We wanted to swim, but the pool was closed.`,`We wanted, to swim but the pool was closed.`,`We wanted to swim but the pool, was closed.`],a:1,exp:`When two complete sentences are joined by but, and, or so, the comma goes before the joining word.`},
+{id:`l45`,s:`language`,k:`Mechanics`,r:218,q:`Which sentence uses quotation marks and punctuation correctly?`,ch:[`"Please close the door", said Mr. Tan.`,`"Please close the door" said Mr. Tan.`,`"Please close the door," said Mr. Tan.`,`Please close the door," said Mr. Tan.`],a:2,exp:`The comma goes inside the closing quotation mark, and the spoken words need marks at both ends.`},
+{id:`l46`,s:`language`,k:`Mechanics`,r:220,q:`Many students keep their bags in lockers. Which sentence shows this correctly?`,ch:[`The student's lockers are on the second floor.`,`The students locker's are on the second floor.`,`The students lockers are on the second floor.`,`The students' lockers are on the second floor.`],a:3,exp:`The lockers belong to many students. For a plural noun ending in s, add only an apostrophe: students'.`},
+{id:`l47`,s:`language`,k:`Mechanics`,r:214,q:`Choose the words that complete the sentence. The dog wagged ____ tail because ____ happy.`,ch:[`its, it's`,`it's, its`,`its, its`,`it's, it's`],a:0,exp:`Its (no apostrophe) shows ownership. It's is short for "it is." The dog wagged its tail because it is happy.`},
+{id:`l48`,s:`language`,k:`Mechanics`,r:218,q:`Which sentence uses a comma correctly?`,ch:[`After we finished dinner we, washed the dishes.`,`After we finished dinner, we washed the dishes.`,`After, we finished dinner we washed the dishes.`,`After we finished, dinner we washed the dishes.`],a:1,exp:`Put a comma after an opening group of words that tells when, before the main part of the sentence begins.`},
+{id:`l49`,s:`language`,k:`Mechanics`,r:215,q:`Which book title is capitalized correctly?`,ch:[`the Mystery of the Missing Map`,`The Mystery Of The Missing Map`,`The Mystery of the Missing Map`,`The mystery of the missing map`],a:2,exp:`Capitalize the first word and the important words. Short words such as of and the stay lowercase unless they come first.`},
+{id:`l50`,s:`language`,k:`Parts of Speech`,r:213,q:`Read the sentence. The children played quietly in the tiny garden. Which word is an adverb?`,ch:[`children`,`played`,`tiny`,`quietly`],a:3,exp:`An adverb tells how, when, or where an action happens. Quietly tells how the children played.`},
+{id:`l51`,s:`language`,k:`Parts of Speech`,r:216,q:`Read the sentence. I wanted to go outside, but it was raining. What part of speech is the word but?`,ch:[`conjunction`,`preposition`,`adverb`,`pronoun`],a:0,exp:`A conjunction joins words or sentences. But joins two complete thoughts.`},
+{id:`l52`,s:`language`,k:`Parts of Speech`,r:215,q:`Read the sentence. The cat slept under the table. Which word is a preposition?`,ch:[`slept`,`under`,`cat`,`table`],a:1,exp:`A preposition shows how a noun relates to another word, often by position. Under tells where the cat slept.`},
+{id:`l53`,s:`language`,k:`Parts of Speech`,r:225,q:`Read the sentence. The girl who won the race is my cousin. What part of speech is the word who?`,ch:[`verb`,`adjective`,`pronoun`,`conjunction`],a:2,exp:`Who stands in for "the girl" and begins the group of words that describes her. It is a relative pronoun.`},
+{id:`l54`,s:`language`,k:`Grammar & Usage`,r:221,q:`Choose the correct verb. The box of crayons ____ on the shelf.`,ch:[`are`,`were`,`have been`,`is`],a:3,exp:`The subject is box, which is singular. "Of crayons" only describes the box, so the verb is is.`},
+{id:`l55`,s:`language`,k:`Grammar & Usage`,r:228,q:`Choose the correct verb. Neither of the boys ____ finished the puzzle.`,ch:[`has`,`have`,`are`,`were`],a:0,exp:`Neither means "not one," so it is singular and takes has.`},
+{id:`l56`,s:`language`,k:`Grammar & Usage`,r:222,q:`Choose the correct word. Dad gave the tickets to Leo and ____.`,ch:[`I`,`me`,`myself`,`we`],a:1,exp:`Take out "Leo and" to test it: Dad gave the tickets to me. Use me after a word such as to.`},
+{id:`l57`,s:`language`,k:`Grammar & Usage`,r:226,q:`Choose the correct words. By the time we arrived, the movie ____ already ____.`,ch:[`has, start`,`have, started`,`had, started`,`was, start`],a:2,exp:`The movie started before another past event (we arrived), so use had started.`},
+{id:`l58`,s:`language`,k:`Grammar & Usage`,r:219,q:`Which of these is a run-on sentence?`,ch:[`When the bell rang, we lined up.`,`The bell rang, and we lined up.`,`We lined up after the bell rang.`,`The bell rang we lined up quickly.`],a:3,exp:`A run-on pushes two complete sentences together with no joining word or punctuation between them.`},
+{id:`l59`,s:`language`,k:`Grammar & Usage`,r:216,q:`Choose the correct word. Of the three sisters, Mia is the ____.`,ch:[`tallest`,`taller`,`more tall`,`most tallest`],a:0,exp:`Use the -est form when comparing three or more. Never use most together with -est.`},
+{id:`l60`,s:`language`,k:`Writing Process`,r:219,q:`Which is the best way to combine these sentences? The dog barked. The dog was hungry.`,ch:[`The dog barked, the dog was hungry.`,`The hungry dog barked.`,`The dog barked hungry and was.`,`Barked the dog and hungry.`],a:1,exp:`Moving hungry in front of dog keeps both ideas in one clear sentence without repeating words.`},
+{id:`l61`,s:`language`,k:`Writing Process`,r:216,q:`Choose the best transition. It rained all morning. ____, the soccer game was cancelled.`,ch:[`However`,`For example`,`As a result`,`Meanwhile`],a:2,exp:`The rain caused the cancellation. "As a result" shows cause and effect.`},
+{id:`l62`,s:`language`,k:`Writing Process`,r:220,p:`(1) Honeybees work together in a hive. (2) Some bees collect nectar from flowers. (3) My uncle once had a pet rabbit. (4) Other bees guard the entrance or care for the young.`,q:`Which sentence does NOT belong in this paragraph?`,ch:[`Sentence 1`,`Sentence 2`,`Sentence 4`,`Sentence 3`],a:3,exp:`The paragraph is about jobs in a beehive. The sentence about a pet rabbit is off the topic.`},
+{id:`l63`,s:`language`,k:`Writing Process`,r:223,p:`____. First, it gives your muscles the energy they need for the morning. It also helps you pay attention in class. Students who skip it often feel tired before lunch.`,q:`Which sentence would be the best topic sentence for this paragraph?`,ch:[`Eating a healthy breakfast helps you in several ways.`,`Pancakes are my favorite food.`,`Lunch is served at noon in most schools.`,`Some students walk to school in the morning.`],a:0,exp:`A topic sentence states the main idea that every other sentence supports. All the details are benefits of breakfast.`},
+{id:`l64`,s:`language`,k:`Writing Process`,r:214,q:`You are writing a report about the planet Mars. Which source would give the most reliable facts?`,ch:[`a comic book about space pirates`,`a science encyclopedia article about the planets`,`a toy advertisement for a rocket`,`a poem about the night sky`],a:1,exp:`An encyclopedia is written to give checked facts. Stories, advertisements, and poems have other purposes.`},
+
+{id:`m68`,s:`math`,k:`Number Sense`,r:212,q:`What is 60,000 + 4,000 + 30 + 8 in standard form?`,ch:[`64,308`,`60,438`,`64,038`,`6,438`],a:2,exp:`There are no hundreds, so a zero holds the hundreds place: 64,038.`},
+{id:`m69`,s:`math`,k:`Number Sense`,r:215,q:`What is 47,862 rounded to the nearest thousand?`,ch:[`47,000`,`47,900`,`50,000`,`48,000`],a:3,exp:`Look at the hundreds digit, 8. It is 5 or more, so round up to 48,000.`},
+{id:`m70`,s:`math`,k:`Number Sense`,r:223,q:`Which list shows the decimals in order from least to greatest?`,ch:[`0.45, 0.5, 0.54, 0.6`,`0.5, 0.6, 0.45, 0.54`,`0.6, 0.54, 0.5, 0.45`,`0.45, 0.54, 0.5, 0.6`],a:0,exp:`Write each with two decimal places: 0.45, 0.50, 0.54, 0.60. Now they are easy to compare.`},
+{id:`m71`,s:`math`,k:`Number Sense`,r:219,q:`Which fraction is equal to 0.75?`,ch:[`7/5`,`3/4`,`1/75`,`5/7`],a:1,exp:`0.75 is 75 hundredths. 75/100 simplifies to 3/4.`},
+{id:`m72`,s:`math`,k:`Number Sense`,r:221,q:`Which of these numbers is a prime number?`,ch:[`21`,`27`,`29`,`33`],a:2,exp:`A prime number has exactly two factors, 1 and itself. 21, 27, and 33 can all be divided by 3. Only 29 cannot be divided evenly.`},
+{id:`m73`,s:`math`,k:`Number Sense`,r:222,q:`Which fraction is equivalent to 4/6?`,ch:[`8/10`,`6/8`,`2/4`,`10/15`],a:3,exp:`4/6 simplifies to 2/3. 10/15 also simplifies to 2/3 when you divide top and bottom by 5.`},
+{id:`m74`,s:`math`,k:`Number Sense`,r:225,q:`What is the value of the digit 7 in 3.472?`,ch:[`7 hundredths`,`7 tenths`,`7 thousandths`,`7 ones`],a:0,exp:`After the decimal point the places are tenths, hundredths, thousandths. The 7 is in the second place: hundredths.`},
+{id:`m75`,s:`math`,k:`Number Sense`,r:227,q:`What is the least common multiple of 6 and 8?`,ch:[`48`,`24`,`14`,`2`],a:1,exp:`Multiples of 8: 8, 16, 24. Multiples of 6: 6, 12, 18, 24. The first number on both lists is 24.`},
+{id:`m76`,s:`math`,k:`Operations & Fractions`,r:221,q:`3/8 + 1/4 = ?`,ch:[`4/12`,`3/4`,`5/8`,`7/8`],a:2,exp:`Change 1/4 to 2/8 so the denominators match. 3/8 + 2/8 = 5/8.`},
+{id:`m77`,s:`math`,k:`Operations & Fractions`,r:223,q:`5/6 - 1/3 = ?`,ch:[`4/3`,`2/3`,`1/6`,`1/2`],a:3,exp:`Change 1/3 to 2/6. 5/6 - 2/6 = 3/6, which simplifies to 1/2.`},
+{id:`m78`,s:`math`,k:`Operations & Fractions`,r:217,q:`36 × 25 = ?`,ch:[`900`,`800`,`850`,`925`],a:0,exp:`36 × 25 = 36 × 100 ÷ 4 = 3,600 ÷ 4 = 900.`},
+{id:`m79`,s:`math`,k:`Operations & Fractions`,r:221,q:`1,008 ÷ 8 = ?`,ch:[`121`,`126`,`136`,`108`],a:1,exp:`8 × 100 = 800, leaving 208. 8 × 26 = 208. So the answer is 126.`},
+{id:`m80`,s:`math`,k:`Operations & Fractions`,r:225,q:`A theater has 24 rows with 18 seats in each row. If 357 tickets are sold, how many seats are empty?`,ch:[`65`,`85`,`75`,`789`],a:2,exp:`24 × 18 = 432 seats. 432 - 357 = 75 empty seats.`},
+{id:`m81`,s:`math`,k:`Operations & Fractions`,r:229,q:`Maya read 2/5 of her book on Monday and 1/5 on Tuesday. The book has 150 pages. How many pages does she have left to read?`,ch:[`90`,`30`,`50`,`60`],a:3,exp:`She has read 3/5, so 2/5 is left. One fifth of 150 is 30, so two fifths is 60 pages.`},
+{id:`m82`,s:`math`,k:`Operations & Fractions`,r:231,q:`A recipe needs 3/4 cup of flour for one batch. How much flour is needed for 6 batches?`,ch:[`4 1/2 cups`,`4 cups`,`6 3/4 cups`,`2 1/4 cups`],a:0,exp:`6 × 3/4 = 18/4 = 4 2/4, which is 4 1/2 cups.`},
+{id:`m83`,s:`math`,k:`Operations & Fractions`,r:219,q:`2.35 + 4.8 = ?`,ch:[`6.83`,`7.15`,`7.05`,`2.83`],a:1,exp:`Line up the decimal points and write 4.8 as 4.80. 2.35 + 4.80 = 7.15.`},
+{id:`m84`,s:`math`,k:`Operations & Fractions`,r:224,q:`10 - 3.76 = ?`,ch:[`7.24`,`6.34`,`6.24`,`7.76`],a:2,exp:`Write 10 as 10.00. 10.00 - 3.76 = 6.24. Check: 6.24 + 3.76 = 10.`},
+{id:`m85`,s:`math`,k:`Operations & Fractions`,r:227,q:`6 + 4 × (9 - 4) = ?`,ch:[`50`,`38`,`41`,`26`],a:3,exp:`Do the brackets first: 9 - 4 = 5. Then multiply: 4 × 5 = 20. Then add: 6 + 20 = 26.`},
+{id:`m86`,s:`math`,k:`Operations & Fractions`,r:222,q:`47 students are going on a trip. Each van holds 6 students. What is the fewest number of vans needed?`,ch:[`8`,`7`,`9`,`6`],a:0,exp:`47 ÷ 6 = 7 with 5 students left over. Those 5 still need a van, so 8 vans are needed.`},
+{id:`m87`,s:`math`,k:`Algebra & Patterns`,r:222,q:`If 3 × n + 5 = 26, what is the value of n?`,ch:[`6`,`7`,`8`,`9`],a:1,exp:`Subtract 5 from 26 to get 21. Then 21 ÷ 3 = 7.`},
+{id:`m88`,s:`math`,k:`Algebra & Patterns`,r:227,q:`What number comes next in the pattern? 2, 5, 11, 23, ____`,ch:[`35`,`46`,`47`,`44`],a:2,exp:`Each number is doubled and then 1 is added. 23 × 2 + 1 = 47.`},
+{id:`m89`,s:`math`,k:`Algebra & Patterns`,r:229,q:`A machine follows one rule. Input 2 gives output 7. Input 4 gives output 13. Input 6 gives output 19. What is the output when the input is 10?`,ch:[`25`,`30`,`33`,`31`],a:3,exp:`The rule is multiply by 3, then add 1. 10 × 3 + 1 = 31.`},
+{id:`m90`,s:`math`,k:`Algebra & Patterns`,r:231,q:`Which expression means "4 less than twice a number n"?`,ch:[`2 × n - 4`,`4 - 2 × n`,`2 × (n - 4)`,`n + 2 - 4`],a:0,exp:`Twice a number is 2 × n. "4 less than" that means subtract 4 from it: 2 × n - 4.`},
+{id:`m91`,s:`math`,k:`Algebra & Patterns`,r:225,q:`A number is multiplied by 6, and then 9 is subtracted. The result is 45. What is the number?`,ch:[`6`,`9`,`8`,`54`],a:1,exp:`Work backward. 45 + 9 = 54. Then 54 ÷ 6 = 9.`},
+{id:`m92`,s:`math`,k:`Geometry`,r:227,q:`A rectangle has an area of 72 square cm and a width of 8 cm. What is its perimeter?`,ch:[`17 cm`,`80 cm`,`34 cm`,`36 cm`],a:2,exp:`Length = 72 ÷ 8 = 9 cm. Perimeter = 2 × (9 + 8) = 34 cm.`},
+{id:`m93`,s:`math`,k:`Geometry`,r:224,q:`How many lines of symmetry does a regular hexagon have?`,ch:[`2`,`3`,`12`,`6`],a:3,exp:`A regular hexagon has 6 equal sides. Three lines pass through opposite corners and three pass through the middles of opposite sides.`},
+{id:`m94`,s:`math`,k:`Geometry`,r:222,q:`Two angles of a triangle measure 65° and 45°. What is the measure of the third angle?`,ch:[`70°`,`80°`,`110°`,`250°`],a:0,exp:`The angles of a triangle add to 180°. 65 + 45 = 110, and 180 - 110 = 70°.`},
+{id:`m95`,s:`math`,k:`Geometry`,r:213,q:`An angle measures 135°. What type of angle is it?`,ch:[`acute`,`obtuse`,`right`,`straight`],a:1,exp:`An obtuse angle is greater than 90° and less than 180°.`},
+{id:`m96`,s:`math`,k:`Geometry`,r:233,q:`A rectangular box is 4 cm long, 3 cm wide, and 5 cm tall. What is its volume?`,ch:[`12 cubic cm`,`47 cubic cm`,`60 cubic cm`,`94 cubic cm`],a:2,exp:`Volume = length × width × height = 4 × 3 × 5 = 60 cubic cm.`},
+{id:`m97`,s:`math`,k:`Measurement`,r:219,q:`A movie starts at 3:45 p.m. and lasts 1 hour 50 minutes. At what time does it end?`,ch:[`5:25 p.m.`,`4:35 p.m.`,`5:45 p.m.`,`5:35 p.m.`],a:3,exp:`3:45 plus 1 hour is 4:45. Add 15 minutes to reach 5:00, then the remaining 35 minutes: 5:35 p.m.`},
+{id:`m98`,s:`math`,k:`Measurement`,r:220,q:`How many milliliters are in 3.5 liters?`,ch:[`3,500`,`350`,`35`,`35,000`],a:0,exp:`1 liter = 1,000 milliliters, so 3.5 × 1,000 = 3,500.`},
+{id:`m99`,s:`math`,k:`Measurement`,r:227,q:`A rope is 4 m 20 cm long. It is cut into 6 equal pieces. How long is each piece?`,ch:[`7 cm`,`70 cm`,`60 cm`,`72 cm`],a:1,exp:`4 m 20 cm = 420 cm. 420 ÷ 6 = 70 cm.`},
+{id:`m100`,s:`math`,k:`Measurement`,r:223,q:`Lena buys 3 notebooks that cost $2.75 each. She pays with a $10 bill. How much change does she get?`,ch:[`$2.25`,`$1.25`,`$1.75`,`$7.25`],a:2,exp:`3 × $2.75 = $8.25. $10.00 - $8.25 = $1.75.`},
+{id:`m101`,s:`math`,k:`Measurement`,r:222,q:`2 kg 300 g + 1 kg 850 g = ?`,ch:[`3 kg 150 g`,`4 kg 50 g`,`4 kg 250 g`,`4 kg 150 g`],a:3,exp:`300 g + 850 g = 1,150 g, which is 1 kg 150 g. Then 2 kg + 1 kg + 1 kg 150 g = 4 kg 150 g.`},
+{id:`m102`,s:`math`,k:`Data & Probability`,r:229,q:`Five test scores are 82, 90, 76, 88, and 84. What is the mean (average) score?`,ch:[`84`,`82`,`86`,`88`],a:0,exp:`Add the scores: 420. Divide by the number of scores: 420 ÷ 5 = 84.`},
+{id:`m103`,s:`math`,k:`Data & Probability`,r:225,q:`What is the median of these numbers? 12, 7, 9, 15, 10`,ch:[`9`,`10`,`12`,`10.6`],a:1,exp:`Put them in order: 7, 9, 10, 12, 15. The middle number is 10. (10.6 is the mean, not the median.)`},
+{id:`m104`,s:`math`,k:`Data & Probability`,r:227,q:`A bag holds 4 red, 3 blue, and 5 green marbles. If you pick one marble without looking, what is the probability that it is blue?`,ch:[`1/3`,`3/5`,`1/4`,`5/12`],a:2,exp:`There are 12 marbles and 3 are blue. 3/12 simplifies to 1/4.`},
+{id:`m105`,s:`math`,k:`Data & Probability`,r:219,q:`A bar graph shows books read this month: Ana 14, Ben 9, Cy 17, Di 12. How many more books did Cy and Di read together than Ana and Ben together?`,ch:[`3`,`8`,`52`,`6`],a:3,exp:`Cy and Di: 17 + 12 = 29. Ana and Ben: 14 + 9 = 23. 29 - 23 = 6.`},
+{id:`m106`,s:`math`,k:`Data & Probability`,r:217,q:`In a picture graph, each apple symbol stands for 4 apples. Monday shows 5 and a half symbols. How many apples were sold on Monday?`,ch:[`22`,`20`,`24`,`9`],a:0,exp:`5 symbols are 20 apples, and half a symbol is 2 more. 20 + 2 = 22.`}
 ];
 
 const TIPS = {
@@ -483,6 +642,48 @@ const ORAL_PROMPTS = [
   {q:`If you could travel anywhere, where would you go? What would you want to see?`, tip:`Use vivid describing words. Say what you would do and why it interests you.`},
   {q:`Explain how to play a game you enjoy. What are the rules?`, tip:`Use sequence words and check that a listener could follow the steps.`},
   {q:`What makes a good friend? Give an example from your own experience.`, tip:`Name two qualities, then tell a short story that shows one of them.`}
+];
+
+ORAL_PROMPTS.forEach(p => { p.cat = "Speaking"; });
+const ORAL_FOLLOWUPS = [
+  [`Which part would you change if you were the author?`, `Who would you recommend this book to, and why?`],
+  [`What is one thing you have learned from this person?`, `How do you show this person that you care?`],
+  [`Why does that problem matter to you?`, `What is one small thing a child your age could do about it?`],
+  [`How did the other person feel afterward? How do you know?`, `Would you do anything differently next time?`],
+  [`What is something difficult in that subject?`, `What do you do when you get stuck?`],
+  [`How would you get ready for the trip?`, `Who would you take with you, and why?`],
+  [`What makes someone good at this game?`, `What do you do when someone breaks the rules?`],
+  [`What do you do when you and a friend disagree?`, `How would you make friends at a new school?`]
+];
+ORAL_PROMPTS.forEach((p,i) => { p.fu = ORAL_FOLLOWUPS[i] || []; });
+ORAL_PROMPTS.push(
+  {cat:`Interview`, q:`Tell me a little about yourself. What should I know about you?`, tip:`Choose three things: something you love, something you are good at, and something you are working on.`, fu:[`What are you most proud of?`, `What would your best friend say about you?`]},
+  {cat:`Interview`, q:`Why would you like to come to this school?`, tip:`Give your own real reasons. Name one thing you are excited to try and one thing you could bring to the class.`, fu:[`What might be hard about changing schools? What would you do about it?`, `What would you like your new teacher to know about how you learn?`]},
+  {cat:`Interview`, q:`What do you like to do when you are not at school?`, tip:`Name the activity, explain how you got started, and describe one moment you remember well.`, fu:[`What is tricky about it?`, `How have you become better at it?`]},
+  {cat:`Interview`, q:`Tell me about a time when something was really hard for you. What did you do?`, tip:`Say what was hard, what you tried, and what happened in the end. It is fine if it did not work the first time.`, fu:[`Did anyone help you? How?`, `What did you learn about yourself?`]},
+  {cat:`Interview`, q:`Imagine a classmate is sitting alone at recess every day. What would you do?`, tip:`Say what you would do first, what you would say, and why.`, fu:[`What if your friends did not want that classmate to join in?`, `Has something like this ever happened to you?`]},
+  {cat:`Interview`, q:`Tell me about a time you disagreed with a friend. How did you solve it?`, tip:`Describe both sides fairly, then explain the solution.`, fu:[`How do you think your friend felt?`, `What would you do if you could not agree?`]},
+  {cat:`Interview`, q:`What is something you are curious about right now? What do you wonder?`, tip:`Share a real question you have, and explain why it interests you.`, fu:[`How could you find out the answer?`, `What do you already know about it?`]},
+  {cat:`Interview`, q:`Your group is making a poster, and nobody can agree on the idea. What do you do?`, tip:`Show that you listen first, then suggest a fair way to decide.`, fu:[`What if one person still refuses to help?`, `Would you rather lead the group or support the leader? Why?`]},
+  {cat:`Interview`, q:`If you could teach your class one thing, what would it be, and how would you teach it?`, tip:`Pick something you know well. Explain the first step you would show.`, fu:[`How would you help someone who did not understand?`, `Why did you choose that?`]},
+  {cat:`Interview`, q:`Do you have any questions for me about the school?`, tip:`Always have two real questions ready, for example about clubs, the library, or what a normal day is like.`, fu:[`Why do you want to know that?`, `Is there anything else you would like to tell me?`]}
+);
+const MOCK_ORAL = [ORAL_PROMPTS[8], ORAL_PROMPTS[0], ORAL_PROMPTS[11], ORAL_PROMPTS[9]];
+const ORAL_RUBRIC = [
+  "Answered the whole question.",
+  "Used complete sentences.",
+  "Gave details or a real example.",
+  "Spoke clearly, at a steady pace, and loud enough.",
+  "Finished with a closing sentence.",
+  "Listened to the follow-up question and answered it without a long pause.",
+  "Looked at the listener and stayed friendly and calm."
+];
+const WRITING_RUBRIC = [
+  ["Ideas and focus", "Answers every part of the prompt and stays on the topic."],
+  ["Organization", "Clear beginning, middle, and end. Paragraphs. Transition words link the ideas."],
+  ["Details and word choice", "Specific examples, feelings, and exact words instead of 'nice' or 'good'."],
+  ["Sentences", "Complete sentences that start in different ways and have different lengths."],
+  ["Conventions", "Capital letters, end punctuation, commas, and spelling are checked."]
 ];
 
 const SKILL_SECTION = {};
@@ -536,7 +737,9 @@ function eloUpdate(section, q, correct, scale){
   const ab = state.ability[section];
   const p = 1 / (1 + Math.exp((q.r - ab) / 14));
   const delta = (correct ? (1 - p) : -p) * 12 * scale;
-  state.ability[section] = Math.max(160, Math.min(250, ab + delta));
+  // The estimate cannot go above the hardest question in the bank for that subject.
+  const cap = Math.max(...DB.filter(x => x.s === section).map(x => x.r));
+  state.ability[section] = Math.max(160, Math.min(cap, ab + delta));
 }
 function abilityOf(section){ return Math.round(state.ability[section]); }
 function skillRows(){
@@ -552,6 +755,30 @@ function weakest(n){
   const fallback = ["Informational Text","Operations & Fractions","Grammar & Usage"].map(k => ({k, m:null, attempts:0, section:SKILL_SECTION[k]}));
   return rows.concat(fallback).slice(0,n);
 }
+function shuffled(q){
+  if(!q) return q;
+  if(q.ch.some(c => /\b(above|both a|a and b|sentence \d)\b/i.test(c))) return q;
+  const order = q.ch.map((_, i) => i);
+  for(let i = order.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [order[i], order[j]] = [order[j], order[i]];
+  }
+  return Object.assign({}, q, { ch: order.map(i => q.ch[i]), a: order.indexOf(q.a) });
+}
+let lastPassage = null;
+function noteMistake(id, correct){
+  state.mistakes = state.mistakes || {};
+  const m = state.mistakes[id];
+  if(!correct){
+    state.mistakes[id] = { n: (m ? m.n : 0) + 1, date: todayKey(), streak: 0 };
+  } else if(m){
+    m.streak = (m.streak || 0) + 1;
+    if(m.streak >= 2) delete state.mistakes[id];
+  }
+}
+function mistakeIds(){
+  return Object.keys(state.mistakes || {}).filter(id => DB.some(q => q.id === id));
+}
 function pickQuestion(section, ability, used){
   let pool = DB.filter(q => q.s === section && !used.has(q.id));
   if(!pool.length){
@@ -564,15 +791,20 @@ function pickQuestion(section, ability, used){
     const m = mastery(q.k);
     const mast = m === null ? 0.5 : m / 100;
     const explore = (state.skills[q.k] && state.skills[q.k].attempts >= 2) ? 0 : 6;
-    const score = -diff * 1.55 + (1 - mast) * 42 + explore + Math.random() * 16;
+    const samePassage = (q.p && q.p === lastPassage) ? 70 : 0;
+    const score = -diff * 1.55 + (1 - mast) * 42 + explore + samePassage + Math.random() * 16;
     if(score > bestScore){ bestScore = score; best = q; }
   }
-  return best;
+  lastPassage = best && best.p ? best.p : null;
+  return shuffled(best);
 }
 function pickSkillQuestion(skill, used){
   let pool = DB.filter(q => q.k === skill && !used.has(q.id));
   if(!pool.length){ used.clear(); pool = DB.filter(q => q.k === skill); }
-  return pool[Math.floor(Math.random() * pool.length)];
+  const same = pool.filter(q => q.p && q.p === lastPassage);
+  const q = same.length ? same[0] : pool[Math.floor(Math.random() * pool.length)];
+  lastPassage = q && q.p ? q.p : null;
+  return shuffled(q);
 }
 function touchStreak(){
   const t = todayKey();
@@ -619,7 +851,7 @@ function getPlan(){  const t = todayKey();
     state.plan = {
       date: t,
       items: [
-        {id:"warm", label:"Warm-up: 24 adaptive questions across all subjects", action:"daily"},
+        {id:"warm", label:"Warm-up: 12 adaptive questions across all subjects", action:"daily"},
         {id:"focus", label:"Focus drill: " + (w[0] ? w[0].k : "Vocabulary"), action:"drill", skill: w[0] ? w[0].k : "Vocabulary"},
         {id:"read", label:"Read for 20 minutes, then retell the main idea aloud", action:"none"},
         {id:"write", label:"Writing Studio: plan and write one timed response", action:"writing"}
@@ -777,6 +1009,7 @@ function viewHome(){
       }).join("")}
       <div class="actions">
         <button class="btn soft small" data-action="startDrill" data-skill="${esc(weak[0].k)}">Drill weakest skill</button>
+        ${mistakeIds().length ? `<button class="btn soft small" data-action="startReview">Review mistakes (${mistakeIds().length})</button>` : ""}
         <button class="btn ghost small" data-action="nav" data-route="report">Full report</button>
       </div>
     </div>
@@ -813,14 +1046,15 @@ function viewPracticeIntro(){
   <div class="card">
     <div class="kicker">Adaptive practice</div>
     <h2 style="font-size:22px;margin-bottom:8px">A smart set that follows your answers</h2>
-    <p>Each set mixes reading, language, and math. Every correct answer raises the difficulty; every wrong answer lowers it and adds more practice on that skill. You get an explanation immediately, so mistakes become learning.</p>
+    <p>Each set mixes reading, language, and math. Every correct answer raises the difficulty; every wrong answer lowers it and adds more practice on that skill. If an answer is wrong, you get a hint and one more try before the explanation appears, and the question is saved in your mistake list to practise again.</p>
     <div class="grid g3" style="margin-top:16px">
-      <div class="stat"><div class="n">24</div><div class="l">Questions per daily set</div></div>
+      <div class="stat"><div class="n">12</div><div class="l">Questions per daily set</div></div>
       <div class="stat"><div class="n">Instant</div><div class="l">Feedback and explanation</div></div>
       <div class="stat"><div class="n">Auto</div><div class="l">Difficulty adjustment</div></div>
     </div>
     <div class="actions" style="justify-content:flex-start;margin-top:18px">
-      <button class="btn red" data-action="startDaily">Start 24-question set</button>
+      <button class="btn red" data-action="startDaily">Start 12-question set</button>
+      ${mistakeIds().length ? `<button class="btn soft" data-action="startReview">Review my mistakes (${mistakeIds().length})</button>` : ""}
       <button class="btn ghost" data-action="startExam">Full mock exam instead</button>
     </div>
   </div>
@@ -850,15 +1084,22 @@ function startPractice(kind, skill){
     plan = Array(Math.min(12, skillCount)).fill(skill);
   }else{
     plan = [];
-    const counts = {reading:10, language:7, math:7};
+    const counts = {reading:5, language:3, math:4};
     for(const sec of ["reading","language","math"]){
       for(let i=0;i<counts[sec];i++) plan.push(sec);
     }
-    for(let i=plan.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1));[plan[i],plan[j]]=[plan[j],plan[i]]; }
   }
+  if(kind === "review"){
+    plan = mistakeIds();
+    for(let i=plan.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1));[plan[i],plan[j]]=[plan[j],plan[i]]; }
+    plan = plan.slice(0, 12);
+    if(!plan.length){ alert("No mistakes saved yet. Great work!"); return; }
+  }
+  lastPassage = null;
   practice = {
     mode: kind, skill: skill || null, plan, idx:0, count: plan.length,
     answers:[], used, current:null, selected:null, checked:false,
+    tries:0, firstWrong:null,
     start: Date.now(), done:false, reviewSkill:null
   };
   loadPracticeQuestion();
@@ -869,7 +1110,9 @@ function startPractice(kind, skill){
 function loadPracticeQuestion(){
   if(practice.idx >= practice.count){ finishPractice(); return; }
   let q;
-  if(practice.skill){
+  if(practice.mode === "review"){
+    q = shuffled(DB.find(x => x.id === practice.plan[practice.idx]));
+  } else if(practice.skill){
     q = pickSkillQuestion(practice.skill, practice.used);
   } else if(practice.reviewSkill && Math.random() < 0.7){
     q = pickSkillQuestion(practice.reviewSkill, practice.used);
@@ -881,6 +1124,8 @@ function loadPracticeQuestion(){
   practice.current = q;
   practice.selected = null;
   practice.checked = false;
+  practice.tries = 0;
+  practice.firstWrong = null;
   practice.used.add(q.id);
   focusQid = q.id;
 }
@@ -905,9 +1150,9 @@ function viewPractice(){
   <div class="progressline"><i style="width:${pct}%"></i></div>
   <div class="qmeta" style="margin-bottom:8px">
     <span class="qtag">${esc(q.k)}</span>
-    <span class="qnum">Question ${practice.idx + 1} of ${practice.count} - Difficulty ${q.r}</span>
+    <span class="qnum">Question ${practice.idx + 1} of ${practice.count}</span>
   </div>
-  ${q.p ? `<div class="passage ${["r21","r30"].includes(q.id)?`poem`:``}">${esc(q.p)}</div>` : ""}
+  ${q.p ? `<div class="passage ${(q.poem||["r21","r30"].includes(q.id))?`poem`:``}">${esc(q.p)}</div>` : ""}
   <div class="qcard">
     <div class="qtext" tabindex="-1">${esc(q.q)}</div>
     <div class="choices">
@@ -916,17 +1161,22 @@ function viewPractice(){
         if(practice.checked){
           if(i === q.a) cls = "correct";
           else if(i === practice.selected) cls = "wrong";
-        } else if(i === practice.selected) cls = "sel";
-        return `<button class="choice ${cls}" data-action="choose" data-i="${i}" ${practice.checked ? "disabled" : ""}>
+        } else if(i === practice.firstWrong) cls = "wrong";
+        else if(i === practice.selected) cls = "sel";
+        return `<button class="choice ${cls}" data-action="choose" data-i="${i}" ${(practice.checked || i === practice.firstWrong) ? "disabled" : ""}>
           <span class="badge">${String.fromCharCode(65+i)}</span><span>${esc(c)}</span>
         </button>`;
       }).join("")}
     </div>
     ${practice.checked ? `
       <div class="feedback ${practice.selected === q.a ? "good" : "bad"}" role="status" aria-live="polite">
-        <b>${practice.selected === q.a ? "Correct" : "Not quite"}</b>
-        ${practice.selected === q.a ? "Well done. " : "The correct answer is " + String.fromCharCode(65+q.a) + ". "}${esc(q.exp)}
-      </div>` : ""}
+        <b>${practice.selected === q.a ? (practice.tries > 1 ? "You got it on the second try" : "Correct") : "Not quite"}</b>
+        ${practice.selected === q.a ? (practice.tries > 1 ? "Good thinking. " : "Well done. ") : "The correct answer is " + String.fromCharCode(65+q.a) + ". "}${esc(q.exp)}
+      </div>` : (practice.tries === 1 ? `
+      <div class="feedback hint" role="status" aria-live="polite">
+        <b>Not yet. Try one more time.</b>
+        Hint: ${esc(TIPS[q.k] || "Read the question again slowly and cross out the answers you know are wrong.")}
+      </div>` : "")}
     <div class="actions">
       <div class="left"><span class="pill">${esc(q.k)}</span></div>
       ${!practice.checked
@@ -939,11 +1189,24 @@ function checkPractice(){
   if(practice.selected === null || practice.checked) return;
   const q = practice.current;
   const correct = practice.selected === q.a;
+  practice.tries++;
+  if(practice.tries === 1){
+    // Only the first attempt counts toward scores and the ability estimate.
+    recordSkill(q.k, correct);
+    eloUpdate(q.s, q, correct, 0.85);
+    noteMistake(q.id, correct);
+    practice.reviewSkill = correct ? null : q.k;
+    if(!correct){
+      practice.firstWrong = practice.selected;
+      practice.selected = null;
+      save();
+      render();
+      return;
+    }
+  }
   practice.checked = true;
-  practice.reviewSkill = correct ? null : q.k;
-  recordSkill(q.k, correct);
-  eloUpdate(q.s, q, correct, 0.85);
-  practice.answers.push({id:q.id, s:q.s, k:q.k, q:q.q, ch:q.ch.slice(), sel:practice.selected, ans:q.a, correct, exp:q.exp});
+  const firstTry = practice.tries === 1 && correct;
+  practice.answers.push({id:q.id, s:q.s, k:q.k, q:q.q, ch:q.ch.slice(), sel:practice.firstWrong !== null ? practice.firstWrong : practice.selected, ans:q.a, correct:firstTry, exp:q.exp});
   save();
   render();
 }
@@ -958,7 +1221,7 @@ function finishPractice(){
   touchStreak();
   if(practice.mode === "daily") markPlan("warm");
   if(practice.mode === "drill") markPlan("focus");
-  const res = buildResult("practice", practice.answers, practice.mode === "drill" ? "Targeted drill: " + practice.skill : "Daily adaptive set", null);
+  const res = buildResult("practice", practice.answers, practice.mode === "drill" ? "Targeted drill: " + practice.skill : (practice.mode === "review" ? "Mistake review" : "Daily adaptive set"), null);
   lastResult = res;
   state.history.push({date:todayKey(), type:"practice", rit:res.overallRit, correct:res.totalCorrect, total:res.total, label:res.title});
   save();
@@ -1020,7 +1283,7 @@ function viewResult(){
         <div class="bigscore">${r.overallRit}</div>
         <div style="font-size:12px;color:#647083;font-weight:700;text-transform:uppercase;letter-spacing:.8px">Estimated RIT</div>
         <div style="margin-top:8px"><span class="pill ${accColor}">${ritLabel(r.overallRit)}</span></div>
-        <p style="max-width:260px;margin-top:8px">Approximate percentile: <b>${percentile(r.overallRit)}th</b> compared with a typical Grade 4 cohort.</p>
+        <p style="max-width:280px;margin-top:8px">This is a practice estimate. Compare it with your own earlier results, not with official MAP norms.</p>
       </div>
     </div>
   </div>
@@ -1046,7 +1309,7 @@ function viewResult(){
   ${oralRatings ? `<div class="card" style="margin-top:16px">
     <h2>Oral language self-rating</h2>
     <p>1 = needs work, 4 = strong. This reflects your own ratings during the mock exam.</p>
-    ${ORAL_PROMPTS.slice(0,4).map((p,i) => {
+    ${MOCK_ORAL.map((p,i) => {
       const score = oralRatings[i] || 0;
       return `<div class="skillrow" style="grid-template-columns:1fr 120px 70px;gap:10px">
         <div class="name" style="white-space:normal">${esc(p.q)}</div>
@@ -1119,17 +1382,17 @@ function viewMockIntro(){
   <div class="card">
     <div class="kicker">Full simulation</div>
     <h2 style="font-size:22px;margin-bottom:8px">2.5-hour mock admission session</h2>
-    <p>This simulation follows the HKIS Grade 3-5 structure: adaptive reading, language, and math sections, a writing prompt, and an oral language check. The timer runs for 150 minutes. Like the real MAP, the academic sections are untimed within the overall session.</p>
+    <p>This simulation follows the HKIS Grade 3-5 structure: adaptive reading, language, and math sections, a writing prompt, and an oral language check. Like the real MAP, there is no time limit: the clock only shows how long you have been working. Careful reading and checking matter more than speed.</p>
     <div class="grid g2" style="margin-top:16px">
       <div>
         <h3>Section plan</h3>
-        ${EXAM_PARTS.map(p => `<div class="planitem"><span class="tick" aria-hidden="true" style="background:#eef2f8;border-color:#eef2f8;color:#0f2c52">${p.mins}</span><div class="lbl">${p.label} <span style="color:#8b93a1">(${p.mins} min suggested)</span></div></div>`).join("")}
+        ${EXAM_PARTS.map(p => `<div class="planitem"><span class="tick" aria-hidden="true" style="background:#eef2f8;border-color:#eef2f8;color:#0f2c52">${p.mins}</span><div class="lbl">${p.label} <span style="color:#8b93a1">(about ${p.mins} min, no limit)</span></div></div>`).join("")}
       </div>
       <div>
         <h3>Before you begin</h3>
         <label class="check"><input type="checkbox" id="readyBox" /> I understand this is practice, not a real school test.</label>
         <label class="check"><input type="checkbox" id="quietBox" /> The room is quiet and I have paper and a pencil nearby.</label>
-        <div class="note" style="margin-top:10px">There is no feedback during the mock. Answer steadily. If time runs out, the exam ends automatically.</div>
+        <div class="note" style="margin-top:10px">There is no feedback during the mock and no time limit. Read every question twice and use your scratch paper. Take a short break between sections if you need one.</div>
       </div>
     </div>
     <div class="actions" style="justify-content:flex-start;margin-top:16px">
@@ -1139,6 +1402,7 @@ function viewMockIntro(){
   </div>`;
 }
 function startExam(){
+  lastPassage = null;
   const first = pickQuestion("reading", state.ability.reading, new Set());
   exam = {
     parts: EXAM_PARTS.map(p => ({
@@ -1166,18 +1430,12 @@ function startExamTimer(){
   exam.timer = setInterval(() => {
     if(!exam || exam.finished){ clearInterval(exam.timer); return; }
     updateExamTimer();
-    if(exam.endAt - Date.now() <= 0){
-      clearInterval(exam.timer);
-      finishExam(true);
-    }
   }, 500);
 }
 function updateExamTimer(){
   const el = document.getElementById("examTimer");
   if(!el || !exam) return;
-  const left = exam.endAt - Date.now();
-  el.textContent = fmtClock(left);
-  if(left < 10*60000) el.classList.add("warn");
+  el.textContent = "Time used " + fmtClock(Date.now() - exam.started);
 }
 function currentPart(){ return exam.parts[exam.part]; }
 function loadExamQuestion(part){
@@ -1199,7 +1457,7 @@ function viewExam(){
         <span class="pill" style="margin-left:6px">Part ${exam.part + 1} of ${exam.parts.length}</span>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <span class="timer" id="examTimer">${fmtClock(exam.endAt - Date.now())}</span>
+        <span class="timer" id="examTimer">Time used ${fmtClock(Date.now() - exam.started)}</span>
         <button class="btn ghost small" data-action="exitExam">Exit</button>
       </div>
     </div>`;
@@ -1223,7 +1481,7 @@ function viewExam(){
       <span class="qtag">${esc(q.k)}</span>
       <span class="qnum">${esc(part.label)} question ${part.idx + 1} of ${part.count}</span>
     </div>
-    ${q.p ? `<div class="passage ${["r21","r30"].includes(q.id)?`poem`:``}">${esc(q.p)}</div>` : ""}
+    ${q.p ? `<div class="passage ${(q.poem||["r21","r30"].includes(q.id))?`poem`:``}">${esc(q.p)}</div>` : ""}
     <div class="qcard">
       <div class="qtext" tabindex="-1">${esc(q.q)}</div>
       <div class="choices">
@@ -1259,12 +1517,13 @@ function viewExam(){
   <div class="card">
     <div class="kicker">Oral language check - about 10 minutes</div>
     <h2 style="font-size:20px">Speak in complete sentences</h2>
-    <p>In the real assessment, the interviewer asks questions like these and listens for clear, organized English. Read each prompt aloud, answer for about one minute, then rate yourself honestly.</p>
+    <p>In the real assessment, the interviewer asks questions like these and listens for clear, organized English. Ask a parent to read each question and its follow-up aloud, like an interviewer. Answer for about one minute, then agree on a rating together.</p>
     <div class="grid g2" style="margin-top:14px">
-      ${ORAL_PROMPTS.slice(0,4).map((p,i) => `
+      ${MOCK_ORAL.map((p,i) => `
         <div class="stat">
           <div style="font-weight:700;color:#17202c;font-size:14px">${esc(p.q)}</div>
           <p style="font-size:12.5px;color:#5b6778;margin-top:8px">${esc(p.tip)}</p>
+          <p style="font-size:12.5px;color:#33445c;margin-top:6px"><b>Follow-up:</b> ${esc(p.fu[0] || "")}</p>
           <div class="optionrow" style="margin-top:8px">
             <span style="font-size:12px;color:#647083">Self-rating:</span>
             ${[1,2,3,4].map(v => `<button class="btn ghost small" data-action="rateOral" data-i="${i}" data-v="${v}">${v}</button>`).join("")}
@@ -1285,6 +1544,7 @@ function examNext(){
   const correct = part.pending === q.a;
   recordSkill(q.k, correct);
   eloUpdate(part.section, q, correct, 1);
+  noteMistake(q.id, correct);
   const answerObj = {id:q.id, s:q.s, k:q.k, q:q.q, ch:q.ch.slice(), sel:part.pending, ans:q.a, correct, exp:q.exp};
   part.answers.push(answerObj);
   part.idx++;
@@ -1348,6 +1608,7 @@ function viewWriting(){
   const draft = state.drafts[p.id] || "";
   const writingKey = todayKey() + "|" + p.id;
   const doneToday = !!(state.writingLog && state.writingLog[writingKey]);
+  const wScores = (state.writingScores && state.writingScores[writingKey]) || [];
   return `
   <div class="split">
     <div class="card">
@@ -1386,11 +1647,29 @@ function viewWriting(){
       <label class="check"><input type="checkbox" /> I checked capitals and end punctuation.</label>
       <label class="check"><input type="checkbox" /> I checked spelling of tricky words.</label>
       <div class="note" style="margin-top:12px">Grade 4 target: about 150-250 words, 3-5 paragraphs, with a clear beginning, middle, and end. Fewer than 150 words is usually too thin; more than 250 words often needs trimming.</div>
+      <h2 style="margin-top:18px">Parent scoring guide</h2>
+      <p style="margin-bottom:6px">Read the draft together, then score each row from 1 (not yet) to 4 (strong). Compare with the model response before you decide.</p>
+      ${WRITING_RUBRIC.map((row,i) => `
+        <div style="padding:8px 0;border-bottom:1px dashed #eee7db">
+          <div style="font-size:13.5px;color:#17202c;font-weight:700">${row[0]}</div>
+          <div style="font-size:12.5px;color:#5b6778;margin:2px 0 6px">${row[1]}</div>
+          ${[1,2,3,4].map(v => `<button class="btn ghost small ${wScores[i]===v?'rated':''}" data-action="wRate" data-i="${i}" data-v="${v}" style="margin-right:4px">${v}</button>`).join("")}
+        </div>`).join("")}
+      <p id="wScoreTotal" style="font-size:13.5px;font-weight:700;color:#0f2c52;margin-top:10px">${esc(writingScoreMsg(wScores))}</p>
       <div class="actions" style="justify-content:flex-start">
         <button class="btn ghost small" data-action="nav" data-route="report">See writing history</button>
       </div>
     </div>
   </div>`;
+}
+function writingScoreMsg(scores){
+  const done = WRITING_RUBRIC.map((_, i) => scores[i] || 0);
+  if(done.some(v => !v)) return "Score all five rows to see today's total.";
+  const total = done.reduce((a,b) => a + b, 0);
+  const low = WRITING_RUBRIC[done.indexOf(Math.min(...done))][0];
+  if(total >= 17) return "Total " + total + "/20. Strong draft. Next time, aim to keep it this good with a new kind of prompt.";
+  if(total >= 13) return "Total " + total + "/20. On track. Rewrite one paragraph to improve: " + low + ".";
+  return "Total " + total + "/20. Choose one goal for the next draft: " + low + ".";
 }
 function updateWordCount(){
   const ta = document.getElementById("writingText");
@@ -1470,11 +1749,11 @@ function viewOral(){
   <div class="split">
     <div class="card">
       <div class="kicker">Oral language practice</div>
-      <h2 style="font-size:22px">Speak clearly for one minute</h2>
-      <p>HKIS looks at expressive language (speaking) and receptive language (listening). Practise answering out loud with a clear beginning, two details, and a closing sentence.</p>
+      <h2 style="font-size:22px">Speaking and interview practice</h2>
+      <p>The oral check is a conversation, so practise with a partner. A parent reads the question, waits, and then asks one follow-up question. Answer with a clear beginning, two details, and a closing sentence.</p>
       <div class="optionrow" style="margin:14px 0">
         <select id="oralSelect" data-action="changeOral">
-          ${ORAL_PROMPTS.map((x,i) => `<option value="${i}" ${i===sel?"selected":""}>Prompt ${i+1}: ${esc(x.q.slice(0,46))}...</option>`).join("")}
+          ${ORAL_PROMPTS.map((x,i) => `<option value="${i}" ${i===sel?"selected":""}>${esc(x.cat)} ${i+1}: ${esc(x.q.slice(0,46))}...</option>`).join("")}
         </select>
         <button class="btn soft small" data-action="oralStart">Start 45s</button>
         <button class="btn ghost small" data-action="oralStop">Stop</button>
@@ -1491,12 +1770,19 @@ function viewOral(){
           </div>
         </div>
       </div>
-      <div class="note" style="margin-top:14px">If recording is not available, simply speak aloud to a parent and use the self-rating below.</div>
+      <div class="stat" style="margin-top:14px">
+        <div style="font-weight:700;color:#17202c;font-size:14px">Follow-up questions (the parent asks one, without warning)</div>
+        <ul style="font-size:14px;color:#33445c;line-height:1.7;padding-left:20px;margin-top:6px">
+          ${(p.fu || []).map(f => `<li>${esc(f)}</li>`).join("")}
+          <li>Why? Can you give me an example?</li>
+        </ul>
+      </div>
+      <div class="note" style="margin-top:14px"><b>For the parent:</b> ask in a friendly voice, then stay silent for five seconds so your child has time to think. Do not correct grammar in the middle of an answer; note one thing to praise and one thing to improve, and say them at the end. Practise in English only, and finish every session with "Do you have any questions for me?"</div>
     </div>
     <div class="card">
-      <h2>Self-rating</h2>
-      <p>Score 1 (needs work) to 4 (strong) after each answer.</p>
-      ${["I answered the whole question.","I used complete sentences.","I gave details or examples.","I spoke clearly and at a steady pace.","I finished with a closing sentence."].map((t,i) => `
+      <h2>Rating guide</h2>
+      <p>Parent and child agree on a score from 1 (needs work) to 4 (strong) after each answer.</p>
+      ${ORAL_RUBRIC.map((t,i) => `
         <div style="padding:8px 0;border-bottom:1px dashed #eee7db">
           <div style="font-size:13px;color:#33445c;margin-bottom:6px">${t}</div>
           ${[1,2,3,4].map(v => `<button class="btn ghost small ${oralRatings[i]===v?'rated':''}" data-action="oralRate" data-i="${i}" data-v="${v}" style="margin-right:4px">${v}</button>`).join("")}
@@ -1583,10 +1869,10 @@ function ensureOralEntry(idx){
   state.oralNotes = state.oralNotes || [];
   let entry = findOralEntry(idx);
   if(!entry){
-    entry = {date:todayKey(), prompt:ORAL_PROMPTS[idx].q, ratings:[0,0,0,0,0]};
+    entry = {date:todayKey(), prompt:ORAL_PROMPTS[idx].q, ratings:[0,0,0,0,0,0,0]};
     state.oralNotes.push(entry);
   }
-  if(!Array.isArray(entry.ratings)) entry.ratings = [0,0,0,0,0];
+  if(!Array.isArray(entry.ratings)) entry.ratings = [0,0,0,0,0,0,0];
   return entry;
 }
 function saveOral(){
@@ -1736,7 +2022,8 @@ function viewAbout(){
       <h2>How the adaptive engine works here</h2>
       <p>Each question carries a difficulty level on the RIT scale. The engine starts at the stored ability estimate for the subject, picks the closest useful question, and updates the estimate after each answer.</p>
       <p>A weakness score is calculated for every skill. Questions from weaker skills are weighted more heavily, so practice time goes where it is needed most.</p>
-      <p>Reports show an estimated RIT, an approximate percentile for a typical Grade 4 cohort, and a ranked list of skills to review.</p>
+      <p>Answer choices are shuffled every time, so the position of an answer never gives a clue. Only the first attempt at a question counts toward the estimate; missed questions go into a mistake list until they are answered correctly twice.</p>
+      <p>Reports show an estimated RIT and a ranked list of skills to review. No percentile is shown, because this tool has no official norm data.</p>
       <div class="note" style="margin-top:10px">RIT estimates in this app are approximations for practice only. They are not official NWEA scores and do not predict an HKIS admissions decision.</div>
     </div>
   </div>
@@ -1758,6 +2045,21 @@ document.addEventListener("click", (e) => {
   if(action === "nav"){ navigate(el.dataset.route); return; }
   if(action === "startDaily"){ startPractice("daily", null); return; }
   if(action === "startDrill"){ startPractice("drill", el.dataset.skill); return; }
+  if(action === "startReview"){ startPractice("review", null); return; }
+  if(action === "wRate"){
+    const sel = document.getElementById("promptSelect");
+    if(!sel) return;
+    const key = todayKey() + "|" + sel.value;
+    state.writingScores = state.writingScores || {};
+    const arr = state.writingScores[key] || [];
+    arr[parseInt(el.dataset.i, 10)] = parseInt(el.dataset.v, 10);
+    state.writingScores[key] = arr;
+    save();
+    Array.from(el.parentElement.querySelectorAll('[data-action="wRate"]')).forEach(b => b.classList.toggle("rated", b === el));
+    const tot = document.getElementById("wScoreTotal");
+    if(tot) tot.textContent = writingScoreMsg(arr);
+    return;
+  }
   if(action === "startExam"){ navigate("mock"); return; }
   if(action === "startExamNow"){
     const ready = document.getElementById("readyBox");

@@ -6,12 +6,14 @@ A single-file, offline practice tool that simulates the computer-adaptive pre-en
 
 ## What's inside
 
-- **160+ multiple-choice items** across 13 skills (vocabulary, literary/informational text, mechanics, parts of speech, grammar, writing process, number sense, operations & fractions, algebra & patterns, geometry, measurement, data & probability)
+- **249 multiple-choice items** (including four long passages with 4-5 questions each and 55 items at RIT 220+) across 13 skills (vocabulary, literary/informational text, mechanics, parts of speech, grammar, writing process, number sense, operations & fractions, algebra & patterns, geometry, measurement, data & probability)
 - **Adaptive engine** — ELO-style ability estimate per subject (RIT scale, 160–250) plus an EWMA mastery score per skill; weak skills are weighted more heavily when picking questions
-- **Instant feedback** with explanations, then a per-skill report and estimated RIT / percentile
-- **Mock exam** — full 150-minute simulation: Reading → Language → Math → Writing prompt → Oral language, with automatic end on timeout
-- **Writing studio** — six prompts (narrative / opinion / informational), 25-minute timer, checklist, model responses
-- **Speaking practice** — 8 prompts, optional mic recording (MediaRecorder), self-rating
+- **Hint and second try** on a wrong answer (only the first attempt is scored), then the explanation; answer choices are shuffled on every display
+- **Mistake list** — missed items return in a review set until answered correctly twice
+- **Per-skill report** with an estimated RIT (no percentile: the tool has no official norm data)
+- **Mock exam** — untimed simulation with an elapsed-time clock: Reading → Language → Math → Writing prompt → Oral language
+- **Writing studio** — six prompts (narrative / opinion / informational), 25-minute timer, checklist, model responses, 5-row parent scoring guide (out of 20)
+- **Speaking and interview practice** — 18 prompts (8 speaking, 10 interview) with follow-up questions, parent guidance, optional mic recording (MediaRecorder), 7-row rating guide
 - **Progress report** — skill mastery bars, RIT trend sparkline, session history, day-by-day countdown to test day, JSON export, print-friendly layout
 - **Persistence** via `localStorage`; nothing leaves the machine
 
@@ -24,7 +26,7 @@ A single-file, offline practice tool that simulates the computer-adaptive pre-en
 ## Structure
 
 ```
-index.html                        # the whole app (HTML + CSS + JS, ~130 KB)
+index.html                        # the whole app (HTML + CSS + JS, ~175 KB)
 hkis-grade4-practice-lab.html     # identical copy, kept under the original filename
 ```
 
