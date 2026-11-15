@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HKIS Grade 4 Admissions Practice Lab</title>
+<style>
+:root{
+  --navy:#0f2c52; --navy2:#163b6b; --red:#c8102e; --ink:#1c2430; --muted:#647083;
+  --bg:#f2efe8; --card:#ffffff; --line:#e4ded2; --good:#137a4b; --goodbg:#e6f5ec;
+  --bad:#b3261e; --badbg:#fbe9e7; --amber:#a86400; --amberbg:#fff3d6; --blue:#2563eb;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit}
+button:focus-visible, select:focus-visible, textarea:focus-visible, input:focus-visible{outline:3px solid #9db4d8;outline-offset:2px}
+.topbar{
+  background:linear-gradient(90deg,var(--navy),var(--navy2)); color:#fff;
+  padding:13px 22px; display:flex; align-items:center; justify-content:space-between;
+  gap:16px; position:sticky; top:0; z-index:30; box-shadow:0 2px 10px rgba(0,0,0,.16);
+}
+.brand{display:flex; align-items:center; gap:12px; min-width:0}
+.crest{
+  width:38px;height:38px;border-radius:10px;background:#fff;color:var(--navy);
+  display:grid;place-items:center;font-weight:800;font-size:13px;letter-spacing:.5px;
+  border:2px solid #d8c79a; flex:none;
+}
+.brand h1{font-size:16px;margin:0;font-weight:700;letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand span{display:block;font-size:11px;color:#c9d6ea;font-weight:500;letter-spacing:.4px}
+.topmeta{font-size:12px;color:#c9d6ea;text-align:right;line-height:1.35}
+.topmeta b{color:#fff}
+.tabs{
+  display:flex; gap:4px; flex-wrap:wrap; background:#fff; padding:8px 16px;
+  border-bottom:1px solid var(--line); position:sticky; top:64px; z-index:20;
+}
+.tab{
+  border:0;background:transparent;color:#3d4a5c;padding:9px 14px;border-radius:9px;
+  font-size:13.5px;font-weight:600;cursor:pointer;transition:.15s;
+}
+.tab:hover{background:#f1eee6;color:var(--navy)}
+.tab.active{background:var(--navy);color:#fff}
+.tab .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-left:7px;vertical-align:middle}
+.wrap{max-width:1060px;margin:0 auto;padding:24px 16px 70px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 1px 2px rgba(20,20,20,.04)}
+.card h2{font-size:16px;margin:0 0 4px;color:var(--navy)}
+.card h3{font-size:14px;margin:0 0 10px;color:var(--navy)}
+.card p{margin:6px 0;font-size:14.5px;color:#3f4a5a;line-height:1.6}
+.hero{
+  background:
+    radial-gradient(1200px 300px at 85% -20%,rgba(200,16,46,.22),transparent 60%),
+    linear-gradient(100deg,var(--navy),#204a86 70%,#2a5aa0);
+  color:#fff;border-radius:18px;padding:26px 26px 22px;position:relative;overflow:hidden;
+}
+.hero h2{color:#fff;font-size:22px;margin:0 0 8px}
+.hero p{color:#dbe6f7;max-width:620px}
+.hero .count{display:flex;align-items:flex-end;gap:10px;margin:14px 0 6px}
+.hero .count b{font-size:52px;line-height:.9;font-weight:800;letter-spacing:-1px}
+.hero .count span{font-size:13px;color:#c9d6ea;padding-bottom:6px}
+.hero .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;
+  font-size:12px;font-weight:700;letter-spacing:.2px;background:#eef2f8;color:#33445c;
+}
+.pill.red{background:#fdecef;color:#a50e27}
+.pill.green{background:var(--goodbg);color:var(--good)}
+.pill.amber{background:var(--amberbg);color:var(--amber)}
+.btn{
+  border:0;border-radius:11px;padding:11px 17px;font-size:14px;font-weight:700;cursor:pointer;
+  background:var(--navy);color:#fff;transition:.15s;display:inline-flex;align-items:center;gap:8px;
+}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn.red{background:var(--red)}
+.btn.green{background:#137a4b}
+.btn.ghost{background:#fff;color:var(--navy);border:1.5px solid #cfd8e6}
+.btn.ghost:hover{background:#f5f8fd}
+.btn.soft{background:#eef2f8;color:var(--navy)}
+.btn.small{padding:8px 12px;font-size:12.5px;border-radius:9px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none;filter:none}
+.btn.rated{background:var(--navy);color:#fff;border-color:var(--navy)}
+.stat{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.stat .n{font-size:26px;font-weight:800;color:var(--navy);line-height:1.1}
+.stat .l{font-size:14px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;font-weight:700;margin-top:4px}
+.bar{height:9px;border-radius:99px;background:#ece8df;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--navy);transition:width .4s}
+.skillrow{display:grid;grid-template-columns:190px 1fr 44px;gap:12px;align-items:center;padding:7px 0}
+.skillrow .name{font-size:14px;font-weight:600;color:#33445c;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.skillrow .pct{font-size:14px;font-weight:800;color:var(--navy);text-align:right}
+.empty{font-size:14px;color:var(--muted);padding:8px 0}
+.planitem{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed #eee7db;font-size:14.5px}
+.planitem:last-child{border-bottom:0}
+.planitem .tick{width:23px;height:23px;border-radius:7px;border:2px solid #c8d2e1;display:grid;place-items:center;font-size:14px;color:#fff;flex:none;cursor:pointer;background:#fff;padding:0;font-family:inherit;line-height:1;appearance:none}
+.planitem.done .tick{background:var(--good);border-color:var(--good)}
+.planitem.done .lbl{text-decoration:line-through;color:#93a0b2}
+.planitem .lbl{flex:1}
+.planitem .go{font-size:12px;color:var(--blue);font-weight:700;cursor:pointer;background:none;border:0}
+.timer{
+  font-variant-numeric:tabular-nums;font-weight:800;letter-spacing:.5px;font-size:17px;
+  background:#0b2342;color:#fff;padding:7px 13px;border-radius:9px;
+}
+.timer.warn{background:var(--red);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.65}}
+.exambar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.progressline{height:7px;background:#e8e3d9;border-radius:99px;overflow:hidden;margin-bottom:18px}
+.progressline i{display:block;height:100%;background:linear-gradient(90deg,var(--navy),var(--blue));transition:width .3s}
+.qcard{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px;box-shadow:0 2px 8px rgba(20,20,20,.05)}
+.qmeta{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.qtag{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--blue);background:#eef3fe;padding:4px 9px;border-radius:6px}
+.qnum{font-size:14px;color:var(--muted);font-weight:600}
+.passage{
+  background:#f8f6f0;border-left:4px solid #c8b98f;padding:14px 16px;border-radius:0 10px 10px 0;
+  font-family:Georgia,"Times New Roman",serif;font-size:15px;line-height:1.7;color:#333c49;
+  white-space:pre-line;margin-bottom:16px;
+}
+.poem{font-family:Georgia,serif;white-space:pre-line;line-height:1.75;font-style:italic}
+.qtext{font-size:20px;line-height:1.55;font-weight:600;margin:6px 0 20px;color:#17202c}
+.choices{display:grid;gap:10px}
+.choice{
+  display:flex;align-items:flex-start;gap:12px;text-align:left;width:100%;
+  background:#fff;border:2px solid #dfe5ee;border-radius:12px;padding:13px 15px;cursor:pointer;
+  font-size:15.5px;color:#22303f;line-height:1.45;transition:.12s;
+}
+.choice:hover{border-color:#9db4d8;background:#f7faff}
+.choice .badge{
+  width:26px;height:26px;border-radius:50%;background:#eef2f8;color:var(--navy);
+  display:grid;place-items:center;font-size:12.5px;font-weight:800;flex:none;margin-top:1px;
+}
+.choice.sel{border-color:var(--navy);background:#eef3fb;box-shadow:0 0 0 3px rgba(15,44,82,.08)}
+.choice.sel .badge{background:var(--navy);color:#fff}
+.choice.correct{border-color:var(--good);background:var(--goodbg)}
+.choice.correct .badge{background:var(--good);color:#fff}
+.choice.wrong{border-color:var(--bad);background:var(--badbg)}
+.choice.wrong .badge{background:var(--bad);color:#fff}
+.choice:disabled{cursor:default}
+.feedback{border-radius:12px;padding:14px 16px;margin-top:18px;font-size:14px;line-height:1.55}
+.feedback.good{background:var(--goodbg);border:1px solid #bfe3cd}
+.feedback.bad{background:var(--badbg);border:1px solid #f0c6c1}
+.feedback b{display:block;font-size:15px;margin-bottom:5px}
+.feedback.good b{color:var(--good)} .feedback.bad b{color:var(--bad)}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+.actions .left{margin-right:auto}
+.kicker{font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+textarea{
+  width:100%;border:1.5px solid #d7deea;border-radius:12px;padding:14px;font-size:15px;
+  line-height:1.6;font-family:inherit;resize:vertical;min-height:280px;background:#fff;color:var(--ink);
+}
+textarea:focus{outline:2px solid #9db4d8;border-color:#9db4d8}
+select,input[type=date],input[type=text]{
+  border:1.5px solid #d7deea;border-radius:9px;padding:9px 11px;font-size:13.5px;background:#fff;font-family:inherit;color:var(--ink);
+}
+input[type=text]{min-width:180px}
+label.check{display:flex;gap:9px;align-items:flex-start;font-size:14.5px;padding:6px 0;color:#33445c;cursor:pointer}
+label.check input{margin-top:3px;width:17px;height:17px;accent-color:var(--navy)}
+.split{display:grid;grid-template-columns:1.45fr .8fr;gap:16px;align-items:start}
+.note{background:#fff9e9;border:1px solid #f0ddac;border-radius:12px;padding:12px 14px;font-size:14px;color:#6b551c;line-height:1.6}
+.disclaimer{font-size:14px;color:#8b8576;line-height:1.6;margin-top:14px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;font-size:14px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:8px 6px;border-bottom:1px solid var(--line)}
+td{padding:9px 6px;border-bottom:1px solid #f0ece3;color:#33445c;font-size:14px}
+.ritbadge{display:inline-block;min-width:46px;text-align:center;font-weight:800;color:#fff;background:var(--navy);border-radius:7px;padding:3px 8px;font-size:12.5px}
+.center{text-align:center}
+.bigscore{font-size:56px;font-weight:800;line-height:1;color:var(--navy);letter-spacing:-1.5px}
+.orch{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap}
+.donut{
+  --p:0;width:132px;height:132px;border-radius:50%;flex:none;
+  background:conic-gradient(var(--navy) calc(var(--p)*1%),#e8e3d9 0);
+  display:grid;place-items:center;position:relative;
+}
+.donut::before{content:"";position:absolute;width:98px;height:98px;border-radius:50%;background:#fff}
+.donut span{position:relative;font-size:24px;font-weight:800;color:var(--navy)}
+.review{border:1px solid var(--line);border-radius:11px;padding:12px 14px;margin-bottom:9px;font-size:14px;line-height:1.55;background:#fff}
+.review .rq{font-weight:600;color:#22303f}
+.review .ra{color:var(--good);font-weight:700}
+.review .rs{color:var(--bad);font-weight:700}
+.review .re{color:#5b6778;margin-top:5px}
+.tabpane{display:none}
+.tabpane.active{display:block}
+.optionrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.footer{text-align:center;font-size:14px;color:#989181;padding:26px 10px 0}
+.footer a{color:#7a7364}
+.scoring{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:820px){
+  .g2,.g3,.g4,.split,.scoring{grid-template-columns:1fr}
+  .skillrow{grid-template-columns:130px 1fr 40px}
+  .qtext{font-size:18px}
+  .hero .count b{font-size:42px}
+  .wrap{padding:16px 12px 60px}
+  .tabs{top:60px}
+}
+@media print{
+  .topbar,.tabs,.footer,.actions,button{display:none!important}
+  .planitem .tick{display:grid!important}
+  body{background:#fff}
+  .wrap{max-width:none;padding:0}
+  .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid;page-break-inside:avoid}
+  .hero{background:#0f2c52!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="crest">HKIS</div>
+    <div>
+      <h1>Grade 4 Admissions Practice Lab</h1>
+      <span>Computerized adaptive practice for the pre-entry assessment</span>
+    </div>
+  </div>
+  <div class="topmeta" id="topmeta">Test day: <b>28 Nov 2026</b></div>
+</header>
+<nav class="tabs" id="tabs" role="tablist" aria-label="Practice sections"></nav>
+<main class="wrap" id="app"></main>
+<div class="footer">Unofficial practice tool. Not affiliated with Hong Kong International School or NWEA. Scores here are practice estimates, not admissions predictions.</div>
+
+<script>
+const STORE_KEY = "hkis_g4_lab_v1";
+const TEST_DATE_DEFAULT = "2026-11-28";
+
+function defaultState(){
+  return {
+    name:"",
+    testDate:TEST_DATE_DEFAULT,
+    skills:{},
+    ability:{reading:200,language:200,math:200},
+    history:[],
+    drafts:{},
+    oralNotes:[],
+    streak:{last:null,count:0},
+    plan:{date:null,items:[],done:{}},
+    writingDone:0,
+    writingLog:{}
+  };
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return defaultState();
+    const s = Object.assign(defaultState(), JSON.parse(raw));
+    s.skills = s.skills || {};
+    s.ability = Object.assign({reading:200,language:200,math:200}, s.ability||{});
+    s.drafts = s.drafts || {};
+    s.history = s.history || [];
+    s.writingLog = s.writingLog || {};
+    s.oralNotes = s.oralNotes || [];
+    return s;
+  }catch(e){ return defaultState(); }
+}
+let state = loadState();
+function save(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(state)); }catch(e){} }
+
+const SECTIONS = {
+  reading:{name:"Reading", short:"Reading", color:"#2563eb"},
+  language:{name:"Language Usage", short:"Language", color:"#7c3aed"},
+  math:{name:"Mathematics", short:"Math", color:"#059669"}
+};
+
+const DB = [
+{id:`r1`,s:`reading`,k:`Vocabulary`,r:188,q:`What does the prefix un- mean in the word unhappy?`,ch:[`before`,`not`,`again`,`wrongly`],a:1,exp:`The prefix un- means "not." Unhappy means not happy.`},
+{id:`r2`,s:`reading`,k:`Vocabulary`,r:190,q:`In the word rewrite, what does the prefix re- mean?`,ch:[`before`,`again`,`not`,`under`],a:1,exp:`Re- means "again." To rewrite is to write again.`},
+{id:`r3`,s:`reading`,k:`Vocabulary`,r:197,q:`Read the sentence. The arid desert had no water for miles. What does arid mean?`,ch:[`very cold`,`very dry`,`very noisy`,`very crowded`],a:1,exp:`Arid means very dry. The clue "had no water" helps you.`},
+{id:`r4`,s:`reading`,k:`Vocabulary`,r:196,q:`Read the sentence. The timid puppy hid behind the sofa when visitors arrived. What does timid mean?`,ch:[`shy`,`angry`,`hungry`,`fast`],a:0,exp:`Timid means shy or easily frightened. Hiding is a clue.`},
+{id:`r5`,s:`reading`,k:`Vocabulary`,r:195,q:`What does the suffix -less mean in the word careless?`,ch:[`full of`,`without`,`again`,`before`],a:1,exp:`The suffix -less means "without." Careless means without care.`},
+{id:`r6`,s:`reading`,k:`Vocabulary`,r:205,q:`The Greek root tele means far. What does the word telescope most likely mean?`,ch:[`a tool for seeing far away`,`a tool for hearing`,`a tool for measuring heat`,`a tool for writing`],a:0,exp:`Tele means far and scope relates to seeing, so a telescope sees far away.`},
+{id:`r7`,s:`reading`,k:`Vocabulary`,r:198,q:`Read the sentence. The sturdy bridge did not move, even in strong wind. What does sturdy mean?`,ch:[`weak`,`strong`,`narrow`,`old`],a:1,exp:`Sturdy means strong and well built. The clue is that it did not move.`},
+{id:`r8`,s:`reading`,k:`Vocabulary`,r:208,q:`Read the sentence. She was reluctant to speak, so she stayed silent during the meeting. What does reluctant mean?`,ch:[`eager`,`unwilling`,`unable`,`happy`],a:1,exp:`Reluctant means unwilling or hesitant. Staying silent shows she did not want to speak.`},
+{id:`r9`,s:`reading`,k:`Vocabulary`,r:194,q:`Read the sentence. The crowd was enormous, filling the whole stadium. What does enormous mean?`,ch:[`very small`,`very large`,`very quiet`,`very late`],a:1,exp:`Enormous means very large. Filling a whole stadium is the clue.`},
+{id:`r10`,s:`reading`,k:`Vocabulary`,r:205,q:`The root bio means life. What does biology most likely study?`,ch:[`rocks`,`living things`,`numbers`,`stars`],a:1,exp:`Bio means life, so biology is the study of living things.`},
+{id:`r11`,s:`reading`,k:`Vocabulary`,r:197,q:`Read the sentence. Handle the fragile vase carefully, or it will break. What does fragile mean?`,ch:[`easily broken`,`very heavy`,`quite ugly`,`hard to find`],a:0,exp:`Fragile means easily broken. The clue is "or it will break."`},
+{id:`r12`,s:`reading`,k:`Vocabulary`,r:206,q:`Read the sentence. The hikers trudged slowly through the deep snow. What does trudged mean?`,ch:[`ran quickly`,`walked heavily`,`jumped high`,`sat still`],a:1,exp:`Trudged means walked slowly and heavily, as if tired.`},
+{id:`r13`,s:`reading`,k:`Vocabulary`,r:199,q:`What does the prefix mis- mean in the word misunderstand?`,ch:[`wrongly`,`before`,`again`,`too much`],a:0,exp:`Mis- means wrongly. To misunderstand is to understand wrongly.`},
+{id:`r14`,s:`reading`,k:`Vocabulary`,r:216,q:`Read the sentence. The scientist's idea was plausible, so other researchers wanted to test it. What does plausible mean?`,ch:[`believable`,`impossible`,`dangerous`,`expensive`],a:0,exp:`Plausible means believable or reasonable.`},
+{id:`r15`,s:`reading`,k:`Vocabulary`,r:218,q:`Read the sentence. The ancient ruins were dilapidated, with broken walls and crumbling roofs. What does dilapidated mean?`,ch:[`newly built`,`falling apart`,`freshly painted`,`well guarded`],a:1,exp:`Dilapidated means in poor condition, falling apart.`},
+{id:`r16`,s:`reading`,k:`Vocabulary`,r:217,q:`Read the sentence. Her speech was concise, using only a few words to make her point. What does concise mean?`,ch:[`brief and clear`,`long and boring`,`loud and angry`,`confusing`],a:0,exp:`Concise means short and clear, using few words.`},
+{id:`r17`,s:`reading`,k:`Vocabulary`,r:206,q:`The Latin root aqua means water. Which word most likely relates to water?`,ch:[`aquatic`,`audible`,`annual`,`artistic`],a:0,exp:`Aquatic comes from aqua, meaning water.`},
+{id:`r18`,s:`reading`,k:`Vocabulary`,r:219,q:`Read the sentence. The medicine had an adverse effect and made him feel worse. What does adverse mean?`,ch:[`helpful`,`harmful`,`sleepy`,`strange`],a:1,exp:`Adverse means unfavorable or harmful.`},
+{id:`r19`,s:`reading`,k:`Vocabulary`,r:226,q:`Read the sentence. He was meticulous, checking every detail twice before handing in his work. What does meticulous mean?`,ch:[`careless`,`very careful`,`very fast`,`uninterested`],a:1,exp:`Meticulous means extremely careful about details.`},
+{id:`r20`,s:`reading`,k:`Vocabulary`,r:228,q:`Read the sentence. The evidence was ambiguous, so people could interpret it in two different ways. What does ambiguous mean?`,ch:[`unclear`,`obvious`,`false`,`heavy`],a:0,exp:`Ambiguous means unclear because it can be understood in more than one way.`},
+
+{id:`r21`,s:`reading`,k:`Literary Text`,r:200,p:`TREES
+
+I think that I shall never see
+A poem lovely as a tree.
+A tree that may in summer wear
+A nest of robins in her hair;
+Upon whose bosom snow has lain;
+Who intimately lives with rain.`,q:`What is the theme of this poem?`,ch:[`Appreciating the beauty of nature`,`Enjoying the benefits of summer`,`Criticizing bad weather`,`Studying the habits of birds`],a:0,exp:`The poem praises the tree in many seasons, so the theme is appreciating nature's beauty.`},
+{id:`r22`,s:`reading`,k:`Literary Text`,r:197,q:`Read the sentence. The wind whispered through the leaves. This sentence uses which kind of figurative language?`,ch:[`simile`,`personification`,`hyperbole`,`alliteration`],a:1,exp:`Personification gives human qualities to something nonhuman. Wind cannot whisper.`},
+{id:`r23`,s:`reading`,k:`Literary Text`,r:190,q:`Read the sentence. Her smile was as bright as the sun. This sentence is an example of a ...`,ch:[`metaphor`,`simile`,`idiom`,`rhyme`],a:1,exp:`A simile compares two things using "as" or "like."`},
+{id:`r24`,s:`reading`,k:`Literary Text`,r:196,q:`Read the sentence. The classroom was a zoo. This sentence is an example of a ...`,ch:[`simile`,`metaphor`,`personification`,`idiom`],a:1,exp:`A metaphor says one thing is another to make a comparison. It does not use like or as.`},
+{id:`r25`,s:`reading`,k:`Literary Text`,r:198,q:`Read the sentence. I have to hit the books before the test tomorrow. What does hit the books mean?`,ch:[`throw books away`,`study hard`,`borrow books`,`read for fun`],a:1,exp:`Hit the books is an idiom that means to study.`},
+{id:`r26`,s:`reading`,k:`Literary Text`,r:195,p:`Maya noticed that the new girl, Lily, was eating lunch alone. Maya usually sat with her friends, who were laughing loudly. For a moment, Maya hesitated. Then she picked up her tray, walked across the cafeteria, and asked, "May I sit with you?" Lily smiled and nodded.`,q:`Which word best describes Maya?`,ch:[`kind`,`bossy`,`careless`,`shy`],a:0,exp:`Maya gave up sitting with her friends to help a lonely student, which shows she is kind.`},
+{id:`r27`,s:`reading`,k:`Literary Text`,r:203,p:`Maya noticed that the new girl, Lily, was eating lunch alone. Maya usually sat with her friends, who were laughing loudly. For a moment, Maya hesitated. Then she picked up her tray, walked across the cafeteria, and asked, "May I sit with you?" Lily smiled and nodded.`,q:`Why did Maya hesitate at first?`,ch:[`She did not like Lily.`,`She was unsure about leaving her friends.`,`She could not find a seat.`,`She forgot her lunch.`],a:1,exp:`Maya usually sits with her friends, so she paused to decide whether to leave them.`},
+{id:`r28`,s:`reading`,k:`Literary Text`,r:200,p:`A rabbit laughed at a turtle for walking so slowly. "I can beat you in a race," the turtle said. The rabbit ran ahead but stopped to take a nap. The turtle kept walking and crossed the finish line first.`,q:`What is the lesson of the story?`,ch:[`Turtles are faster than rabbits.`,`Steady effort can beat overconfidence.`,`Never take a nap outdoors.`,`Racing is not a good idea.`],a:1,exp:`The turtle kept working while the rabbit was overconfident, so steady effort won.`},
+{id:`r29`,s:`reading`,k:`Literary Text`,r:210,p:`The old house stood at the end of the lane. Its windows were dark, and the wind made the wooden door creak. Sam pulled his coat tighter and hurried past.`,q:`What is the mood of this passage?`,ch:[`cheerful and funny`,`quiet and peaceful`,`uneasy and suspenseful`,`angry and loud`],a:2,exp:`Dark windows, creaking doors, and hurrying past create an uneasy, suspenseful mood.`},
+{id:`r30`,s:`reading`,k:`Literary Text`,r:212,p:`Rain on the roof, rain on the street, rain on the windows, rain on my feet.`,q:`Why does the poet repeat "rain on"?`,ch:[`To show the rain is everywhere`,`To make the poem shorter`,`To describe the sun`,`To tell the time`],a:0,exp:`The repetition emphasizes that rain is falling everywhere and creates a rhythm.`},
+{id:`r31`,s:`reading`,k:`Literary Text`,r:208,p:`Leo practiced the piano every day after school. He wanted to play in the school concert more than anything else.`,q:`Why did Leo practice every day?`,ch:[`He wanted to perform in the concert.`,`He wanted to avoid homework.`,`His teacher gave him candy.`,`He was bored.`],a:0,exp:`The passage says he wanted to play in the school concert, which motivates his practice.`},
+{id:`r32`,s:`reading`,k:`Literary Text`,r:215,p:`Ben shared his snack with the student who had none. Ana kept both of her snacks for herself.`,q:`Which pair of words best describes Ben and Ana?`,ch:[`generous and selfish`,`funny and serious`,`brave and afraid`,`quiet and loud`],a:0,exp:`Ben is generous because he shared. Ana is selfish because she kept everything.`},
+{id:`r33`,s:`reading`,k:`Literary Text`,r:213,p:`The story takes place on a small ship during a terrible storm.`,q:`Why is the setting important to the story?`,ch:[`It explains what the characters eat.`,`It creates danger and tension.`,`It shows that the ship is new.`,`It tells the time of day.`],a:1,exp:`A ship in a storm creates danger and tension, which shapes the events.`},
+{id:`r34`,s:`reading`,k:`Literary Text`,r:201,q:`Read the fable. A lion let a mouse go free. Later, the mouse chewed the ropes that trapped the lion. What is the message?`,ch:[`Even small friends can help in big ways.`,`Lions are stronger than mice.`,`Never help anyone.`,`Ropes are easy to break.`],a:0,exp:`The small mouse helps the powerful lion, so the message is that even small friends can help.`},
+{id:`r35`,s:`reading`,k:`Literary Text`,r:199,q:`Read the sentence. The weekend flew by, and Monday arrived too soon. What does flew by mean?`,ch:[`passed quickly`,`went by plane`,`was cancelled`,`felt boring`],a:0,exp:`Time flew by means time passed quickly.`},
+
+{id:`r36`,s:`reading`,k:`Informational Text`,r:203,p:`Antarctica, where the South Pole is located, is the coldest place on Earth. Almost all of it is covered by thick ice, and it is also the driest continent. It is called a desert because it gets very little rain or snow each year. Antarctica is huge: it is bigger than Europe and almost twice the size of Australia. Yet no one lives there permanently. Scientists stay at research stations for part of the year. Penguins, seals, and whales live there, and long ago the climate was much warmer.`,q:`What is the main idea of the passage?`,ch:[`Antarctica is an extreme, mostly uninhabited continent.`,`Penguins are the most important animals.`,`Scientists should not visit Antarctica.`,`Antarctica is the same size as Australia.`],a:0,exp:`Most of the passage describes Antarctica's extreme conditions and lack of permanent residents.`},
+{id:`r37`,s:`reading`,k:`Informational Text`,r:208,p:`Antarctica, where the South Pole is located, is the coldest place on Earth. Almost all of it is covered by thick ice, and it is also the driest continent. It is called a desert because it gets very little rain or snow each year. Antarctica is huge: it is bigger than Europe and almost twice the size of Australia. Yet no one lives there permanently. Scientists stay at research stations for part of the year. Penguins, seals, and whales live there, and long ago the climate was much warmer.`,q:`Why does the author mention Europe and Australia?`,ch:[`To show how big Antarctica is`,`To show how cold Antarctica is`,`To compare the animals there`,`To explain who lives there`],a:0,exp:`Europe and Australia are used as familiar comparisons to show Antarctica's size.`},
+{id:`r38`,s:`reading`,k:`Informational Text`,r:193,q:`A recipe gives steps for making pancakes. What is the author's purpose?`,ch:[`to entertain`,`to inform`,`to persuade`,`to instruct`],a:3,exp:`A recipe tells the reader how to do something, so the purpose is to instruct.`},
+{id:`r39`,s:`reading`,k:`Informational Text`,r:207,p:`Black bears and polar bears are both bears, but they live in very different places. Black bears live in forests and eat berries, fish, and plants. Polar bears live in the frozen Arctic and hunt seals.`,q:`How is this passage organized?`,ch:[`problem and solution`,`compare and contrast`,`cause and effect`,`sequence of events`],a:1,exp:`The passage tells how the two bears are alike and different, which is compare and contrast.`},
+{id:`r40`,s:`reading`,k:`Informational Text`,r:204,p:`Exercise helps your body in many ways. It makes your heart stronger and your muscles grow. It also helps you sleep better at night.`,q:`Which detail best supports the main idea?`,ch:[`Exercise makes your heart stronger.`,`Many people own bicycles.`,`Sleep is important for everyone.`,`Muscles are made of cells.`],a:0,exp:`The main idea is that exercise helps the body, and a stronger heart is a supporting detail.`},
+{id:`r41`,s:`reading`,k:`Informational Text`,r:197,p:`Because the town received very little rain that year, the lake shrank to half its size.`,q:`What is the effect of the town receiving little rain?`,ch:[`The lake shrank.`,`The town grew larger.`,`The rain stopped forever.`,`The lake became deeper.`],a:0,exp:`The passage states the effect directly: the lake shrank to half its size.`},
+{id:`r42`,s:`reading`,k:`Informational Text`,r:195,q:`Which sentence is an opinion?`,ch:[`Pizza is the best food in the world.`,`Pizza is made with dough and cheese.`,`Many people eat pizza.`,`Pizza can be cooked in an oven.`],a:0,exp:`"Best" is a judgment, so it is an opinion and cannot be proven.`},
+{id:`r43`,s:`reading`,k:`Informational Text`,r:206,p:`Owls are nocturnal. They hunt for food at night and sleep during the day.`,q:`What does nocturnal mean?`,ch:[`active at night`,`afraid of the dark`,`able to fly`,`very small`],a:0,exp:`The next sentence explains it: they hunt at night and sleep during the day.`},
+{id:`r44`,s:`reading`,k:`Informational Text`,r:214,p:`Antarctica, where the South Pole is located, is the coldest place on Earth. Almost all of it is covered by thick ice, and it is also the driest continent. It is called a desert because it gets very little rain or snow each year. Antarctica is huge: it is bigger than Europe and almost twice the size of Australia. Yet no one lives there permanently. Scientists stay at research stations for part of the year. Penguins, seals, and whales live there, and long ago the climate was much warmer.`,q:`Which sentence best summarizes the passage?`,ch:[`Antarctica is a huge, cold, dry continent with no permanent residents.`,`Antarctica is a warm continent full of forests.`,`Many families live in Antarctica all year.`,`Antarctica is smaller than Europe.`],a:0,exp:`A good summary includes the main points: size, cold, dry, and no permanent residents.`},
+{id:`r45`,s:`reading`,k:`Informational Text`,r:215,p:`Antarctica, where the South Pole is located, is the coldest place on Earth. Almost all of it is covered by thick ice, and it is also the driest continent. It is called a desert because it gets very little rain or snow each year. Antarctica is huge: it is bigger than Europe and almost twice the size of Australia. Yet no one lives there permanently. Scientists stay at research stations for part of the year. Penguins, seals, and whales live there, and long ago the climate was much warmer.`,q:`Why do people NOT live permanently in Antarctica?`,ch:[`The conditions are extremely harsh.`,`There is too much rain.`,`There are too many trees.`,`The continent is too small.`],a:0,exp:`The extreme cold, ice, and dryness make it too harsh for permanent homes.`},
+{id:`r46`,s:`reading`,k:`Informational Text`,r:200,p:`Honeybees live in large groups called colonies. Each colony has one queen, many worker bees, and some drones. Worker bees do many jobs: they clean the hive, care for young bees, guard the entrance, and collect nectar from flowers. When a worker finds a good patch of flowers, it returns to the hive and performs a special dance. The dance tells the other bees which direction to fly and how far to go. In this way, the colony works together to find food.`,q:`What is the main idea of the passage?`,ch:[`Honeybees communicate and work together.`,`Only the queen bee works.`,`Bees dance for fun.`,`Hives are always empty.`],a:0,exp:`The passage explains how worker bees use a dance to share information and work together.`},
+{id:`r47`,s:`reading`,k:`Informational Text`,r:211,p:`Honeybees live in large groups called colonies. Each colony has one queen, many worker bees, and some drones. Worker bees do many jobs: they clean the hive, care for young bees, guard the entrance, and collect nectar from flowers. When a worker finds a good patch of flowers, it returns to the hive and performs a special dance. The dance tells the other bees which direction to fly and how far to go. In this way, the colony works together to find food.`,q:`Which sentence best shows the author's point of view?`,ch:[`Honeybees are organized and cooperative.`,`Honeybees are dangerous and useless.`,`Honeybees are lazy.`,`Honeybees cannot communicate.`],a:0,exp:`The author emphasizes teamwork and communication, showing a positive view of bees.`},
+{id:`r48`,s:`reading`,k:`Informational Text`,r:212,q:`You need facts about how volcanoes erupt. Which source is best?`,ch:[`a science website article`,`a comic book`,`a cookbook`,`a dictionary of names`],a:0,exp:`A science website article is the most reliable source for scientific facts.`},
+{id:`r49`,s:`reading`,k:`Informational Text`,r:198,p:`First, the caterpillar hatches from an egg. Then it eats leaves and grows. Next, it forms a chrysalis. Finally, a butterfly comes out.`,q:`What happens right after the caterpillar forms a chrysalis?`,ch:[`A butterfly comes out.`,`It eats leaves.`,`It hatches from an egg.`,`It flies south.`],a:0,exp:`The sequence says finally, a butterfly comes out after the chrysalis stage.`},
+{id:`r50`,s:`reading`,k:`Informational Text`,r:209,p:`Maya noticed that the new girl, Lily, was eating lunch alone. Maya usually sat with her friends, who were laughing loudly. For a moment, Maya hesitated. Then she picked up her tray, walked across the cafeteria, and asked, "May I sit with you?" Lily smiled and nodded.`,q:`Which conclusion is best supported by the passage?`,ch:[`Lily felt welcomed by Maya.`,`Lily wanted to eat alone.`,`Maya's friends were angry.`,`Maya left the cafeteria.`],a:0,exp:`Lily smiled and nodded, which supports the conclusion that she felt welcomed.`},
+
+{id:`l1`,s:`language`,k:`Mechanics`,r:196,q:`What is the correct spelling for more than one wolf?`,ch:[`wolfs`,`wolvs`,`wolves`,`wolfes`],a:2,exp:`Nouns ending in f often change f to v and add es: wolf becomes wolves.`},
+{id:`l2`,s:`language`,k:`Mechanics`,r:188,q:`Which word should be capitalized in this sentence? My friend lives in paris.`,ch:[`my`,`friend`,`paris`,`lives`],a:2,exp:`Paris is a proper noun, the name of a place, so it needs a capital letter.`},
+{id:`l3`,s:`language`,k:`Mechanics`,r:195,q:`Which sentence uses commas correctly in a list?`,ch:[`I packed apples bread and cheese.`,`I packed apples, bread, and cheese.`,`I packed, apples bread and cheese.`,`I packed apples, bread and, cheese.`],a:1,exp:`Use a comma between each item in a list and before "and."`},
+{id:`l4`,s:`language`,k:`Mechanics`,r:193,q:`Which word is spelled correctly?`,ch:[`beutiful`,`beautiful`,`beautifull`,`beautifal`],a:1,exp:`The correct spelling is beautiful.`},
+{id:`l5`,s:`language`,k:`Mechanics`,r:197,q:`Which sentence uses the apostrophe correctly?`,ch:[`The dog's bone is buried.`,`The dogs bone is buried.`,`The dog's are barking.`,`The dogs' is barking.`],a:0,exp:`The dog's bone shows that the bone belongs to one dog.`},
+{id:`l6`,s:`language`,k:`Mechanics`,r:207,q:`Which sentence uses quotation marks correctly?`,ch:[`Mia said, I will be there soon.`,`Mia said, "I will be there soon."`,`Mia said "I will be there soon".`,`"Mia said, I will be there soon."`],a:1,exp:`Put quotation marks around the speaker's exact words.`},
+{id:`l7`,s:`language`,k:`Mechanics`,r:189,q:`What is the correct plural of child?`,ch:[`childs`,`childes`,`children`,`childrens`],a:2,exp:`Child has an irregular plural: children.`},
+{id:`l8`,s:`language`,k:`Mechanics`,r:208,q:`Choose the correct word. The cat licked ___ paw.`,ch:[`its`,`it's`,`its'`,`it is`],a:0,exp:`Its shows possession. It's is a contraction meaning it is.`},
+{id:`l9`,s:`language`,k:`Mechanics`,r:210,q:`Which sentence uses the comma correctly?`,ch:[`After the storm we, went outside.`,`After the storm, we went outside.`,`After, the storm we went outside.`,`After the storm we went, outside.`],a:1,exp:`Put a comma after an introductory phrase such as "After the storm."`},
+{id:`l10`,s:`language`,k:`Mechanics`,r:211,q:`Which word is spelled correctly?`,ch:[`recieved`,`received`,`receved`,`receeved`],a:1,exp:`The correct spelling is received. Remember: i before e except after c.`},
+{id:`l11`,s:`language`,k:`Mechanics`,r:191,q:`What is the correct plural of leaf?`,ch:[`leafs`,`leaves`,`leafes`,`leafies`],a:1,exp:`Leaf becomes leaves, changing f to v and adding es.`},
+{id:`l12`,s:`language`,k:`Mechanics`,r:186,q:`Which punctuation mark belongs at the end of this sentence? Where is my backpack`,ch:[`a period`,`a question mark`,`an exclamation mark`,`a comma`],a:1,exp:`The sentence asks a question, so it needs a question mark.`},
+{id:`l13`,s:`language`,k:`Mechanics`,r:212,q:`Which word is spelled correctly?`,ch:[`seperate`,`separate`,`seperete`,`separete`],a:1,exp:`The correct spelling is separate. Remember there is "a rat" in the middle.`},
+{id:`l14`,s:`language`,k:`Mechanics`,r:216,q:`Which sentence correctly shows that the projects belong to more than one student?`,ch:[`The students projects were displayed.`,`The student's projects were displayed.`,`The students' projects were displayed.`,`The students's projects were displayed.`],a:2,exp:`For a plural noun ending in s, add an apostrophe after the s: students'.`},
+{id:`l15`,s:`language`,k:`Mechanics`,r:190,q:`Which words should be capitalized? We meet on monday in march.`,ch:[`we, meet`,`monday, march`,`on, in`,`meet, on`],a:1,exp:`Days of the week and months are proper nouns, so Monday and March need capitals.`},
+
+{id:`l16`,s:`language`,k:`Parts of Speech`,r:197,q:`What is a proper noun?`,ch:[`a word that names a particular person, place, or thing`,`a word that describes a noun`,`a word that shows action`,`a word that replaces a noun`],a:0,exp:`A proper noun names a specific person, place, or thing and is capitalized.`},
+{id:`l17`,s:`language`,k:`Parts of Speech`,r:189,q:`Find the adjective. The happy boy ran outside.`,ch:[`happy`,`boy`,`ran`,`outside`],a:0,exp:`Happy describes the boy, so it is an adjective.`},
+{id:`l18`,s:`language`,k:`Parts of Speech`,r:187,q:`Find the verb. Birds sing loudly in the morning.`,ch:[`Birds`,`sing`,`loudly`,`morning`],a:1,exp:`Sing is the action word, so it is the verb.`},
+{id:`l19`,s:`language`,k:`Parts of Speech`,r:198,q:`Find the adverb. She ran quickly to the door.`,ch:[`She`,`ran`,`quickly`,`door`],a:2,exp:`Quickly describes how she ran, so it is an adverb.`},
+{id:`l20`,s:`language`,k:`Parts of Speech`,r:196,q:`Which word is a pronoun in this sentence? He found the keys under the chair.`,ch:[`He`,`found`,`keys`,`chair`],a:0,exp:`He replaces a person's name, so it is a pronoun.`},
+{id:`l21`,s:`language`,k:`Parts of Speech`,r:199,q:`Which word is a conjunction? I wanted to go, but it rained.`,ch:[`wanted`,`go`,`but`,`rained`],a:2,exp:`But connects two ideas, so it is a conjunction.`},
+{id:`l22`,s:`language`,k:`Parts of Speech`,r:205,q:`Which word is a preposition? The cat sat under the table.`,ch:[`cat`,`sat`,`under`,`table`],a:2,exp:`Under shows the position of the cat, so it is a preposition.`},
+{id:`l23`,s:`language`,k:`Parts of Speech`,r:200,q:`What is the subject of this sentence? Ethan almost left his white socks on his bed.`,ch:[`white socks`,`his`,`left`,`Ethan`],a:3,exp:`Ethan is the one who left the socks, so Ethan is the subject.`},
+{id:`l24`,s:`language`,k:`Parts of Speech`,r:208,q:`What is the predicate of this sentence? The children played in the park.`,ch:[`The children`,`played in the park`,`in the park`,`children`],a:1,exp:`The predicate tells what the subject did: played in the park.`},
+{id:`l25`,s:`language`,k:`Parts of Speech`,r:214,q:`Which word is an abstract noun?`,ch:[`desk`,`apple`,`freedom`,`teacher`],a:2,exp:`Freedom is an idea or feeling you cannot touch, so it is an abstract noun.`},
+
+{id:`l26`,s:`language`,k:`Grammar & Usage`,r:195,q:`Choose the correct verb. The dogs ___ barking loudly.`,ch:[`is`,`are`,`was`,`am`],a:1,exp:`Dogs is plural, so use are: The dogs are barking.`},
+{id:`l27`,s:`language`,k:`Grammar & Usage`,r:205,q:`Choose the correct word. ___ going to the park after lunch.`,ch:[`There`,`Their`,`They're`,`Theyre`],a:2,exp:`They're is short for "they are," which fits the sentence.`},
+{id:`l28`,s:`language`,k:`Grammar & Usage`,r:206,q:`Which group of words is a sentence fragment?`,ch:[`She walked home.`,`Ran to the store.`,`The dog barked.`,`We ate lunch.`],a:1,exp:`"Ran to the store" has no subject, so it is a fragment.`},
+{id:`l29`,s:`language`,k:`Grammar & Usage`,r:209,q:`Which is the best way to fix this run-on sentence? I was tired I went to bed.`,ch:[`I was tired, so I went to bed.`,`I was tired, I went to bed.`,`I was tired and I went to bed and.`,`I was tired went to bed.`],a:0,exp:`Add a comma and a conjunction to join the two complete ideas correctly.`},
+{id:`l30`,s:`language`,k:`Grammar & Usage`,r:215,q:`Choose the correct pronoun. Each student must bring ___ book to class.`,ch:[`their`,`his or her`,`they`,`them`],a:1,exp:`Each is singular, so use the singular "his or her."`},
+{id:`l31`,s:`language`,k:`Grammar & Usage`,r:198,q:`Choose the correct past-tense verb. Yesterday, she ___ to school.`,ch:[`walk`,`walks`,`walked`,`walking`],a:2,exp:`Yesterday signals past tense, so use walked.`},
+{id:`l32`,s:`language`,k:`Grammar & Usage`,r:199,q:`What is the correct comparative form of careful?`,ch:[`carefuler`,`more careful`,`most careful`,`carefully`],a:1,exp:`For longer adjectives, use more: more careful.`},
+{id:`l33`,s:`language`,k:`Grammar & Usage`,r:207,q:`Which sentence does NOT use a double negative?`,ch:[`I don't have no money.`,`I didn't see nobody.`,`I don't have any money.`,`She never said nothing.`],a:2,exp:`"Any money" avoids the double negative. The other sentences use two negative words.`},
+{id:`l34`,s:`language`,k:`Grammar & Usage`,r:210,q:`Which is the best way to combine these sentences? The boy was tall. He played basketball.`,ch:[`The tall boy played basketball.`,`The boy was tall he played basketball.`,`The boy played tall basketball.`,`The tall played boy basketball.`],a:0,exp:`Turning "tall" into an adjective creates one clear sentence.`},
+{id:`l35`,s:`language`,k:`Grammar & Usage`,r:214,q:`Which sentence is a compound sentence?`,ch:[`I like tea, and she likes coffee.`,`I like tea with honey.`,`She likes coffee in the morning.`,`Because I like tea, we stopped.`],a:0,exp:`A compound sentence joins two complete ideas with a comma and a conjunction.`},
+
+{id:`l36`,s:`language`,k:`Writing Process`,r:207,q:`Which of these is required in research writing?`,ch:[`a sense of humor`,`a list of references`,`personal experiences`,`an imaginary story`],a:1,exp:`Research writing uses sources, so a list of references is required to show where facts came from.`},
+{id:`l37`,s:`language`,k:`Writing Process`,r:197,q:`What is the job of a topic sentence?`,ch:[`to tell the main idea of the paragraph`,`to end the paragraph`,`to list every detail`,`to ask a question`],a:0,exp:`A topic sentence states the main idea that the rest of the paragraph supports.`},
+{id:`l38`,s:`language`,k:`Writing Process`,r:206,q:`Which transition word best shows a contrast?`,ch:[`However`,`Also`,`First`,`Because`],a:0,exp:`However signals that the next idea is different from the last one.`},
+{id:`l39`,s:`language`,k:`Writing Process`,r:210,q:`Which sentence does NOT belong in a paragraph about how butterflies grow?`,ch:[`A butterfly begins as an egg.`,`The caterpillar eats leaves.`,`My uncle drives a blue truck.`,`It later forms a chrysalis.`],a:2,exp:`A blue truck is unrelated to the life cycle of a butterfly.`},
+{id:`l40`,s:`language`,k:`Writing Process`,r:196,q:`What is the purpose of a concluding sentence?`,ch:[`to wrap up the paragraph's main idea`,`to introduce a new topic`,`to give the first detail`,`to list references`],a:0,exp:`A concluding sentence brings the paragraph to a close and restates the main idea.`},
+{id:`l41`,s:`language`,k:`Writing Process`,r:188,q:`Which is the best title for a passage about how volcanoes erupt?`,ch:[`How Volcanoes Erupt`,`My Summer Vacation`,`A Recipe for Soup`,`The Life of a Butterfly`],a:0,exp:`A title should tell the reader what the passage is about.`},
+{id:`l42`,s:`language`,k:`Writing Process`,r:209,q:`Which sentence states an opinion?`,ch:[`School should start later in the morning.`,`School starts at 8 a.m.`,`The school has 20 classrooms.`,`Students eat lunch at noon.`],a:0,exp:`"Should" expresses a belief, so it is an opinion.`},
+{id:`l43`,s:`language`,k:`Writing Process`,r:217,q:`Which revision is clearest? The dog that was brown and small ran.`,ch:[`The small brown dog ran.`,`The dog ran that was brown and small.`,`The brown ran small dog.`,`The dog was brown and small ran.`],a:0,exp:`Putting the adjectives before the noun makes the sentence clear and smooth.`},
+
+{id:`m1`,s:`math`,k:`Number Sense`,r:196,q:`What is the value of the digit 7 in 4,782?`,ch:[`7`,`70`,`700`,`7,000`],a:2,exp:`The 7 is in the hundreds place, so its value is 700.`},
+{id:`m2`,s:`math`,k:`Number Sense`,r:195,q:`Round 3,568 to the nearest hundred.`,ch:[`3,500`,`3,600`,`3,570`,`4,000`],a:1,exp:`Look at the tens digit, 6. Since 6 is 5 or more, round up to 3,600.`},
+{id:`m3`,s:`math`,k:`Number Sense`,r:204,q:`Which number is greater, 0.6 or 0.58?`,ch:[`0.6`,`0.58`,`They are equal`,`Cannot tell`],a:0,exp:`Write 0.6 as 0.60. 0.60 is greater than 0.58.`},
+{id:`m4`,s:`math`,k:`Number Sense`,r:198,q:`Which list shows all the factors of 24?`,ch:[`1, 2, 3, 4, 6, 8, 12, 24`,`1, 2, 4, 6, 8, 24`,`2, 3, 4, 6, 8, 12`,`1, 2, 3, 5, 6, 8, 12, 24`],a:0,exp:`The factors of 24 are 1, 2, 3, 4, 6, 8, 12, and 24.`},
+{id:`m5`,s:`math`,k:`Number Sense`,r:193,q:`Which list shows only multiples of 6?`,ch:[`6, 12, 18, 24`,`6, 9, 12, 15`,`4, 8, 12, 16`,`6, 12, 16, 20`],a:0,exp:`Multiples of 6 are 6, 12, 18, 24, and so on.`},
+{id:`m6`,s:`math`,k:`Number Sense`,r:206,q:`Which of these numbers is prime?`,ch:[`4`,`7`,`9`,`12`],a:1,exp:`7 has only two factors, 1 and 7, so it is prime.`},
+{id:`m7`,s:`math`,k:`Number Sense`,r:197,q:`Order these fractions from least to greatest: 1/2, 1/4, 3/4.`,ch:[`1/4, 1/2, 3/4`,`1/2, 1/4, 3/4`,`3/4, 1/2, 1/4`,`1/4, 3/4, 1/2`],a:0,exp:`One fourth is smallest, then one half, then three fourths.`},
+{id:`m8`,s:`math`,k:`Number Sense`,r:194,q:`What is 5,321 in expanded form?`,ch:[`5,000 + 300 + 20 + 1`,`5,000 + 30 + 20 + 1`,`500 + 300 + 20 + 1`,`5,000 + 200 + 30 + 1`],a:0,exp:`5,321 = 5,000 + 300 + 20 + 1.`},
+{id:`m9`,s:`math`,k:`Number Sense`,r:208,q:`Round 47.85 to the nearest tenth.`,ch:[`47.8`,`47.9`,`48.0`,`47.0`],a:1,exp:`The hundredths digit is 5, so round the tenths digit up: 47.9.`},
+{id:`m10`,s:`math`,k:`Number Sense`,r:216,q:`Which fraction is greater, 3/5 or 5/8?`,ch:[`3/5`,`5/8`,`They are equal`,`Cannot tell`],a:1,exp:`3/5 = 0.60 and 5/8 = 0.625, so 5/8 is greater.`},
+{id:`m11`,s:`math`,k:`Number Sense`,r:210,q:`Which number is divisible by 3?`,ch:[`124`,`125`,`123`,`128`],a:2,exp:`Add the digits of 123: 1 + 2 + 3 = 6, and 6 is divisible by 3.`},
+{id:`m12`,s:`math`,k:`Number Sense`,r:214,q:`Which comparison is true?`,ch:[`-3 < -1`,`-3 > -1`,`-1 < -3`,`-3 = -1`],a:0,exp:`On a number line, -3 is to the left of -1, so -3 is less than -1.`},
+
+{id:`m13`,s:`math`,k:`Operations & Fractions`,r:198,q:`A supermarket packed 60 eggs equally into 4 boxes. How many eggs were in 3 boxes?`,ch:[`15`,`20`,`36`,`45`],a:3,exp:`Each box has 60 divided by 4 = 15 eggs. Three boxes have 15 times 3 = 45 eggs.`},
+{id:`m14`,s:`math`,k:`Operations & Fractions`,r:188,q:`347 + 286 = ?`,ch:[`523`,`633`,`623`,`643`],a:1,exp:`347 + 286 = 633.`},
+{id:`m15`,s:`math`,k:`Operations & Fractions`,r:196,q:`5,000 - 2,368 = ?`,ch:[`2,732`,`2,632`,`2,532`,`3,632`],a:1,exp:`5,000 - 2,368 = 2,632.`},
+{id:`m16`,s:`math`,k:`Operations & Fractions`,r:190,q:`24 × 6 = ?`,ch:[`124`,`134`,`144`,`154`],a:2,exp:`24 × 6 = 144.`},
+{id:`m17`,s:`math`,k:`Operations & Fractions`,r:199,q:`156 ÷ 4 = ?`,ch:[`29`,`36`,`39`,`49`],a:2,exp:`156 ÷ 4 = 39 because 39 × 4 = 156.`},
+{id:`m18`,s:`math`,k:`Operations & Fractions`,r:197,q:`3/8 + 2/8 = ?`,ch:[`5/8`,`5/16`,`1/8`,`6/8`],a:0,exp:`The denominators are the same, so add the numerators: 3 + 2 = 5, giving 5/8.`},
+{id:`m19`,s:`math`,k:`Operations & Fractions`,r:205,q:`1/2 + 1/4 = ?`,ch:[`2/6`,`3/4`,`2/4`,`1/6`],a:1,exp:`1/2 = 2/4, so 2/4 + 1/4 = 3/4.`},
+{id:`m20`,s:`math`,k:`Operations & Fractions`,r:208,q:`0.75 + 0.4 = ?`,ch:[`1.15`,`0.79`,`1.05`,`1.19`],a:0,exp:`Line up the decimal points: 0.75 + 0.40 = 1.15.`},
+{id:`m21`,s:`math`,k:`Operations & Fractions`,r:196,q:`Mia bought 3 packs of pencils with 8 pencils in each pack. She also had 5 pencils at home. How many pencils does she have in all?`,ch:[`24`,`29`,`32`,`40`],a:1,exp:`3 × 8 = 24, then 24 + 5 = 29 pencils.`},
+{id:`m22`,s:`math`,k:`Operations & Fractions`,r:207,q:`1 - 3/5 = ?`,ch:[`2/5`,`3/5`,`1/5`,`4/5`],a:0,exp:`Write 1 as 5/5. Then 5/5 - 3/5 = 2/5.`},
+{id:`m23`,s:`math`,k:`Operations & Fractions`,r:203,q:`12 × 34 = ?`,ch:[`308`,`408`,`418`,`510`],a:1,exp:`12 × 34 = 408.`},
+{id:`m24`,s:`math`,k:`Operations & Fractions`,r:213,q:`2.5 - 0.75 = ?`,ch:[`1.75`,`1.25`,`1.85`,`2.25`],a:0,exp:`2.50 - 0.75 = 1.75.`},
+{id:`m25`,s:`math`,k:`Operations & Fractions`,r:206,q:`What is 1/4 of 8?`,ch:[`1`,`2`,`4`,`6`],a:1,exp:`1/4 of 8 means 8 ÷ 4 = 2.`},
+{id:`m26`,s:`math`,k:`Operations & Fractions`,r:199,q:`29 ÷ 4 = ?`,ch:[`6 remainder 5`,`7 remainder 1`,`7 remainder 2`,`8 remainder 1`],a:1,exp:`4 × 7 = 28, and 29 - 28 = 1, so the answer is 7 remainder 1.`},
+{id:`m27`,s:`math`,k:`Operations & Fractions`,r:216,q:`3.6 ÷ 3 = ?`,ch:[`0.12`,`1.2`,`1.02`,`12`],a:1,exp:`3.6 ÷ 3 = 1.2.`},
+
+{id:`m28`,s:`math`,k:`Algebra & Patterns`,r:200,q:`What number goes in place of the question mark? ? - 14 = 27`,ch:[`13`,`17`,`41`,`51`],a:2,exp:`Add 14 to both sides: ? = 27 + 14 = 41.`},
+{id:`m29`,s:`math`,k:`Algebra & Patterns`,r:201,q:`What rule describes the pattern 12, 21, 30, 39?`,ch:[`add 9`,`add 7`,`multiply by 2`,`subtract 9`],a:0,exp:`Each number increases by 9: 12 + 9 = 21, 21 + 9 = 30, and so on.`},
+{id:`m30`,s:`math`,k:`Algebra & Patterns`,r:189,q:`5 × ? = 35. What is the missing number?`,ch:[`5`,`6`,`7`,`8`],a:2,exp:`35 ÷ 5 = 7.`},
+{id:`m31`,s:`math`,k:`Algebra & Patterns`,r:205,q:`What is the next number in the pattern 2, 6, 18, 54, ...?`,ch:[`72`,`108`,`162`,`216`],a:2,exp:`Each number is multiplied by 3: 54 × 3 = 162.`},
+{id:`m32`,s:`math`,k:`Algebra & Patterns`,r:187,q:`? + 8 = 20. What is the missing number?`,ch:[`10`,`12`,`14`,`28`],a:1,exp:`20 - 8 = 12.`},
+{id:`m33`,s:`math`,k:`Algebra & Patterns`,r:207,q:`Which expression means "3 more than n"?`,ch:[`3 - n`,`3n`,`n + 3`,`n ÷ 3`],a:2,exp:`"3 more than n" means add 3 to n, or n + 3.`},
+{id:`m34`,s:`math`,k:`Algebra & Patterns`,r:203,q:`4n = 28. What is n?`,ch:[`4`,`7`,`11`,`24`],a:1,exp:`28 ÷ 4 = 7.`},
+{id:`m35`,s:`math`,k:`Algebra & Patterns`,r:211,q:`What is the next number in the pattern 1, 4, 9, 16, ...?`,ch:[`20`,`24`,`25`,`36`],a:2,exp:`These are square numbers: 1, 4, 9, 16, 25.`},
+{id:`m36`,s:`math`,k:`Algebra & Patterns`,r:213,q:`A table shows x = 1, 2, 3 and y = 6, 7, 8. Which rule connects x and y?`,ch:[`y = x + 5`,`y = x + 6`,`y = 5x`,`y = x - 5`],a:0,exp:`Each y is 5 more than x, so y = x + 5.`},
+{id:`m37`,s:`math`,k:`Algebra & Patterns`,r:202,q:`? ÷ 6 = 9. What is the missing number?`,ch:[`3`,`15`,`54`,`63`],a:2,exp:`Multiply both sides by 6: ? = 9 × 6 = 54.`},
+
+{id:`m38`,s:`math`,k:`Geometry`,r:207,q:`Which set of angles could belong to an isosceles triangle?`,ch:[`35°, 70°, 75°`,`36°, 72°, 72°`,`30°, 60°, 90°`,`32°, 110°, 38°`],a:1,exp:`An isosceles triangle has two equal angles. Only 36°, 72°, 72° has two equal angles.`},
+{id:`m39`,s:`math`,k:`Geometry`,r:190,q:`How many degrees are in a right angle?`,ch:[`45°`,`90°`,`180°`,`360°`],a:1,exp:`A right angle measures 90 degrees.`},
+{id:`m40`,s:`math`,k:`Geometry`,r:211,q:`How many lines of symmetry does a square have?`,ch:[`1`,`2`,`4`,`8`],a:2,exp:`A square has 4 lines of symmetry: two through the middle and two diagonals.`},
+{id:`m41`,s:`math`,k:`Geometry`,r:188,q:`Which shape has 4 equal sides and 4 right angles?`,ch:[`rectangle`,`square`,`rhombus`,`triangle`],a:1,exp:`A square has four equal sides and four right angles.`},
+{id:`m42`,s:`math`,k:`Geometry`,r:197,q:`What is the perimeter of a rectangle that is 6 cm long and 4 cm wide?`,ch:[`10 cm`,`20 cm`,`24 cm`,`28 cm`],a:1,exp:`Perimeter = 6 + 4 + 6 + 4 = 20 cm.`},
+{id:`m43`,s:`math`,k:`Geometry`,r:198,q:`What is the area of a rectangle that is 6 cm long and 4 cm wide?`,ch:[`10 square cm`,`20 square cm`,`24 square cm`,`28 square cm`],a:2,exp:`Area = length × width = 6 × 4 = 24 square cm.`},
+{id:`m44`,s:`math`,k:`Geometry`,r:209,q:`A triangle has angles of 60° and 80°. What is the third angle?`,ch:[`30°`,`40°`,`50°`,`60°`],a:1,exp:`The angles of a triangle add to 180°. 180 - 60 - 80 = 40°.`},
+{id:`m45`,s:`math`,k:`Geometry`,r:199,q:`What is true about parallel lines?`,ch:[`They cross at a right angle.`,`They never meet.`,`They form a circle.`,`They are always curved.`],a:1,exp:`Parallel lines stay the same distance apart and never meet.`},
+{id:`m46`,s:`math`,k:`Geometry`,r:201,q:`An angle that measures 120° is called ...`,ch:[`acute`,`right`,`obtuse`,`straight`],a:2,exp:`An obtuse angle is greater than 90° and less than 180°.`},
+{id:`m47`,s:`math`,k:`Geometry`,r:216,q:`A shape is made of two rectangles: one is 3 m by 4 m and the other is 2 m by 5 m. What is the total area?`,ch:[`10 square m`,`12 square m`,`22 square m`,`24 square m`],a:2,exp:`The areas are 3 × 4 = 12 and 2 × 5 = 10. The total is 12 + 10 = 22 square m.`},
+{id:`m48`,s:`math`,k:`Geometry`,r:193,q:`How many faces does a cube have?`,ch:[`4`,`6`,`8`,`12`],a:1,exp:`A cube has 6 flat square faces.`},
+{id:`m49`,s:`math`,k:`Geometry`,r:204,q:`A circle has a diameter of 10 cm. What is its radius?`,ch:[`5 cm`,`10 cm`,`20 cm`,`2 cm`],a:0,exp:`The radius is half the diameter: 10 ÷ 2 = 5 cm.`},
+
+{id:`m50`,s:`math`,k:`Measurement`,r:199,q:`Which item weighs approximately 1 gram?`,ch:[`an apple`,`a can of cola`,`a stick of gum`,`a cellphone`],a:2,exp:`A stick of gum is very light, about 1 gram. The other items weigh much more.`},
+{id:`m51`,s:`math`,k:`Measurement`,r:190,q:`1 kilometer = ? meters`,ch:[`10`,`100`,`1,000`,`10,000`],a:2,exp:`1 kilometer equals 1,000 meters.`},
+{id:`m52`,s:`math`,k:`Measurement`,r:207,q:`2.5 kilograms = ? grams`,ch:[`25`,`250`,`2,500`,`25,000`],a:2,exp:`1 kilogram = 1,000 grams, so 2.5 × 1,000 = 2,500 grams.`},
+{id:`m53`,s:`math`,k:`Measurement`,r:210,q:`A class starts at 9:45 a.m. and ends at 11:20 a.m. How long is the class?`,ch:[`1 hour 25 minutes`,`1 hour 35 minutes`,`1 hour 45 minutes`,`2 hours 35 minutes`],a:1,exp:`From 9:45 to 10:45 is 1 hour, then 10:45 to 11:20 is 35 minutes. Total: 1 hour 35 minutes.`},
+{id:`m54`,s:`math`,k:`Measurement`,r:196,q:`3 feet = ? yard(s)`,ch:[`1`,`2`,`3`,`6`],a:0,exp:`1 yard equals 3 feet.`},
+{id:`m55`,s:`math`,k:`Measurement`,r:185,q:`1 hour = ? minutes`,ch:[`30`,`45`,`60`,`100`],a:2,exp:`1 hour equals 60 minutes.`},
+{id:`m56`,s:`math`,k:`Measurement`,r:189,q:`Which unit is best for measuring the length of a pencil?`,ch:[`centimeters`,`liters`,`kilograms`,`hours`],a:0,exp:`Centimeters measure length. Liters measure liquid, kilograms measure mass, and hours measure time.`},
+{id:`m57`,s:`math`,k:`Measurement`,r:198,q:`5 liters = ? milliliters`,ch:[`50`,`500`,`5,000`,`50,000`],a:2,exp:`1 liter = 1,000 milliliters, so 5 × 1,000 = 5,000 milliliters.`},
+{id:`m58`,s:`math`,k:`Measurement`,r:197,q:`You pay for a toy that costs 3 dollars 75 cents with a 5 dollar bill. How much change do you get?`,ch:[`1 dollar 25 cents`,`1 dollar 75 cents`,`2 dollars 25 cents`,`2 dollars 75 cents`],a:0,exp:`5.00 - 3.75 = 1.25, so you get 1 dollar 25 cents.`},
+{id:`m59`,s:`math`,k:`Measurement`,r:205,q:`36 inches = ? feet`,ch:[`2`,`3`,`4`,`6`],a:1,exp:`1 foot = 12 inches, so 36 ÷ 12 = 3 feet.`},
+
+{id:`m60`,s:`math`,k:`Data & Probability`,r:208,q:`What is the mean of 4, 6, 8, and 10?`,ch:[`6`,`7`,`8`,`9`],a:1,exp:`Add the numbers: 4 + 6 + 8 + 10 = 28. Divide by 4: 28 ÷ 4 = 7.`},
+{id:`m61`,s:`math`,k:`Data & Probability`,r:210,q:`What is the median of 3, 7, 5, 9, and 11?`,ch:[`5`,`7`,`8`,`9`],a:1,exp:`Put them in order: 3, 5, 7, 9, 11. The middle number is 7.`},
+{id:`m62`,s:`math`,k:`Data & Probability`,r:196,q:`What is the mode of 2, 3, 3, 4, and 5?`,ch:[`2`,`3`,`4`,`5`],a:1,exp:`The mode is the number that appears most often, which is 3.`},
+{id:`m63`,s:`math`,k:`Data & Probability`,r:203,q:`What is the range of the data set 4, 7, 9, and 12?`,ch:[`4`,`7`,`8`,`12`],a:2,exp:`Range = greatest minus least = 12 - 4 = 8.`},
+{id:`m64`,s:`math`,k:`Data & Probability`,r:197,q:`A bar graph shows books read: Monday 4, Tuesday 6, Wednesday 5, Thursday 8. How many more books were read on Thursday than on Monday?`,ch:[`2`,`3`,`4`,`8`],a:2,exp:`8 - 4 = 4 more books on Thursday.`},
+{id:`m65`,s:`math`,k:`Data & Probability`,r:207,q:`You roll a fair six-sided die. What is the probability of rolling an even number?`,ch:[`1/6`,`1/3`,`1/2`,`2/3`],a:2,exp:`The even numbers are 2, 4, and 6, so 3 out of 6 outcomes, which is 1/2.`},
+{id:`m66`,s:`math`,k:`Data & Probability`,r:199,q:`A spinner has 3 red sections and 1 blue section. Which color are you most likely to land on?`,ch:[`red`,`blue`,`both equally likely`,`neither`],a:0,exp:`Red covers more of the spinner, so it is more likely.`},
+{id:`m67`,s:`math`,k:`Data & Probability`,r:214,q:`A line plot shows the values 2, 3, 3, 4, 4, 4, and 5. What is the difference between the greatest and least values?`,ch:[`2`,`3`,`4`,`5`],a:1,exp:`Greatest is 5 and least is 2, so 5 - 2 = 3.`}
+];
+
+const TIPS = {
+  "Vocabulary":"Use context clues: read the sentences around the word and look for examples, synonyms, or opposites.",
+  "Literary Text":"Before answering, ask: Who? What do they want? What is the problem? What is the lesson?",
+  "Informational Text":"Find the main idea in the first and last sentences, then find one detail that supports it.",
+  "Mechanics":"Read punctuation aloud. Check capitals for names, days, months, and sentence beginnings.",
+  "Parts of Speech":"Name each word's job: noun, verb, adjective, adverb. The job decides the part of speech.",
+  "Grammar & Usage":"Check subject-verb agreement and pronoun agreement. Say the sentence out loud to hear errors.",
+  "Writing Process":"Plan before you write: beginning, middle, end, and a strong closing sentence.",
+  "Number Sense":"Use place value and number lines. Compare fractions by finding a common denominator.",
+  "Operations & Fractions":"Estimate first, then compute. Keep the denominator the same when adding fractions.",
+  "Algebra & Patterns":"Find the rule: what changes each step? Then check the rule on two pairs.",
+  "Geometry":"Draw the shape and label what you know. Triangle angles always add to 180 degrees.",
+  "Measurement":"Write the unit next to every number. Convert units before you compute.",
+  "Data & Probability":"Read the labels and scale first. Mean is the fair share, median is the middle, mode is most often."
+};
+
+const WRITING_PROMPTS = [
+  {id:`w1`, type:`Narrative`, title:`A Time You Tried Something New`, prompt:`Write a story about a time you tried something new for the first time. Explain what happened and how you felt before, during, and after.`, tips:[`Start with a hook that sets the scene.`,`Use time-order words: first, then, next, finally.`,`Include how you felt, not just what you did.`,`End with what you learned or how you changed.`], model:`The first time I climbed the climbing wall, my hands would not stop shaking. The wall looked as tall as a building. I watched other children reach the top, and I almost turned around.\n\nThen my coach said, "One hold at a time." I grabbed the lowest hold and pulled myself up. My heart was pounding, but I kept going. When I finally touched the top, the whole class cheered.\n\nThat day I learned that being brave does not mean you are not scared. It means you keep going even when you are.`},
+  {id:`w2`, type:`Opinion`, title:`More Recess Time`, prompt:`Should students have more recess time at school? State your opinion and give at least two reasons with examples.`, tips:[`State your opinion clearly in the first paragraph.`,`Give two or three strong reasons.`,`Support each reason with an example from school life.`,`Answer the other side, then end with a strong call to action.`], model:`I believe students should have more recess time each day. Recess is not just free time; it helps us learn better.\n\nFirst, moving outside helps students focus in class. After running and playing, I can concentrate on math much more easily. Second, recess teaches us how to solve problems with friends. We learn to share, take turns, and include others.\n\nSome people say class time is too important to lose. However, healthy, happy students learn more in the time they have. More recess would make our school day better for everyone.`},
+  {id:`w3`, type:`Informational`, title:`How the Water Cycle Works`, prompt:`Explain the water cycle to a younger student. Use at least three stages and clear details.`, tips:[`Begin with a big idea sentence.`,`Explain each stage in order: evaporation, condensation, precipitation.`,`Use a comparison to make it easy to understand.`,`End by explaining why the water cycle matters.`], model:`The water cycle is the journey water takes again and again. It has three main stages.\n\nFirst, the sun heats water in oceans and lakes. The water turns into vapor and rises. This is evaporation. Next, high in the sky, the vapor cools and forms tiny drops that make clouds. This is condensation. Finally, the drops join together and fall as rain or snow. This is precipitation.\n\nThe water cycle is important because it gives plants, animals, and people fresh water. Without it, our world would be dry and empty.`},
+  {id:`w4`, type:`Narrative`, title:`The Mysterious Key`, prompt:`Imagine you found a mysterious key on the playground. Write a story about what happens next.`, tips:[`Describe the key with details.`,`Create a problem or surprise.`,`Use dialogue to bring characters to life.`,`Show the ending clearly, even if it is a twist.`], model:`The key was small and gold, with a tiny dragon carved on one side. It was lying under the slide, shining in the sun. I picked it up and looked around. No one was watching.\n\nOn the way home, I noticed a small locked box outside the library. It had a dragon on the lid. My heart jumped. I slid the key into the lock, and it fit perfectly. The box clicked open. Inside was a note: "Please return this book to shelf twelve." I laughed. It was a library mystery after all.\n\nI returned the book and kept the key. Now I always look under the slide.`},
+  {id:`w5`, type:`Opinion`, title:`Book or Movie?`, prompt:`Is it better to read a book or watch a movie? Support your opinion with reasons and examples.`, tips:[`Choose one side and stay with it.`,`Compare both choices to show why yours is better.`,`Use a personal example.`,`End with a memorable closing sentence.`], model:`In my opinion, reading a book is better than watching a movie. A book lets you build the world in your own imagination.\n\nWhen I read a fantasy book, I decide what the castle looks like and how the characters sound. A movie shows one version, but a book can belong to every reader. Books also give more details about why characters make choices. For example, the movie version of my favorite story skipped a whole chapter about the hero's family.\n\nMovies are fun, but a good book stays with you longer. That is why I will always choose the book first.`},
+  {id:`w6`, type:`Informational`, title:`A Place That Matters to You`, prompt:`Describe a place that is special to you and explain why it matters. Include sensory details and at least two reasons.`, tips:[`Open with the place and one strong image.`,`Describe what you see, hear, and smell.`,`Explain two reasons it matters.`,`Close by showing how you feel when you are there.`], model:`The beach near my grandparents' home is my favorite place in the world. I know it by sound before I even see it.\n\nWhen I step onto the sand, I hear gulls calling and waves rolling. The air smells salty, and the sand feels warm and soft under my feet. At low tide, tiny crabs scoot across the rocks.\n\nThis place matters to me for two reasons. First, my grandfather taught me to skip stones there. Second, it is where our whole family gathers every summer, laughing and eating ice cream as the sun goes down. When I am there, I feel calm and at home.`}
+];
+
+const ORAL_PROMPTS = [
+  {q:`Tell me about your favorite book. What happens in the story, and why do you like it?`, tip:`Speak in complete sentences. Use "First... then... finally..." to organize.`},
+  {q:`Describe a person who is important to you. What makes this person special?`, tip:`Give one clear description, two examples, and a closing sentence.`},
+  {q:`If you could solve one problem in our world, what would it be and why?`, tip:`State your idea, give two reasons, and finish with what you would do first.`},
+  {q:`Tell me about a time you helped someone. What did you do and how did it turn out?`, tip:`Set the scene, describe your actions, and explain what you learned.`},
+  {q:`What is your favorite subject at school? Explain why and give an example.`, tip:`Answer directly, then support your answer with a specific example.`},
+  {q:`If you could travel anywhere, where would you go? What would you want to see?`, tip:`Use vivid describing words. Say what you would do and why it interests you.`},
+  {q:`Explain how to play a game you enjoy. What are the rules?`, tip:`Use sequence words and check that a listener could follow the steps.`},
+  {q:`What makes a good friend? Give an example from your own experience.`, tip:`Name two qualities, then tell a short story that shows one of them.`}
+];
+
+const SKILL_SECTION = {};
+DB.forEach(q => { SKILL_SECTION[q.k] = q.s; });
+const ALL_SKILLS = [...new Set(DB.map(q => q.k))];
+
+function esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function todayKey(d){
+  const x = d || new Date();
+  const y = x.getFullYear();
+  const m = String(x.getMonth()+1).padStart(2,"0");
+  const day = String(x.getDate()).padStart(2,"0");
+  return y + "-" + m + "-" + day;
+}
+function daysUntil(dateStr){
+  const t = new Date(dateStr + "T00:00:00");
+  const n = new Date(); n.setHours(0,0,0,0);
+  return Math.ceil((t - n) / 86400000);
+}
+const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function formatTestDate(){
+  const d = new Date(state.testDate + "T00:00:00");
+  if(isNaN(d.getTime())) return state.testDate;
+  return d.getDate() + " " + MONTHS_SHORT[d.getMonth()] + " " + d.getFullYear();
+}
+function fmtClock(ms){
+  if(ms < 0) ms = 0;
+  const total = Math.floor(ms/1000);
+  const h = Math.floor(total/3600);
+  const m = Math.floor((total%3600)/60);
+  const s = total%60;
+  if(h > 0) return h + ":" + String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+  return String(m).padStart(2,"0") + ":" + String(s).padStart(2,"0");
+}
+function mastery(k){
+  const s = state.skills[k];
+  if(!s || !s.attempts) return null;
+  return Math.round(s.ewma * 100);
+}
+function recordSkill(k, correct){
+  const s = state.skills[k] || {attempts:0, correct:0, ewma:0.5};
+  s.attempts++;
+  if(correct) s.correct++;
+  s.ewma = s.ewma * 0.68 + (correct ? 1 : 0) * 0.32;
+  state.skills[k] = s;
+}
+function eloUpdate(section, q, correct, scale){
+  scale = scale == null ? 1 : scale;
+  const ab = state.ability[section];
+  const p = 1 / (1 + Math.exp((q.r - ab) / 14));
+  const delta = (correct ? (1 - p) : -p) * 12 * scale;
+  state.ability[section] = Math.max(160, Math.min(250, ab + delta));
+}
+function abilityOf(section){ return Math.round(state.ability[section]); }
+function skillRows(){
+  return ALL_SKILLS.map(k => {
+    const m = mastery(k);
+    const s = state.skills[k];
+    return {k, m, attempts: s ? s.attempts : 0, section: SKILL_SECTION[k]};
+  });
+}
+function weakest(n){
+  const rows = skillRows().filter(r => r.m !== null).sort((a,b) => a.m - b.m);
+  if(rows.length >= n) return rows.slice(0,n);
+  const fallback = ["Informational Text","Operations & Fractions","Grammar & Usage"].map(k => ({k, m:null, attempts:0, section:SKILL_SECTION[k]}));
+  return rows.concat(fallback).slice(0,n);
+}
+function pickQuestion(section, ability, used){
+  let pool = DB.filter(q => q.s === section && !used.has(q.id));
+  if(!pool.length){
+    used.clear();
+    pool = DB.filter(q => q.s === section);
+  }
+  let best = null, bestScore = -1e9;
+  for(const q of pool){
+    const diff = Math.abs(q.r - ability);
+    const m = mastery(q.k);
+    const mast = m === null ? 0.5 : m / 100;
+    const explore = (state.skills[q.k] && state.skills[q.k].attempts >= 2) ? 0 : 6;
+    const score = -diff * 1.55 + (1 - mast) * 42 + explore + Math.random() * 16;
+    if(score > bestScore){ bestScore = score; best = q; }
+  }
+  return best;
+}
+function pickSkillQuestion(skill, used){
+  let pool = DB.filter(q => q.k === skill && !used.has(q.id));
+  if(!pool.length){ used.clear(); pool = DB.filter(q => q.k === skill); }
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+function touchStreak(){
+  const t = todayKey();
+  if(state.streak.last === t) return;
+  const y = todayKey(new Date(Date.now() - 86400000));
+  state.streak.count = state.streak.last === y ? state.streak.count + 1 : 1;
+  state.streak.last = t;
+}
+function markPlan(id){
+  const p = getPlan();
+  p.done[id] = true;
+  save();
+}
+const COUNTDOWN_FOCUS = [
+  "Diagnostic: one adaptive set, then note the two weakest skills",
+  "Reading: informational texts, main idea and supporting details",
+  "Math: number sense and multi-step operations",
+  "Language: mechanics, capitals, punctuation, spelling",
+  "Reading: literary texts, theme, inference, and character",
+  "Math: fractions and decimals",
+  "Writing: one narrative prompt in 25 minutes",
+  "Mock exam day: full 2.5-hour simulation",
+  "Review every missed question from the mock exam",
+  "Math: geometry and measurement",
+  "Language: grammar, sentence structure, and usage",
+  "Writing: opinion prompt plus oral speaking practice",
+  "Light review, speaking practice, and early sleep",
+  "Test day: eat well, arrive early, and stay calm"
+];
+function countdownRows(){
+  const end = new Date(state.testDate + "T00:00:00");
+  const start = new Date(); start.setHours(0,0,0,0);
+  const rows = [];
+  let i = 0;
+  for(let t = new Date(start); t <= end && i < 21; t.setDate(t.getDate() + 1)){
+    rows.push({date: todayKey(t), focus: COUNTDOWN_FOCUS[i % COUNTDOWN_FOCUS.length], today: todayKey(t) === todayKey()});
+    i++;
+  }
+  return rows;
+}
+function getPlan(){  const t = todayKey();
+  if(!state.plan || state.plan.date !== t){
+    const w = weakest(2);
+    state.plan = {
+      date: t,
+      items: [
+        {id:"warm", label:"Warm-up: 24 adaptive questions across all subjects", action:"daily"},
+        {id:"focus", label:"Focus drill: " + (w[0] ? w[0].k : "Vocabulary"), action:"drill", skill: w[0] ? w[0].k : "Vocabulary"},
+        {id:"read", label:"Read for 20 minutes, then retell the main idea aloud", action:"none"},
+        {id:"write", label:"Writing Studio: plan and write one timed response", action:"writing"}
+      ],
+      done: {}
+    };
+    save();
+  }
+  return state.plan;
+}
+
+function erfc(x){
+  const z = Math.abs(x);
+  const t = 1 / (1 + 0.5 * z);
+  const r = t * Math.exp(-z*z - 1.26551223 + t*(1.00002368 + t*(0.37409196 + t*(0.09678418 + t*(-0.18628806 + t*(0.27886807 + t*(-1.13520398 + t*(1.48851587 + t*(-0.82215223 + t*0.17087277)))))))));
+  return x >= 0 ? r : 2 - r;
+}
+function percentile(rit){
+  const z = (rit - 200) / 15;
+  const p = 0.5 * erfc(-z / Math.SQRT2);
+  return Math.max(1, Math.min(99, Math.round(p * 100)));
+}
+function ritLabel(rit){
+  if(rit < 190) return "Building foundations";
+  if(rit < 200) return "Approaching grade level";
+  if(rit < 210) return "At grade level";
+  if(rit < 220) return "Above grade level";
+  return "Advanced";
+}
+
+let route = "home";
+let practice = null;
+let exam = null;
+let lastResult = null;
+let focusQid = null;
+let writingTimer = { left: 25*60, interval:null, running:false };
+let oralState = { index:0, left:45, interval:null, recorder:null, chunks:[], stream:null, url:null };
+
+const TABS = [
+  ["home","Dashboard"], ["practice","Practice"], ["mock","Mock Exam"], ["writing","Writing"],
+  ["oral","Speaking"], ["report","Report"], ["about","About"]
+];
+function renderTabs(){
+  document.getElementById("tabs").innerHTML = TABS.map(([r,l]) => {
+    const active = route===r || (r==='mock' && route==='result' && lastResult && lastResult.type==='exam') || (r==='practice' && route==='result' && lastResult && lastResult.type!=='exam');
+    return `<button class="tab ${active ? 'active' : ''}" role="tab" aria-selected="${active ? 'true' : 'false'}" data-action="nav" data-route="${r}">${l}${r==='report' && state.history.length ? '<span class="dot"></span>' : ''}</button>`;
+  }).join("");
+  const d = daysUntil(state.testDate);
+  document.getElementById("topmeta").innerHTML = `Test day: <b>${esc(formatTestDate())}</b><br>${d >= 0 ? d + ' day' + (d===1?'':'s') + ' to go' : 'Test date passed'}`;
+}
+function navigate(r){
+  if(exam && !exam.finished && r !== "result"){
+    if(!confirm("Leave the mock exam? Your unfinished answers will be lost.")) return;
+    clearInterval(exam.timer); exam = null;
+  }
+  if(practice && !practice.done && r !== "result"){
+    if(!confirm("Leave this practice set? Your progress in it will be lost.")) return;
+    practice = null;
+  }
+  if(r !== "oral") stopOral();
+  if(r !== "writing") pauseWritingTimer();
+  route = r;
+  render();
+  window.scrollTo(0,0);
+}
+function render(){
+  renderTabs();
+  const tabsEl = document.getElementById("tabs");
+  if(tabsEl) tabsEl.style.display = (exam && !exam.finished && route === "mock") ? "none" : "flex";
+  const app = document.getElementById("app");
+  if(route === "home") app.innerHTML = viewHome();
+  else if(route === "practice") app.innerHTML = (practice && !practice.done) ? viewPractice() : viewPracticeIntro();
+  else if(route === "mock") app.innerHTML = (exam && !exam.finished) ? viewExam() : viewMockIntro();
+  else if(route === "writing") app.innerHTML = viewWriting();
+  else if(route === "oral") app.innerHTML = viewOral();
+  else if(route === "report") app.innerHTML = viewReport();
+  else if(route === "about") app.innerHTML = viewAbout();
+  else if(route === "result") app.innerHTML = viewResult();
+  afterRender();
+}
+function afterRender(){
+  if(route === "writing"){
+    const ta = document.getElementById("writingText");
+    if(ta){
+      ta.addEventListener("input", () => {
+        const id = document.getElementById("promptSelect").value;
+        state.drafts[id] = ta.value;
+        updateWordCount();
+        clearTimeout(ta._t);
+        ta._t = setTimeout(save, 400);
+      });
+    }
+    updateWordCount();
+    renderWritingTimer();
+  }
+  if(exam && !exam.finished && route === "mock") updateExamTimer();
+  if(focusQid){
+    const qt = document.querySelector(".qtext");
+    if(qt){ try{ qt.focus({preventScroll:true}); }catch(e){ qt.focus(); } }
+    focusQid = null;
+  }
+}
+function viewHome(){
+  const d = daysUntil(state.testDate);
+  const answered = Object.values(state.skills).reduce((a,s) => a + (s.attempts||0), 0);
+  const mocks = state.history.filter(h => h.type === "exam").length;
+  const drafts = Object.keys(state.drafts).filter(k => (state.drafts[k]||"").trim().length).length;
+  const rows = skillRows().filter(r => r.attempts > 0).sort((a,b) => a.m - b.m);
+  const plan = getPlan();
+  const weak = weakest(3);
+  const greet = state.name ? "Ready, " + esc(state.name) + "?" : "Ready to practice?";
+  return `
+  <section class="hero">
+    <div class="kicker" style="color:#ffc7d0">Hong Kong International School - Grade 4</div>
+    <h2>${greet}</h2>
+    <p>This lab mirrors the HKIS Grade 3-5 pre-entry session: a computer-adaptive assessment in reading, language, and math, plus a writing prompt and oral language practice. Questions adapt to your answers and target your weakest skills.</p>
+    <div class="count"><b>${d >= 0 ? d : 0}</b><span>days until<br>${esc(formatTestDate())} test</span></div>
+    <div class="row">
+      <button class="btn red" data-action="startDaily">Start today's practice</button>
+      <button class="btn ghost" data-action="startExam">Run a full mock exam</button>
+    </div>
+  </section>
+
+  <div class="grid g4" style="margin-top:16px">
+    <div class="stat"><div class="n">${state.streak.count}</div><div class="l">Day streak</div></div>
+    <div class="stat"><div class="n">${answered}</div><div class="l">Questions answered</div></div>
+    <div class="stat"><div class="n">${mocks}</div><div class="l">Mock exams done</div></div>
+    <div class="stat"><div class="n">${drafts}</div><div class="l">Writing drafts</div></div>
+  </div>
+
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h2>Today's plan</h2>
+      <p style="margin-bottom:10px">A short, focused routine keeps momentum without tiring your child.</p>
+      ${plan.items.map(it => `
+        <div class="planitem ${plan.done[it.id] ? 'done' : ''}">
+          <button type="button" class="tick" data-action="togglePlan" data-id="${it.id}" aria-pressed="${plan.done[it.id] ? 'true' : 'false'}" aria-label="Toggle task complete">${plan.done[it.id] ? '✓' : ''}</button>
+          <div class="lbl">${esc(it.label)}</div>
+          ${it.action === 'daily' ? `<button class="go" data-action="startDaily">Start</button>` : ''}
+          ${it.action === 'drill' ? `<button class="go" data-action="startDrill" data-skill="${esc(it.skill)}">Start</button>` : ''}
+          ${it.action === 'writing' ? `<button class="go" data-action="nav" data-route="writing">Open</button>` : ''}
+        </div>`).join("")}
+    </div>
+    <div class="card">
+      <h2>Focus areas</h2>
+      <p style="margin-bottom:8px">Lowest mastery first. The question engine automatically gives these skills more weight.</p>
+      ${weak.map(w => {
+        const m = w.m === null ? "New" : w.m + "%";
+        const pct = w.m === null ? 4 : Math.max(4, w.m);
+        return `<div class="skillrow">
+          <div class="name">${esc(w.k)}</div>
+          <div class="bar"><i style="width:${pct}%;background:${w.m!==null && w.m < 60 ? '#c8102e' : (w.m!==null && w.m < 80 ? '#a86400' : '#137a4b')}"></i></div>
+          <div class="pct">${m}</div>
+        </div>`;
+      }).join("")}
+      <div class="actions">
+        <button class="btn soft small" data-action="startDrill" data-skill="${esc(weak[0].k)}">Drill weakest skill</button>
+        <button class="btn ghost small" data-action="nav" data-route="report">Full report</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>What the real assessment involves</h2>
+    <div class="grid g3" style="margin-top:10px">
+      <div>
+        <h3>Reading</h3>
+        <p>Vocabulary in context, literary texts, informational texts, main idea, inference, author's purpose.</p>
+      </div>
+      <div>
+        <h3>Language Usage</h3>
+        <p>Mechanics, spelling, parts of speech, grammar, sentence structure, and writing process.</p>
+      </div>
+      <div>
+        <h3>Math</h3>
+        <p>Number sense, operations and fractions, patterns and algebra, geometry, measurement, data.</p>
+      </div>
+    </div>
+    <div class="note" style="margin-top:12px">HKIS states that selected Grade 3-12 applicants complete a standardized computerized adaptive assessment covering math, reading, writing, and oral language. The session is about 2.5 hours. The MAP-style sections are untimed, so accuracy matters more than speed.</div>
+    <div class="actions">
+      <button class="btn ghost small" data-action="nav" data-route="about">Read the research summary</button>
+      <button class="btn ghost small" data-action="setName">Set student name</button>
+      <input type="date" id="testDateInput" value="${esc(state.testDate)}" data-action="setDate" title="Change test date" />
+    </div>
+  </div>`;
+}
+
+function viewPracticeIntro(){
+  const row = skillRows().sort((a,b) => (a.m===null?999:a.m) - (b.m===null?999:b.m));
+  return `
+  <div class="card">
+    <div class="kicker">Adaptive practice</div>
+    <h2 style="font-size:22px;margin-bottom:8px">A smart set that follows your answers</h2>
+    <p>Each set mixes reading, language, and math. Every correct answer raises the difficulty; every wrong answer lowers it and adds more practice on that skill. You get an explanation immediately, so mistakes become learning.</p>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="stat"><div class="n">24</div><div class="l">Questions per daily set</div></div>
+      <div class="stat"><div class="n">Instant</div><div class="l">Feedback and explanation</div></div>
+      <div class="stat"><div class="n">Auto</div><div class="l">Difficulty adjustment</div></div>
+    </div>
+    <div class="actions" style="justify-content:flex-start;margin-top:18px">
+      <button class="btn red" data-action="startDaily">Start 24-question set</button>
+      <button class="btn ghost" data-action="startExam">Full mock exam instead</button>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>Skill map</h2>
+    <p style="margin-bottom:10px">Tap any skill to run a targeted drill (up to 12 questions, based on available questions).</p>
+    <div class="grid g2">
+      ${["reading","language","math"].map(sec => `
+        <div>
+          <h3 style="margin-top:6px">${SECTIONS[sec].name}</h3>
+          ${row.filter(r => r.section === sec).map(r => `
+            <div class="skillrow" style="grid-template-columns:1fr 46px auto;gap:8px">
+              <div class="name" style="white-space:normal">${esc(r.k)}</div>
+              <div class="pct">${r.m===null ? '--' : r.m + '%'}</div>
+              <button class="btn soft small" data-action="startDrill" data-skill="${esc(r.k)}">Drill</button>
+            </div>`).join("")}
+        </div>`).join("")}
+    </div>
+  </div>`;
+}
+
+function startPractice(kind, skill){
+  const used = new Set();
+  let plan = [];
+  if(kind === "drill" && skill){
+    const skillCount = DB.filter(q => q.k === skill).length;
+    plan = Array(Math.min(12, skillCount)).fill(skill);
+  }else{
+    plan = [];
+    const counts = {reading:10, language:7, math:7};
+    for(const sec of ["reading","language","math"]){
+      for(let i=0;i<counts[sec];i++) plan.push(sec);
+    }
+    for(let i=plan.length-1;i>0;i--){ const j = Math.floor(Math.random()*(i+1));[plan[i],plan[j]]=[plan[j],plan[i]]; }
+  }
+  practice = {
+    mode: kind, skill: skill || null, plan, idx:0, count: plan.length,
+    answers:[], used, current:null, selected:null, checked:false,
+    start: Date.now(), done:false, reviewSkill:null
+  };
+  loadPracticeQuestion();
+  route = "practice";
+  render();
+  window.scrollTo(0,0);
+}
+function loadPracticeQuestion(){
+  if(practice.idx >= practice.count){ finishPractice(); return; }
+  let q;
+  if(practice.skill){
+    q = pickSkillQuestion(practice.skill, practice.used);
+  } else if(practice.reviewSkill && Math.random() < 0.7){
+    q = pickSkillQuestion(practice.reviewSkill, practice.used);
+    practice.reviewSkill = null;
+  } else {
+    const target = practice.plan[practice.idx];
+    q = pickQuestion(target, state.ability[target], practice.used);
+  }
+  practice.current = q;
+  practice.selected = null;
+  practice.checked = false;
+  practice.used.add(q.id);
+  focusQid = q.id;
+}
+function viewPractice(){
+  if(practice.done) return viewResult();
+  const q = practice.current;
+  const target = practice.plan[practice.idx];
+  const sec = q ? q.s : target;
+  const elapsed = fmtClock(Date.now() - practice.start);
+  const pct = Math.round((practice.idx / practice.count) * 100);
+  return `
+  <div class="exambar">
+    <div>
+      <span class="pill">${SECTIONS[sec].name}</span>
+      <span class="pill amber" style="margin-left:6px">Untimed practice</span>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span class="pill green">Elapsed ${elapsed}</span>
+      <button class="btn ghost small" data-action="exitPractice">End set</button>
+    </div>
+  </div>
+  <div class="progressline"><i style="width:${pct}%"></i></div>
+  <div class="qmeta" style="margin-bottom:8px">
+    <span class="qtag">${esc(q.k)}</span>
+    <span class="qnum">Question ${practice.idx + 1} of ${practice.count} - Difficulty ${q.r}</span>
+  </div>
+  ${q.p ? `<div class="passage ${["r21","r30"].includes(q.id)?`poem`:``}">${esc(q.p)}</div>` : ""}
+  <div class="qcard">
+    <div class="qtext" tabindex="-1">${esc(q.q)}</div>
+    <div class="choices">
+      ${q.ch.map((c,i) => {
+        let cls = "";
+        if(practice.checked){
+          if(i === q.a) cls = "correct";
+          else if(i === practice.selected) cls = "wrong";
+        } else if(i === practice.selected) cls = "sel";
+        return `<button class="choice ${cls}" data-action="choose" data-i="${i}" ${practice.checked ? "disabled" : ""}>
+          <span class="badge">${String.fromCharCode(65+i)}</span><span>${esc(c)}</span>
+        </button>`;
+      }).join("")}
+    </div>
+    ${practice.checked ? `
+      <div class="feedback ${practice.selected === q.a ? "good" : "bad"}" role="status" aria-live="polite">
+        <b>${practice.selected === q.a ? "Correct" : "Not quite"}</b>
+        ${practice.selected === q.a ? "Well done. " : "The correct answer is " + String.fromCharCode(65+q.a) + ". "}${esc(q.exp)}
+      </div>` : ""}
+    <div class="actions">
+      <div class="left"><span class="pill">${esc(q.k)}</span></div>
+      ${!practice.checked
+        ? `<button class="btn" data-action="checkAnswer" ${practice.selected === null ? "disabled" : ""}>Check answer</button>`
+        : `<button class="btn green" data-action="nextPractice">${practice.idx + 1 >= practice.count ? "See my results" : "Next question"}</button>`}
+    </div>
+  </div>`;
+}
+function checkPractice(){
+  if(practice.selected === null || practice.checked) return;
+  const q = practice.current;
+  const correct = practice.selected === q.a;
+  practice.checked = true;
+  practice.reviewSkill = correct ? null : q.k;
+  recordSkill(q.k, correct);
+  eloUpdate(q.s, q, correct, 0.85);
+  practice.answers.push({id:q.id, s:q.s, k:q.k, q:q.q, ch:q.ch.slice(), sel:practice.selected, ans:q.a, correct, exp:q.exp});
+  save();
+  render();
+}
+function nextPractice(){
+  practice.idx++;
+  if(practice.idx >= practice.count){ finishPractice(); return; }
+  loadPracticeQuestion();
+  render();
+}
+function finishPractice(){
+  practice.done = true;
+  touchStreak();
+  if(practice.mode === "daily") markPlan("warm");
+  if(practice.mode === "drill") markPlan("focus");
+  const res = buildResult("practice", practice.answers, practice.mode === "drill" ? "Targeted drill: " + practice.skill : "Daily adaptive set", null);
+  lastResult = res;
+  state.history.push({date:todayKey(), type:"practice", rit:res.overallRit, correct:res.totalCorrect, total:res.total, label:res.title});
+  save();
+  route = "result";
+  render();
+  window.scrollTo(0,0);
+}
+
+function buildResult(type, answers, title, examInfo){
+  const total = answers.length;
+  const totalCorrect = answers.filter(a => a.correct).length;
+  const bySection = {};
+  const bySkill = {};
+  answers.forEach(a => {
+    if(!bySection[a.s]) bySection[a.s] = {correct:0, total:0};
+    bySection[a.s].total++;
+    if(a.correct) bySection[a.s].correct++;
+    if(!bySkill[a.k]) bySkill[a.k] = {correct:0, total:0};
+    bySkill[a.k].total++;
+    if(a.correct) bySkill[a.k].correct++;
+  });
+  const sections = Object.keys(bySection).map(sec => ({
+    key: sec, name: SECTIONS[sec].name, correct: bySection[sec].correct, total: bySection[sec].total,
+    rit: abilityOf(sec), pct: Math.round(bySection[sec].correct / bySection[sec].total * 100)
+  }));
+  const skills = Object.keys(bySkill).map(k => ({
+    k, correct: bySkill[k].correct, total: bySkill[k].total,
+    pct: Math.round(bySkill[k].correct / bySkill[k].total * 100)
+  })).sort((a,b) => a.pct - b.pct);
+  const overallRit = sections.length ? Math.round(sections.reduce((a,s) => a + s.rit, 0) / sections.length) : 200;
+  return {
+    type, title, date: todayKey(), total, totalCorrect,
+    accuracy: total ? Math.round(totalCorrect/total*100) : 0,
+    sections, skills, answers, overallRit, examInfo: examInfo || null
+  };
+}
+function viewResult(){
+  if(!lastResult) return `<div class="card"><h2>No results yet</h2><p>Complete a practice set or mock exam first.</p><button class="btn" data-action="nav" data-route="home">Go to dashboard</button></div>`;
+  const r = lastResult;
+  const accColor = r.accuracy >= 80 ? "green" : r.accuracy >= 60 ? "amber" : "red";
+  const focus = r.skills.filter(s => s.pct < 80).slice(0,3);
+  const review = r.answers.filter(a => !a.correct).slice(0,14);
+  const writingInfo = r.examInfo && r.examInfo.writing ? r.examInfo.writing : null;
+  let writingMsg = "";
+  if(writingInfo){
+    if(writingInfo.words < 150) writingMsg = "Below the 150-word target. Add another example or more detail next time.";
+    else if(writingInfo.words > 250) writingMsg = "Above the 250-word target. Strong detail; next time trim repeated ideas.";
+    else writingMsg = "Within the 150-250 word target. Now check organization, details, and conventions.";
+  }
+  const oralRatings = r.examInfo && Array.isArray(r.examInfo.oral) ? r.examInfo.oral : null;
+  return `
+  <div class="card">
+    <div class="kicker">${r.type === "exam" ? "Mock exam report" : "Practice report"}</div>
+    <h2 style="font-size:22px">${esc(r.title)}</h2>
+    <p>${r.date} &middot; ${r.totalCorrect} of ${r.total} correct</p>
+    <div class="orch" style="margin:22px 0 8px">
+      <div class="donut" style="--p:${r.accuracy}"><span>${r.accuracy}%</span></div>
+      <div>
+        <div class="bigscore">${r.overallRit}</div>
+        <div style="font-size:12px;color:#647083;font-weight:700;text-transform:uppercase;letter-spacing:.8px">Estimated RIT</div>
+        <div style="margin-top:8px"><span class="pill ${accColor}">${ritLabel(r.overallRit)}</span></div>
+        <p style="max-width:260px;margin-top:8px">Approximate percentile: <b>${percentile(r.overallRit)}th</b> compared with a typical Grade 4 cohort.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid g3" style="margin-top:16px">
+    ${r.sections.map(s => `
+      <div class="stat">
+        <div class="l" style="margin-top:0;margin-bottom:6px">${esc(s.name)}</div>
+        <div class="n">${s.rit}</div>
+        <div style="font-size:12px;color:#647083;margin:3px 0 8px">RIT estimate</div>
+        <div class="bar"><i style="width:${s.pct}%;background:${s.pct>=80?'#137a4b':s.pct>=60?'#a86400':'#c8102e'}"></i></div>
+        <div style="font-size:12px;color:#647083;margin-top:6px">${s.correct}/${s.total} correct (${s.pct}%)</div>
+      </div>`).join("")}
+  </div>
+
+  ${writingInfo ? `<div class="card" style="margin-top:16px">
+    <h2>Writing response</h2>
+    <p>${writingInfo.prompt ? `<b>${esc(writingInfo.prompt.type)}:</b> ${esc(writingInfo.prompt.title)}` : "Prompt"}</p>
+    <p>${writingInfo.words} words written. ${esc(writingMsg)}</p>
+    ${writingInfo.text ? `<div class="passage" style="border-left-color:#137a4b;background:#f3faf5">${esc(writingInfo.text)}</div>` : `<p class="empty">No writing was submitted.</p>`}
+  </div>` : ""}
+
+  ${oralRatings ? `<div class="card" style="margin-top:16px">
+    <h2>Oral language self-rating</h2>
+    <p>1 = needs work, 4 = strong. This reflects your own ratings during the mock exam.</p>
+    ${ORAL_PROMPTS.slice(0,4).map((p,i) => {
+      const score = oralRatings[i] || 0;
+      return `<div class="skillrow" style="grid-template-columns:1fr 120px 70px;gap:10px">
+        <div class="name" style="white-space:normal">${esc(p.q)}</div>
+        <div class="bar"><i style="width:${score ? score*25 : 0}%;background:${score>=3?'#137a4b':score===2?'#a86400':'#c8102e'}"></i></div>
+        <div class="pct">${score ? score + "/4" : "Not rated"}</div>
+      </div>`;
+    }).join("")}
+  </div>` : ""}
+
+  <div class="split" style="margin-top:16px">
+    <div class="card">
+      <h2>Skill breakdown</h2>
+      ${r.skills.map(s => `
+        <div class="skillrow">
+          <div class="name">${esc(s.k)}</div>
+          <div class="bar"><i style="width:${s.pct}%;background:${s.pct>=80?'#137a4b':s.pct>=60?'#a86400':'#c8102e'}"></i></div>
+          <div class="pct">${s.pct}%</div>
+        </div>`).join("")}
+    </div>
+    <div class="card">
+      <h2>What to work on next</h2>
+      ${focus.length ? focus.map(s => `
+        <div style="padding:9px 0;border-bottom:1px dashed #eee7db">
+          <div style="font-weight:700;color:#17202c;font-size:13.5px">${esc(s.k)}</div>
+          <p style="margin:3px 0 0">${esc(TIPS[s.k] || "Practice this skill with a short daily drill.")}</p>
+        </div>`).join("") : `<p>Everything is at or above 80%. Keep the routine going and try a full mock exam to build stamina.</p>`}
+      <div class="actions" style="justify-content:flex-start;margin-top:14px">
+        ${focus.length ? `<button class="btn red small" data-action="startDrill" data-skill="${esc(focus[0].k)}">Drill weakest skill</button>` : ``}
+        <button class="btn ghost small" data-action="startDaily">New practice set</button>
+      </div>
+    </div>
+  </div>
+
+  ${focus.length ? `<div class="card" style="margin-top:16px">
+    <h2>Suggested 20-minute home routine</h2>
+    <div class="grid g3" style="margin-top:8px">
+      <div><h3>Warm-up</h3><p>10 mixed questions on this site. Aim for accuracy, not speed.</p></div>
+      <div><h3>Target</h3><p>Drill ${esc(focus[0].k)} and talk through each explanation out loud.</p></div>
+      <div><h3>Apply</h3><p>Read one short article and say the main idea plus two supporting details.</p></div>
+    </div>
+  </div>` : ""}
+
+  ${review.length ? `<div class="card" style="margin-top:16px">
+    <h2>Review your mistakes</h2>
+    <p style="margin-bottom:10px">Read the explanation, then retell the correct answer in your own words.</p>
+    ${review.map(a => `
+      <div class="review">
+        <div class="rq">${esc(a.q)}</div>
+        <div style="margin-top:6px">Your answer: <span class="rs">${a.sel >= 0 ? esc(a.ch ? a.ch[a.sel] : "") : "No answer"}</span></div>
+        <div>Correct answer: <span class="ra">${esc(a.ch ? a.ch[a.ans] : "")}</span></div>
+        <div class="re">${esc(a.exp)}</div>
+      </div>`).join("")}
+  </div>` : ""}
+
+  <div class="actions" style="justify-content:center;margin-top:18px">
+    <button class="btn" data-action="nav" data-route="home">Back to dashboard</button>
+    <button class="btn ghost" data-action="startExam">Full mock exam</button>
+  </div>`;
+}
+
+const EXAM_PARTS = [
+  {type:"mc", section:"reading", count:24, label:"Reading", mins:35},
+  {type:"mc", section:"language", count:20, label:"Language Usage", mins:30},
+  {type:"mc", section:"math", count:24, label:"Mathematics", mins:35},
+  {type:"writing", label:"Writing Prompt", mins:30},
+  {type:"oral", label:"Oral Language", mins:15}
+];
+function viewMockIntro(){
+  return `
+  <div class="card">
+    <div class="kicker">Full simulation</div>
+    <h2 style="font-size:22px;margin-bottom:8px">2.5-hour mock admission session</h2>
+    <p>This simulation follows the HKIS Grade 3-5 structure: adaptive reading, language, and math sections, a writing prompt, and an oral language check. The timer runs for 150 minutes. Like the real MAP, the academic sections are untimed within the overall session.</p>
+    <div class="grid g2" style="margin-top:16px">
+      <div>
+        <h3>Section plan</h3>
+        ${EXAM_PARTS.map(p => `<div class="planitem"><span class="tick" aria-hidden="true" style="background:#eef2f8;border-color:#eef2f8;color:#0f2c52">${p.mins}</span><div class="lbl">${p.label} <span style="color:#8b93a1">(${p.mins} min suggested)</span></div></div>`).join("")}
+      </div>
+      <div>
+        <h3>Before you begin</h3>
+        <label class="check"><input type="checkbox" id="readyBox" /> I understand this is practice, not a real school test.</label>
+        <label class="check"><input type="checkbox" id="quietBox" /> The room is quiet and I have paper and a pencil nearby.</label>
+        <div class="note" style="margin-top:10px">There is no feedback during the mock. Answer steadily. If time runs out, the exam ends automatically.</div>
+      </div>
+    </div>
+    <div class="actions" style="justify-content:flex-start;margin-top:16px">
+      <button class="btn red" data-action="startExamNow">Begin mock exam</button>
+      <button class="btn ghost" data-action="nav" data-route="home">Not yet</button>
+    </div>
+  </div>`;
+}
+function startExam(){
+  const first = pickQuestion("reading", state.ability.reading, new Set());
+  exam = {
+    parts: EXAM_PARTS.map(p => ({
+      type: p.type, section: p.section, count: p.count, label: p.label, mins: p.mins,
+      idx:0, answers:[], used:new Set(), current:first && p.section==="reading" ? first : null,
+      ability: p.section ? state.ability[p.section] : null,
+      prompt: p.type === "writing" ? WRITING_PROMPTS[Math.floor(Math.random()*WRITING_PROMPTS.length)] : null,
+      done:false, pending:null, text:"", ratings:[]
+    })),
+    part:0,
+    started: Date.now(),
+    endAt: Date.now() + 150*60000,
+    timer:null,
+    finished:false
+  };
+  exam.parts[0].used.add(first.id);
+  focusQid = first.id;
+  startExamTimer();
+  route = "mock";
+  render();
+  window.scrollTo(0,0);
+}
+function startExamTimer(){
+  if(exam.timer) clearInterval(exam.timer);
+  exam.timer = setInterval(() => {
+    if(!exam || exam.finished){ clearInterval(exam.timer); return; }
+    updateExamTimer();
+    if(exam.endAt - Date.now() <= 0){
+      clearInterval(exam.timer);
+      finishExam(true);
+    }
+  }, 500);
+}
+function updateExamTimer(){
+  const el = document.getElementById("examTimer");
+  if(!el || !exam) return;
+  const left = exam.endAt - Date.now();
+  el.textContent = fmtClock(left);
+  if(left < 10*60000) el.classList.add("warn");
+}
+function currentPart(){ return exam.parts[exam.part]; }
+function loadExamQuestion(part){
+  const sec = part.section;
+  part.current = pickQuestion(sec, state.ability[sec], part.used);
+  part.used.add(part.current.id);
+  part.pending = null;
+  focusQid = part.current.id;
+}
+function viewExam(){
+  if(exam.finished) return viewResult();
+  const part = currentPart();
+  const answeredCount = exam.parts.reduce((a,p) => a + (p.type==="mc" ? p.answers.length : 0), 0);
+  const totalMc = exam.parts.filter(p => p.type==="mc").reduce((a,p) => a + p.count, 0);
+  const header = `
+    <div class="exambar">
+      <div>
+        <span class="pill">${esc(part.label)}</span>
+        <span class="pill" style="margin-left:6px">Part ${exam.part + 1} of ${exam.parts.length}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span class="timer" id="examTimer">${fmtClock(exam.endAt - Date.now())}</span>
+        <button class="btn ghost small" data-action="exitExam">Exit</button>
+      </div>
+    </div>`;
+  if(part.type === "mc"){
+    if(part.done){
+      const c = part.answers.filter(a => a.correct).length;
+      return header + `
+      <div class="card center" style="padding:40px 24px">
+        <div class="kicker">Section complete</div>
+        <h2 style="font-size:24px">${esc(part.label)} is finished</h2>
+        <p>You answered ${part.answers.length} questions. Keep going; the next section begins when you are ready.</p>
+        <button class="btn" data-action="continuePart">Continue to ${exam.part + 1 < exam.parts.length ? esc(exam.parts[exam.part+1].label) : "results"}</button>
+      </div>`;
+    }
+    if(!part.current) loadExamQuestion(part);
+    const q = part.current;
+    const pct = Math.round((answeredCount / totalMc) * 100);
+    return header + `
+    <div class="progressline"><i style="width:${pct}%"></i></div>
+    <div class="qmeta" style="margin-bottom:8px">
+      <span class="qtag">${esc(q.k)}</span>
+      <span class="qnum">${esc(part.label)} question ${part.idx + 1} of ${part.count}</span>
+    </div>
+    ${q.p ? `<div class="passage ${["r21","r30"].includes(q.id)?`poem`:``}">${esc(q.p)}</div>` : ""}
+    <div class="qcard">
+      <div class="qtext" tabindex="-1">${esc(q.q)}</div>
+      <div class="choices">
+        ${q.ch.map((c,i) => `<button class="choice ${part.pending===i?'sel':''}" data-action="examChoose" data-i="${i}">
+          <span class="badge">${String.fromCharCode(65+i)}</span><span>${esc(c)}</span>
+        </button>`).join("")}
+      </div>
+      <div class="actions">
+        <div class="left"><span class="pill amber">No feedback until the end</span></div>
+        <button class="btn" data-action="examNext" ${part.pending===null?"disabled":""}>${part.idx + 1 >= part.count ? "Finish section" : "Next"}</button>
+      </div>
+    </div>`;
+  }
+  if(part.type === "writing"){
+    const prompt = part.prompt || WRITING_PROMPTS[0];
+    return header + `
+    <div class="card">
+      <div class="kicker">${esc(prompt.type)} prompt - suggested 25-30 minutes</div>
+      <h2 style="font-size:20px">${esc(prompt.title)}</h2>
+      <p style="font-size:15px;color:#25303f;margin:10px 0 14px">${esc(prompt.prompt)}</p>
+      <div class="note" style="margin-bottom:12px">Plan for 3 minutes: beginning, middle, end. Then write. Leave 3 minutes to check capitals, punctuation, and spelling.</div>
+      <textarea id="examWriting" placeholder="Type your response here...">${esc(part.text)}</textarea>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:#647083">
+        <span id="examWordCount">0 words</span><span>Handwriting is not required in this simulation.</span>
+      </div>
+      <div class="actions">
+        <button class="btn ghost" data-action="saveExamWriting">Save draft</button>
+        <button class="btn" data-action="examWritingNext">Finish writing section</button>
+      </div>
+    </div>`;
+  }
+  return header + `
+  <div class="card">
+    <div class="kicker">Oral language check - about 10 minutes</div>
+    <h2 style="font-size:20px">Speak in complete sentences</h2>
+    <p>In the real assessment, the interviewer asks questions like these and listens for clear, organized English. Read each prompt aloud, answer for about one minute, then rate yourself honestly.</p>
+    <div class="grid g2" style="margin-top:14px">
+      ${ORAL_PROMPTS.slice(0,4).map((p,i) => `
+        <div class="stat">
+          <div style="font-weight:700;color:#17202c;font-size:14px">${esc(p.q)}</div>
+          <p style="font-size:12.5px;color:#5b6778;margin-top:8px">${esc(p.tip)}</p>
+          <div class="optionrow" style="margin-top:8px">
+            <span style="font-size:12px;color:#647083">Self-rating:</span>
+            ${[1,2,3,4].map(v => `<button class="btn ghost small" data-action="rateOral" data-i="${i}" data-v="${v}">${v}</button>`).join("")}
+            <span id="oralRate${i}" style="font-size:12px;font-weight:700;color:#0f2c52"></span>
+          </div>
+        </div>`).join("")}
+    </div>
+    <div class="actions">
+      <button class="btn" data-action="finishExamPart">Finish oral language and see results</button>
+    </div>
+  </div>`;
+}
+function examChoose(i){ const part = currentPart(); part.pending = i; render(); }
+function examNext(){
+  const part = currentPart();
+  if(part.pending === null) return;
+  const q = part.current;
+  const correct = part.pending === q.a;
+  recordSkill(q.k, correct);
+  eloUpdate(part.section, q, correct, 1);
+  const answerObj = {id:q.id, s:q.s, k:q.k, q:q.q, ch:q.ch.slice(), sel:part.pending, ans:q.a, correct, exp:q.exp};
+  part.answers.push(answerObj);
+  part.idx++;
+  part.pending = null;
+  if(part.idx >= part.count){ part.done = true; part.current = null; }
+  else { loadExamQuestion(part); }
+  save();
+  render();
+}
+function continuePart(){
+  if(exam.part + 1 >= exam.parts.length){ finishExam(false); return; }
+  exam.part++;
+  const part = currentPart();
+  if(part.type === "mc" && !part.current){ loadExamQuestion(part); }
+  render();
+  window.scrollTo(0,0);
+}
+function finishExamPart(){
+  const part = currentPart();
+  if(part.type === "writing"){
+    const ta = document.getElementById("examWriting");
+    if(ta) part.text = ta.value;
+  }
+  part.done = true;
+  continuePart();
+}
+function finishExam(timeUp){
+  if(!exam || exam.finished) return;
+  clearInterval(exam.timer);
+  const all = [];
+  exam.parts.forEach(p => { if(p.type === "mc") all.push(...p.answers); });
+  const writingPart = exam.parts.find(p => p.type === "writing");
+  const oralPart = exam.parts.find(p => p.type === "oral");
+  const info = {
+    timeUp: !!timeUp,
+    usedMin: Math.round((Date.now() - exam.started)/60000),
+    writing: writingPart ? { text: writingPart.text || "", words: (writingPart.text||"").trim() ? (writingPart.text.trim().split(/\s+/).length) : 0, prompt: writingPart.prompt || null } : null,
+    oral: oralPart ? oralPart.ratings.slice() : []
+  };
+  const res = buildResult("exam", all, timeUp ? "Mock exam (time ended)" : "Full mock exam", info);
+  lastResult = res;
+  exam.finished = true;
+  state.history.push({date:todayKey(), type:"exam", rit:res.overallRit, correct:res.totalCorrect, total:res.total, label:"Mock exam"});
+  if(info.writing && info.writing.words) state.writingDone++;
+  touchStreak();
+  save();
+  route = "result";
+  render();
+  window.scrollTo(0,0);
+}
+function exitExam(){
+  if(confirm("Exit the mock exam? Unfinished answers will be lost.")){
+    clearInterval(exam.timer); exam = null; navigate("home");
+  }
+}
+
+function viewWriting(){
+  const prompts = WRITING_PROMPTS;
+  const sel = window.__writingPrompt || prompts[0].id;
+  const p = prompts.find(x => x.id === sel) || prompts[0];
+  const draft = state.drafts[p.id] || "";
+  const writingKey = todayKey() + "|" + p.id;
+  const doneToday = !!(state.writingLog && state.writingLog[writingKey]);
+  return `
+  <div class="split">
+    <div class="card">
+      <div class="kicker">Writing studio - grade 4 style</div>
+      <h2 style="font-size:22px">Plan, write, then check</h2>
+      <p>Grade 3-5 applicants complete a writing prompt. Use this space to practise a full response in 25 minutes, then review it against the checklist.</p>
+      <div class="optionrow" style="margin:14px 0">
+        <select id="promptSelect" data-action="changePrompt">
+          ${prompts.map(x => `<option value="${x.id}" ${x.id===p.id?"selected":""}>${esc(x.type)}: ${esc(x.title)}</option>`).join("")}
+        </select>
+        <span class="pill" id="wTimer">25:00</span>
+        <button class="btn soft small" data-action="startWritingTimer">Start timer</button>
+        <button class="btn ghost small" data-action="resetWritingTimer">Reset</button>
+      </div>
+      <div class="note" style="margin-bottom:12px"><b>${esc(p.type)} prompt:</b> ${esc(p.prompt)}</div>
+      <textarea id="writingText" placeholder="Plan here first: who/what, problem, events, ending...">${esc(draft)}</textarea>
+      <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:#647083">
+        <span id="wordCount">0 words</span><span id="paraCount">0 paragraphs</span>
+      </div>
+      <div class="actions" style="justify-content:flex-start">
+        <button class="btn" data-action="saveDraft">Save draft</button>
+        <button class="btn green" data-action="markWriting" ${doneToday ? "disabled" : ""}>${doneToday ? "Completed today" : "Mark task complete"}</button>
+        <button class="btn ghost" data-action="showModel">Show model response</button>
+      </div>
+      <div id="modelBox" style="display:none;margin-top:14px"></div>
+    </div>
+    <div class="card">
+      <h2>Checklist</h2>
+      <p style="margin-bottom:8px">Read your draft once for each item.</p>
+      <label class="check"><input type="checkbox" /> My first sentence grabs the reader.</label>
+      <label class="check"><input type="checkbox" /> I answered every part of the prompt.</label>
+      <label class="check"><input type="checkbox" /> My ideas are in a clear order.</label>
+      <label class="check"><input type="checkbox" /> I used details, examples, or feelings.</label>
+      <label class="check"><input type="checkbox" /> I used transitions between ideas.</label>
+      <label class="check"><input type="checkbox" /> I have a strong ending sentence.</label>
+      <label class="check"><input type="checkbox" /> I checked capitals and end punctuation.</label>
+      <label class="check"><input type="checkbox" /> I checked spelling of tricky words.</label>
+      <div class="note" style="margin-top:12px">Grade 4 target: about 150-250 words, 3-5 paragraphs, with a clear beginning, middle, and end. Fewer than 150 words is usually too thin; more than 250 words often needs trimming.</div>
+      <div class="actions" style="justify-content:flex-start">
+        <button class="btn ghost small" data-action="nav" data-route="report">See writing history</button>
+      </div>
+    </div>
+  </div>`;
+}
+function updateWordCount(){
+  const ta = document.getElementById("writingText");
+  const wc = document.getElementById("wordCount");
+  const pc = document.getElementById("paraCount");
+  if(!ta || !wc) return;
+  const text = ta.value.trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  const paras = text ? text.split(/\n\s*\n/).filter(x => x.trim()).length : 0;
+  wc.textContent = words + (words === 1 ? " word" : " words");
+  if(pc) pc.textContent = paras + (paras === 1 ? " paragraph" : " paragraphs");
+}
+function renderWritingTimer(){
+  const el = document.getElementById("wTimer");
+  if(el) el.textContent = fmtClock(writingTimer.left * 1000);
+}
+function startWritingTimer(){
+  if(writingTimer.running) return;
+  writingTimer.running = true;
+  writingTimer.interval = setInterval(() => {
+    if(!writingTimer.running) return;
+    writingTimer.left--;
+    renderWritingTimer();
+    if(writingTimer.left <= 0){ pauseWritingTimer(); alert("Time is up. Read your work and check it."); }
+  }, 1000);
+}
+function pauseWritingTimer(){
+  writingTimer.running = false;
+  if(writingTimer.interval){ clearInterval(writingTimer.interval); writingTimer.interval = null; }
+}
+function resetWritingTimer(){ pauseWritingTimer(); writingTimer.left = 25*60; renderWritingTimer(); }
+function changePrompt(id){ window.__writingPrompt = id; render(); }
+function saveDraft(){
+  const ta = document.getElementById("writingText");
+  const id = document.getElementById("promptSelect").value;
+  if(ta) state.drafts[id] = ta.value;
+  save();
+  const btn = document.querySelector('[data-action="saveDraft"]');
+  if(btn){ const old = btn.textContent; btn.textContent = "Saved"; setTimeout(() => { btn.textContent = old; }, 1200); }
+}
+function markWriting(){
+  saveDraft();
+  const id = document.getElementById("promptSelect").value;
+  const key = todayKey() + "|" + id;
+  if(!state.writingLog[key]){
+    state.writingLog[key] = true;
+    state.writingDone++;
+    touchStreak();
+    markPlan("write");
+  }
+  save();
+  const btn = document.querySelector('[data-action="markWriting"]');
+  if(btn){ btn.textContent = "Completed today"; btn.disabled = true; }
+  renderTabs();
+}
+function showModel(){
+  const id = document.getElementById("promptSelect").value;
+  const p = WRITING_PROMPTS.find(x => x.id === id);
+  const box = document.getElementById("modelBox");
+  if(!p || !box) return;
+  box.style.display = "block";
+  box.innerHTML = `
+    <div class="kicker">Model response (not the only correct answer)</div>
+    <div class="passage" style="border-left-color:#137a4b;background:#f3faf5">${esc(p.model)}</div>
+    <h3>What makes it work</h3>
+    <ul style="font-size:13px;color:#3f4a5a;line-height:1.6;padding-left:20px;margin:6px 0">
+      ${p.tips.map(t => `<li>${esc(t)}</li>`).join("")}
+    </ul>`;
+}
+
+function viewOral(){
+  const sel = oralState.index;
+  const p = ORAL_PROMPTS[sel];
+  const oralEntry = findOralEntry(sel);
+  const oralRatings = oralEntry && Array.isArray(oralEntry.ratings) ? oralEntry.ratings : [];
+  return `
+  <div class="split">
+    <div class="card">
+      <div class="kicker">Oral language practice</div>
+      <h2 style="font-size:22px">Speak clearly for one minute</h2>
+      <p>HKIS looks at expressive language (speaking) and receptive language (listening). Practise answering out loud with a clear beginning, two details, and a closing sentence.</p>
+      <div class="optionrow" style="margin:14px 0">
+        <select id="oralSelect" data-action="changeOral">
+          ${ORAL_PROMPTS.map((x,i) => `<option value="${i}" ${i===sel?"selected":""}>Prompt ${i+1}: ${esc(x.q.slice(0,46))}...</option>`).join("")}
+        </select>
+        <button class="btn soft small" data-action="oralStart">Start 45s</button>
+        <button class="btn ghost small" data-action="oralStop">Stop</button>
+      </div>
+      <div class="stat" style="background:#f8f6f0">
+        <div style="font-size:18px;font-weight:700;color:#17202c;line-height:1.5">${esc(p.q)}</div>
+        <p style="margin-top:10px;font-size:12.5px;color:#5b6778">${esc(p.tip)}</p>
+        <div style="display:flex;align-items:center;gap:14px;margin-top:14px">
+          <div class="donut" id="oralDonut" style="--p:0;width:112px;height:112px"><span id="oralCount" style="font-size:18px">45</span></div>
+          <div>
+            <button class="btn red small" data-action="toggleRecord" id="recBtn">Record</button>
+            <audio id="oralAudio" controls style="display:none;width:220px;margin-top:8px"></audio>
+            <p id="recStatus" style="font-size:12px;color:#647083;margin-top:6px"></p>
+          </div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:14px">If recording is not available, simply speak aloud to a parent and use the self-rating below.</div>
+    </div>
+    <div class="card">
+      <h2>Self-rating</h2>
+      <p>Score 1 (needs work) to 4 (strong) after each answer.</p>
+      ${["I answered the whole question.","I used complete sentences.","I gave details or examples.","I spoke clearly and at a steady pace.","I finished with a closing sentence."].map((t,i) => `
+        <div style="padding:8px 0;border-bottom:1px dashed #eee7db">
+          <div style="font-size:13px;color:#33445c;margin-bottom:6px">${t}</div>
+          ${[1,2,3,4].map(v => `<button class="btn ghost small ${oralRatings[i]===v?'rated':''}" data-action="oralRate" data-i="${i}" data-v="${v}" style="margin-right:4px">${v}</button>`).join("")}
+        </div>`).join("")}
+      <div class="actions" style="justify-content:flex-start;margin-top:14px">
+        <button class="btn green" data-action="saveOral">Save practice note</button>
+        <button class="btn ghost small" data-action="nav" data-route="home">Done</button>
+      </div>
+      <p style="font-size:11.5px;color:#8b8576;margin-top:10px">Tip: record once, listen, then answer again. The second answer is usually much stronger.</p>
+    </div>
+  </div>`;
+}
+function changeOral(i){ stopOral(); oralState.index = parseInt(i,10); render(); }
+function startOralTimer(){
+  const total = 45;
+  oralState.left = total;
+  if(oralState.interval) clearInterval(oralState.interval);
+  const tick = () => {
+    const d = document.getElementById("oralDonut");
+    const c = document.getElementById("oralCount");
+    if(!d || !c){ clearInterval(oralState.interval); return; }
+    const left = Math.max(0, oralState.left);
+    c.textContent = left;
+    d.style.setProperty("--p", Math.round((total-left)/total*100));
+    if(left <= 0){ clearInterval(oralState.interval); c.textContent = "0"; }
+    oralState.left--;
+  };
+  tick();
+  oralState.interval = setInterval(tick, 1000);
+}
+function stopOral(){
+  if(oralState.interval){ clearInterval(oralState.interval); oralState.interval = null; }
+  if(oralState.recorder && oralState.recorder.state === "recording"){ try{ oralState.recorder.stop(); }catch(e){} }
+  if(oralState.stream){ try{ oralState.stream.getTracks().forEach(t => t.stop()); }catch(e){} oralState.stream = null; }
+  oralState.recorder = null;
+  oralState.chunks = [];
+}
+async function toggleRecord(){
+  const status = document.getElementById("recStatus");
+  const btn = document.getElementById("recBtn");
+  if(oralState.recorder && oralState.recorder.state === "recording"){
+    oralState.recorder.stop();
+    if(btn) btn.textContent = "Record";
+    if(status) status.textContent = "Recording stopped. Listen back below.";
+    return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    oralState.stream = stream;
+    oralState.chunks = [];
+    const rec = new MediaRecorder(stream);
+    oralState.recorder = rec;
+    rec.ondataavailable = e => { if(e.data.size) oralState.chunks.push(e.data); };
+    rec.onstop = () => {
+      const blob = new Blob(oralState.chunks, {type:"audio/webm"});
+      if(oralState.url) URL.revokeObjectURL(oralState.url);
+      oralState.url = URL.createObjectURL(blob);
+      const audio = document.getElementById("oralAudio");
+      if(audio){ audio.src = oralState.url; audio.style.display = "block"; }
+      if(oralState.stream){ oralState.stream.getTracks().forEach(t => t.stop()); oralState.stream = null; }
+    };
+    rec.start();
+    if(btn) btn.textContent = "Stop";
+    if(status) status.textContent = "Recording...";
+    startOralTimer();
+  }catch(e){
+    if(status) status.textContent = "Microphone not available. Speak aloud instead.";
+  }
+}
+function oralRate(i, v){
+  if(!exam) return;
+  const part = exam.parts.find(p => p.type === "oral");
+  if(!part) return;
+  part.ratings[i] = v;
+  const el = document.getElementById("oralRate" + i);
+  if(el) el.textContent = "saved";
+}
+function findOralEntry(idx){
+  const prompt = ORAL_PROMPTS[idx].q;
+  const date = todayKey();
+  return (state.oralNotes || []).find(e => e && e.date === date && e.prompt === prompt);
+}
+function ensureOralEntry(idx){
+  state.oralNotes = state.oralNotes || [];
+  let entry = findOralEntry(idx);
+  if(!entry){
+    entry = {date:todayKey(), prompt:ORAL_PROMPTS[idx].q, ratings:[0,0,0,0,0]};
+    state.oralNotes.push(entry);
+  }
+  if(!Array.isArray(entry.ratings)) entry.ratings = [0,0,0,0,0];
+  return entry;
+}
+function saveOral(){
+  touchStreak();
+  ensureOralEntry(oralState.index);
+  save();
+  alert("Saved. Next time, try to add one more detail and a stronger closing sentence.");
+}
+
+function viewReport(){
+  const rows = skillRows().filter(r => r.attempts > 0).sort((a,b) => a.m - b.m);
+  const hist = state.history.slice().reverse().slice(0,12);
+  const exams = state.history.filter(h => h.type === "exam");
+  const lastExam = exams.length ? exams[exams.length-1] : null;
+  const avgRit = state.history.length ? Math.round(state.history.reduce((a,h) => a + h.rit, 0) / state.history.length) : null;
+  const drafts = WRITING_PROMPTS.map(p => ({p, text: state.drafts[p.id] || ""})).filter(d => d.text.trim());
+  const trend = state.history.slice(-10).map(h => h.rit);
+  let spark = "";
+  if(trend.length > 1){
+    const min = Math.min(...trend) - 5, max = Math.max(...trend) + 5;
+    const pts = trend.map((v,i) => {
+      const x = (i / (trend.length-1)) * 300 + 10;
+      const y = 90 - ((v - min) / Math.max(1, max - min)) * 70;
+      return x + "," + y;
+    }).join(" ");
+    spark = `<svg viewBox="0 0 320 100" style="width:100%;height:100px"><polyline fill="none" stroke="#2563eb" stroke-width="3" points="${pts}"/></svg>`;
+  }
+  return `
+  <div class="card">
+    <div class="kicker">Progress report</div>
+    <h2 style="font-size:22px">${state.name ? esc(state.name) + "'s" : "Your"} preparation snapshot</h2>
+    <div class="grid g4" style="margin-top:14px">
+      <div class="stat"><div class="n">${state.history.length}</div><div class="l">Sessions logged</div></div>
+      <div class="stat"><div class="n">${avgRit || "--"}</div><div class="l">Average RIT</div></div>
+      <div class="stat"><div class="n">${state.streak.count}</div><div class="l">Day streak</div></div>
+      <div class="stat"><div class="n">${drafts.length}</div><div class="l">Writing samples</div></div>
+    </div>
+  </div>
+
+  <div class="split" style="margin-top:16px">
+    <div class="card">
+      <h2>Skill mastery</h2>
+      ${rows.length ? rows.map(r => `
+        <div class="skillrow" style="grid-template-columns:1fr 1fr 44px;gap:10px">
+          <div class="name" style="white-space:normal">${esc(r.k)}</div>
+          <div class="bar"><i style="width:${r.m}%;background:${r.m>=80?'#137a4b':r.m>=60?'#a86400':'#c8102e'}"></i></div>
+          <div class="pct">${r.m}%</div>
+        </div>`).join("") : `<p class="empty">No skill data yet. Complete one practice set and this fills in automatically.</p>`}
+      <div class="actions" style="justify-content:flex-start;margin-top:12px">
+        <button class="btn red small" data-action="startDaily">Practice weakest skills</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>RIT trend</h2>
+      ${spark || `<p class="empty">Your trend line appears after two sessions.</p>`}
+      <h3 style="margin-top:14px">Latest mock exam</h3>
+      ${lastExam ? `<p><b>${lastExam.rit}</b> estimated RIT &middot; ${lastExam.correct}/${lastExam.total} correct &middot; ${esc(lastExam.date)}</p>` : `<p class="empty">No mock exam yet. Try one this week to build stamina.</p>`}
+      <div class="actions" style="justify-content:flex-start">
+        <button class="btn ghost small" data-action="startExam">Take a mock exam</button>
+      </div>
+      <div class="note" style="margin-top:12px">Target range for a confident Grade 4 entry profile: roughly 200-215 RIT in reading and language, 205-220 in math. Use this as a practice guide only.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Recent sessions</h2>
+    ${hist.length ? `<table>
+      <thead><tr><th>Date</th><th>Type</th><th>RIT</th><th>Score</th></tr></thead>
+      <tbody>${hist.map(h => `<tr><td>${esc(h.date)}</td><td>${esc(h.label || h.type)}</td><td><span class="ritbadge">${h.rit}</span></td><td>${h.correct}/${h.total}</td></tr>`).join("")}</tbody>
+    </table>` : `<p class="empty">No sessions yet.</p>`}
+  </div>
+
+  ${drafts.length ? `<div class="card" style="margin-top:16px">
+    <h2>Writing samples</h2>
+    ${drafts.map(({p,text}) => {
+      const words = text.trim().split(/\s+/).length;
+      return `<div class="review">
+        <div class="rq">${esc(p.type)}: ${esc(p.title)}</div>
+        <div style="color:#647083;margin-top:4px">${words} words</div>
+        <div style="white-space:pre-line;margin-top:6px;color:#33445c">${esc(text.slice(0,420))}${text.length>420?"...":""}</div>
+      </div>`;
+    }).join("")}
+  </div>` : ""}
+
+  <div class="card" style="margin-top:16px">
+    <h2>Daily schedule until ${esc(formatTestDate())}</h2>
+    <p style="margin-bottom:10px">A predictable 30-minute routine beats one long cram session. Adjust to your child's energy.</p>
+    <table>
+      <thead><tr><th>Day</th><th>Focus</th><th>Task</th></tr></thead>
+      <tbody>
+        <tr><td>Mon-Fri</td><td>Skills</td><td>1 adaptive set plus 1 weak-skill drill</td></tr>
+        <tr><td>Sat</td><td>Writing</td><td>1 full timed prompt, then checklist review</td></tr>
+        <tr><td>Sun</td><td>Simulation</td><td>Full mock exam, then read every explanation</td></tr>
+        <tr><td>Final 2 days</td><td>Confidence</td><td>Light reading, speaking practice, early sleep</td></tr>
+      </tbody>
+    </table>
+    <div class="actions" style="justify-content:flex-start;margin-top:14px">
+      <button class="btn ghost small" data-action="exportData">Export progress</button>
+      <button class="btn ghost small" data-action="printReport">Print report</button>
+      <button class="btn ghost small" data-action="resetData">Reset data</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h2>Day-by-day countdown to test day</h2>
+    <p style="margin-bottom:10px">A suggested focus for each day. Keep sessions to about 30 minutes and stop while your child still feels successful.</p>
+    ${countdownRows().length ? `<table>
+      <thead><tr><th>Date</th><th>Suggested focus</th></tr></thead>
+      <tbody>${countdownRows().map(r => `<tr ${r.today?'style="background:#fff9e9"':''}><td>${esc(r.date)}${r.today?' <b>(today)</b>':''}</td><td>${esc(r.focus)}</td></tr>`).join("")}</tbody>
+    </table>` : `<p class="empty">The test date has passed. Update the date on the dashboard to build a new plan.</p>`}
+  </div>`;
+}
+
+function viewAbout(){
+  return `
+  <div class="card">
+    <div class="kicker">What the sources say</div>
+    <h2 style="font-size:22px">How this simulation was built</h2>
+    <p>The design follows the public admissions information below. It is a practice tool, not an official sample paper.</p>
+  </div>
+  <div class="grid g2" style="margin-top:16px">
+    <div class="card">
+      <h2>HKIS pre-entry assessment</h2>
+      <p><b>Who:</b> selected applicants from Grade 3 to Grade 12 are invited to a pre-entry assessment.</p>
+      <p><b>What:</b> a standardized computerized adaptive assessment covering math, reading, writing, and oral language.</p>
+      <p><b>When:</b> invitations are based on priority and space; families schedule through the admissions portal.</p>
+      <p><b>Entry criteria:</b> English proficiency, demonstrated academic achievement, personal characteristics, fit with HKIS learning results, and proven success in a similar school environment.</p>
+      <p style="font-size:12px;color:#8b8576">Source: hkis.edu.hk/admissions/how-to-apply and hkis.edu.hk/admissions/faq</p>
+    </div>
+    <div class="card">
+      <h2>Grade 3-5 test format</h2>
+      <p>The assessment is described as a standardized test such as MAP plus a writing prompt. HKIS reports that the session runs about 2.5 hours.</p>
+      <p><b>MAP sections:</b> Reading, Language Usage, and Mathematics (Science is optional at some schools).</p>
+      <p><b>Question types:</b> mostly multiple choice, with drag-and-drop, fill-in, and other interactive items.</p>
+      <p><b>Adaptive:</b> a correct answer raises the difficulty; a wrong answer lowers it. The goal is to find the level the child can answer about half the time.</p>
+      <p><b>Scoring:</b> RIT, an equal-interval scale that tracks growth across grades.</p>
+      <p style="font-size:12px;color:#8b8576">Sources: topschoolsadmissions.com/blog/3, ampla-edu.com MAP page, testprep-online.com MAP 4th grade, warmup.nwea.org</p>
+    </div>
+    <div class="card">
+      <h2>Grade 4 skill expectations</h2>
+      <p><b>Reading:</b> vocabulary in context, literary and informational texts, main idea, inference, author's purpose, summarising, and comparing texts.</p>
+      <p><b>Language:</b> mechanics (capitals, punctuation, spelling), parts of speech, grammar and usage, sentence structure, and the writing process.</p>
+      <p><b>Math:</b> number sense, multi-step operations, fractions and decimals, patterns and algebra, geometry, measurement, and data.</p>
+      <p><b>Writing:</b> narrative, opinion, and informational responses with organization, detail, transitions, and a clear ending.</p>
+    </div>
+    <div class="card">
+      <h2>How the adaptive engine works here</h2>
+      <p>Each question carries a difficulty level on the RIT scale. The engine starts at the stored ability estimate for the subject, picks the closest useful question, and updates the estimate after each answer.</p>
+      <p>A weakness score is calculated for every skill. Questions from weaker skills are weighted more heavily, so practice time goes where it is needed most.</p>
+      <p>Reports show an estimated RIT, an approximate percentile for a typical Grade 4 cohort, and a ranked list of skills to review.</p>
+      <div class="note" style="margin-top:10px">RIT estimates in this app are approximations for practice only. They are not official NWEA scores and do not predict an HKIS admissions decision.</div>
+    </div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h2>Using the lab in the final two weeks</h2>
+    <div class="grid g3" style="margin-top:8px">
+      <div><h3>Week 1: diagnose</h3><p>Do 2-3 adaptive sets and one mock exam. Read every explanation together. Note the two weakest skills.</p></div>
+      <div><h3>Week 2: target</h3><p>Alternate a weak-skill drill with a timed writing prompt. Keep reading aloud daily for fluency and oral language.</p></div>
+      <div><h3>Last 2 days: rest</h3><p>One light practice set, one speaking practice, early bedtime. Confidence and sleep matter more than new content.</p></div>
+    </div>
+    <div class="disclaimer">Disclaimer: This is an independent practice tool. It is not produced, endorsed, or reviewed by Hong Kong International School, NWEA, or any admissions consultant. Question content is original and aligned to publicly described Grade 4 skills. External sources are linked for reference only.</div>
+  </div>`;
+}
+
+document.addEventListener("click", (e) => {
+  const el = e.target.closest("[data-action]");
+  if(!el) return;
+  const action = el.dataset.action;
+  if(action === "nav"){ navigate(el.dataset.route); return; }
+  if(action === "startDaily"){ startPractice("daily", null); return; }
+  if(action === "startDrill"){ startPractice("drill", el.dataset.skill); return; }
+  if(action === "startExam"){ navigate("mock"); return; }
+  if(action === "startExamNow"){
+    const ready = document.getElementById("readyBox");
+    const quiet = document.getElementById("quietBox");
+    if(ready && quiet && (!ready.checked || !quiet.checked)){
+      alert("Please confirm both checkboxes before starting the mock exam."); return;
+    }
+    startExam(); return;
+  }
+  if(action === "togglePlan"){
+    const p = getPlan();
+    p.done[el.dataset.id] = !p.done[el.dataset.id];
+    save(); render(); return;
+  }
+  if(action === "choose"){
+    if(!practice || practice.checked) return;
+    practice.selected = parseInt(el.dataset.i, 10); render(); return;
+  }
+  if(action === "checkAnswer"){ checkPractice(); return; }
+  if(action === "nextPractice"){ nextPractice(); return; }
+  if(action === "exitPractice"){
+    if(confirm("End this practice set and see your report?")){
+      if(practice && practice.answers.length) finishPractice();
+      else { practice = null; route = "practice"; render(); }
+    }
+    return;
+  }
+  if(action === "examChoose"){ examChoose(parseInt(el.dataset.i,10)); return; }
+  if(action === "examNext"){ examNext(); return; }
+  if(action === "continuePart"){ continuePart(); return; }
+  if(action === "finishExamPart"){ finishExamPart(); return; }
+  if(action === "saveExamWriting"){
+    const ta = document.getElementById("examWriting");
+    if(ta){ currentPart().text = ta.value; alert("Draft saved."); }
+    return;
+  }
+  if(action === "examWritingNext"){
+    const ta = document.getElementById("examWriting");
+    if(ta){ currentPart().text = ta.value; }
+    finishExamPart(); return;
+  }
+  if(action === "exitExam"){ exitExam(); return; }
+  if(action === "rateOral"){
+    if(!exam) return;
+    const part = exam.parts.find(p => p.type === "oral");
+    if(!part) return;
+    part.ratings[parseInt(el.dataset.i,10)] = parseInt(el.dataset.v,10);
+    const nm = document.getElementById("oralRate" + el.dataset.i);
+    if(nm) nm.textContent = "saved";
+    return;
+  }
+  if(action === "changePrompt"){ return; }
+  if(action === "startWritingTimer"){ startWritingTimer(); return; }
+  if(action === "resetWritingTimer"){ resetWritingTimer(); return; }
+  if(action === "saveDraft"){ saveDraft(); return; }
+  if(action === "markWriting"){ markWriting(); return; }
+  if(action === "showModel"){ showModel(); return; }
+  if(action === "oralStart"){ startOralTimer(); return; }
+  if(action === "oralStop"){ stopOral(); return; }
+  if(action === "toggleRecord"){ toggleRecord(); return; }
+  if(action === "changeOral"){ return; }
+  if(action === "oralRate"){
+    const item = parseInt(el.dataset.i, 10);
+    const value = parseInt(el.dataset.v, 10);
+    const entry = ensureOralEntry(oralState.index);
+    entry.ratings[item] = value;
+    save();
+    const row = el.parentElement;
+    if(row){
+      Array.from(row.querySelectorAll('[data-action="oralRate"]')).forEach(b => {
+        b.classList.toggle("rated", b === el);
+      });
+    }
+    return;
+  }
+  if(action === "saveOral"){ saveOral(); return; }
+  if(action === "setName"){
+    const n = prompt("Student's first name:", state.name || "");
+    if(n !== null){ state.name = n.trim().slice(0,30); save(); render(); }
+    return;
+  }
+  if(action === "exportData"){
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "hkis-grade4-progress.json";
+    a.click();
+    return;
+  }
+  if(action === "printReport"){ window.print(); return; }
+  if(action === "resetData"){
+    if(confirm("Reset all progress? This cannot be undone.")){
+      state = defaultState(); save(); practice = null; exam = null; lastResult = null; navigate("home");
+    }
+    return;
+  }
+});
+
+document.addEventListener("change", (e) => {
+  const el = e.target;
+  if(el.id === "promptSelect"){ changePrompt(el.value); return; }
+  if(el.id === "oralSelect"){ changeOral(el.value); return; }
+  if(el.id === "testDateInput"){
+    if(el.value){ state.testDate = el.value; save(); render(); }
+    return;
+  }
+});
+
+document.addEventListener("input", (e) => {
+  if(e.target.id === "examWriting"){
+    const part = exam && currentPart();
+    if(part) part.text = e.target.value;
+    const wc = document.getElementById("examWordCount");
+    if(wc){
+      const t = e.target.value.trim();
+      wc.textContent = (t ? t.split(/\s+/).length : 0) + " words";
+    }
+  }
+});
+
+window.addEventListener("beforeunload", (e) => {
+  if(exam && !exam.finished){ e.preventDefault(); e.returnValue = ""; }
+});
+
+render();
+</script>
+</body>
+</html>
