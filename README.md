@@ -30,4 +30,12 @@ hkis-grade4-practice-lab.html     # identical copy, kept under the original file
 
 ## License
 
-Personal/educational use. No warranty.
+**Public domain — CC0 1.0 Universal.** This work is dedicated to the public
+ domain; the author has waived all copyright and related rights worldwide.
+ You may copy, modify, distribute, and use it for any purpose, including
+ commercial use, without asking permission and without attribution.
+
+See [LICENSE](LICENSE) for the full legal code.
+
+Third-party names (HKIS, NWEA, MAP) remain the trademarks of their respective
+owners and are not covered by this dedication.
