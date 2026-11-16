@@ -890,6 +890,121 @@ let focusQid = null;
 let writingTimer = { left: 25*60, interval:null, running:false };
 let oralState = { index:0, left:45, interval:null, recorder:null, chunks:[], stream:null, url:null };
 
+/* v3: an unfinished practice set or mock exam is saved after every step,
+   so closing the page or leaving the screen never loses the place. */
+const SESSION_KEY = "hkis_g4_lab_session_v1";
+function practiceActive(){ return !!(practice && !practice.done); }
+function examActive(){ return !!(exam && !exam.finished); }
+function syncClocks(){
+  // The clocks only run while the set or exam is actually on screen.
+  const now = Date.now();
+  const hidden = typeof document !== "undefined" && document.hidden;
+  if(practiceActive()){
+    const on = route === "practice" && !hidden;
+    if(on && practice.pausedAt){ practice.start += now - practice.pausedAt; practice.pausedAt = null; }
+    else if(!on && !practice.pausedAt){ practice.pausedAt = now; }
+  }
+  if(examActive()){
+    const on = route === "mock" && !hidden;
+    if(on && exam.pausedAt){ exam.started += now - exam.pausedAt; exam.pausedAt = null; }
+    else if(!on && !exam.pausedAt){ exam.pausedAt = now; }
+  }
+}
+function saveSession(){
+  try{
+    if(!practiceActive() && !examActive()){ localStorage.removeItem(SESSION_KEY); return; }
+    const now = Date.now();
+    const out = { v:1, route, lastPassage, savedAt: now, practice:null, exam:null };
+    if(practiceActive()){
+      out.practice = Object.assign({}, practice, {
+        used: Array.from(practice.used),
+        elapsed: (practice.pausedAt || now) - practice.start
+      });
+      delete out.practice.pausedAt; delete out.practice.start;
+    }
+    if(examActive()){
+      const ta = document.getElementById("examWriting");
+      if(ta && currentPart().type === "writing") currentPart().text = ta.value;
+      out.exam = {
+        part: exam.part,
+        elapsed: (exam.pausedAt || now) - exam.started,
+        parts: exam.parts.map(p => Object.assign({}, p, { used: Array.from(p.used) }))
+      };
+    }
+    localStorage.setItem(SESSION_KEY, JSON.stringify(out));
+  }catch(e){}
+}
+let sessionSaveTimer = null;
+function saveSessionSoon(){ clearTimeout(sessionSaveTimer); sessionSaveTimer = setTimeout(saveSession, 400); }
+function restoreSession(){
+  let raw = null;
+  try{ raw = localStorage.getItem(SESSION_KEY); }catch(e){ return; }
+  if(!raw) return;
+  try{
+    const d = JSON.parse(raw);
+    const now = Date.now();
+    const known = q => !q || DB.some(x => x.id === q.id);
+    if(d.practice && Array.isArray(d.practice.plan) && d.practice.current && known(d.practice.current)){
+      const pr = d.practice;
+      pr.used = new Set(pr.used || []);
+      pr.answers = pr.answers || [];
+      pr.start = now - (pr.elapsed || 0);
+      pr.pausedAt = now;
+      pr.done = false;
+      delete pr.elapsed;
+      practice = pr;
+    }
+    if(d.exam && Array.isArray(d.exam.parts) && d.exam.parts.length === EXAM_PARTS.length && d.exam.parts.every(p => known(p.current))){
+      exam = {
+        parts: d.exam.parts.map(p => Object.assign({}, p, { used: new Set(p.used || []), answers: p.answers || [], ratings: p.ratings || [] })),
+        part: Math.min(Math.max(0, d.exam.part|0), d.exam.parts.length - 1),
+        started: now - (d.exam.elapsed || 0),
+        pausedAt: now,
+        endAt: now + 150*60000,
+        timer: null,
+        finished: false
+      };
+      startExamTimer();
+    }
+    lastPassage = d.lastPassage || null;
+    if(d.route === "mock" && exam) route = "mock";
+    else if(d.route === "practice" && practice) route = "practice";
+  }catch(e){
+    practice = null; exam = null;
+    try{ localStorage.removeItem(SESSION_KEY); }catch(e2){}
+  }
+}
+function resumeBanner(){
+  let h = "";
+  if(practiceActive()){
+    const label = practice.mode === "drill" ? "Targeted drill: " + practice.skill : (practice.mode === "review" ? "Mistake review" : "Daily practice set");
+    h += `<div class="card" style="margin-top:16px;border:2px solid #137a4b">
+      <div class="kicker">Saved for you</div>
+      <h2 style="font-size:20px">Unfinished: ${esc(label)}</h2>
+      <p>You stopped at question ${Math.min(practice.idx + 1, practice.count)} of ${practice.count}. Pick up exactly where you left off.</p>
+      <div class="actions" style="justify-content:flex-start">
+        <button class="btn green" data-action="resumePractice">Continue practice</button>
+        <button class="btn ghost small" data-action="discardPractice">Discard</button>
+      </div>
+    </div>`;
+  }
+  if(examActive()){
+    const part = currentPart();
+    const done = exam.parts.reduce((a,p) => a + (p.type === "mc" ? p.answers.length : 0), 0);
+    const total = exam.parts.filter(p => p.type === "mc").reduce((a,p) => a + p.count, 0);
+    h += `<div class="card" style="margin-top:16px;border:2px solid #c8102e">
+      <div class="kicker">Saved for you</div>
+      <h2 style="font-size:20px">Mock exam paused</h2>
+      <p>You are in ${esc(part.label)} (part ${exam.part + 1} of ${exam.parts.length}), with ${done} of ${total} questions answered. Every answer so far is saved.</p>
+      <div class="actions" style="justify-content:flex-start">
+        <button class="btn red" data-action="resumeExam">Continue mock exam</button>
+        <button class="btn ghost small" data-action="discardExam">Discard</button>
+      </div>
+    </div>`;
+  }
+  return h;
+}
+
 const TABS = [
   ["home","Dashboard"], ["practice","Practice"], ["mock","Mock Exam"], ["writing","Writing"],
   ["oral","Speaking"], ["report","Report"], ["about","About"]
@@ -903,13 +1018,9 @@ function renderTabs(){
   document.getElementById("topmeta").innerHTML = `Test day: <b>${esc(formatTestDate())}</b><br>${d >= 0 ? d + ' day' + (d===1?'':'s') + ' to go' : 'Test date passed'}`;
 }
 function navigate(r){
-  if(exam && !exam.finished && r !== "result"){
-    if(!confirm("Leave the mock exam? Your unfinished answers will be lost.")) return;
-    clearInterval(exam.timer); exam = null;
-  }
-  if(practice && !practice.done && r !== "result"){
-    if(!confirm("Leave this practice set? Your progress in it will be lost.")) return;
-    practice = null;
+  if(examActive() && route === "mock" && r !== "mock"){
+    const ta = document.getElementById("examWriting");
+    if(ta && currentPart().type === "writing") currentPart().text = ta.value;
   }
   if(r !== "oral") stopOral();
   if(r !== "writing") pauseWritingTimer();
@@ -918,6 +1029,7 @@ function navigate(r){
   window.scrollTo(0,0);
 }
 function render(){
+  syncClocks();
   renderTabs();
   const tabsEl = document.getElementById("tabs");
   if(tabsEl) tabsEl.style.display = (exam && !exam.finished && route === "mock") ? "none" : "flex";
@@ -931,6 +1043,7 @@ function render(){
   else if(route === "about") app.innerHTML = viewAbout();
   else if(route === "result") app.innerHTML = viewResult();
   afterRender();
+  saveSession();
 }
 function afterRender(){
   if(route === "writing"){
@@ -974,6 +1087,7 @@ function viewHome(){
       <button class="btn ghost" data-action="startExam">Run a full mock exam</button>
     </div>
   </section>
+  ${resumeBanner()}
 
   <div class="grid g4" style="margin-top:16px">
     <div class="stat"><div class="n">${state.streak.count}</div><div class="l">Day streak</div></div>
@@ -1077,6 +1191,11 @@ function viewPracticeIntro(){
 }
 
 function startPractice(kind, skill){
+  if(practiceActive()){
+    if(!confirm("You have an unfinished practice set saved (question " + Math.min(practice.idx + 1, practice.count) + " of " + practice.count + ").\n\nOK = start a new set and discard the saved one.\nCancel = go back to the saved set.")){
+      route = "practice"; render(); window.scrollTo(0,0); return;
+    }
+  }
   const used = new Set();
   let plan = [];
   if(kind === "drill" && skill){
@@ -1144,6 +1263,7 @@ function viewPractice(){
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <span class="pill green">Elapsed ${elapsed}</span>
+      <button class="btn ghost small" data-action="pausePractice">Save &amp; exit</button>
       <button class="btn ghost small" data-action="exitPractice">End set</button>
     </div>
   </div>
@@ -1458,7 +1578,7 @@ function viewExam(){
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <span class="timer" id="examTimer">Time used ${fmtClock(Date.now() - exam.started)}</span>
-        <button class="btn ghost small" data-action="exitExam">Exit</button>
+        <button class="btn ghost small" data-action="exitExam">Save &amp; exit</button>
       </div>
     </div>`;
   if(part.type === "mc"){
@@ -1596,9 +1716,8 @@ function finishExam(timeUp){
   window.scrollTo(0,0);
 }
 function exitExam(){
-  if(confirm("Exit the mock exam? Unfinished answers will be lost.")){
-    clearInterval(exam.timer); exam = null; navigate("home");
-  }
+  // Nothing is lost: the exam is saved and can be continued from the home screen.
+  navigate("home");
 }
 
 function viewWriting(){
@@ -2087,13 +2206,24 @@ document.addEventListener("click", (e) => {
     }
     return;
   }
+  if(action === "pausePractice"){ navigate("home"); return; }
+  if(action === "resumePractice"){ if(practiceActive()){ route = "practice"; render(); window.scrollTo(0,0); } return; }
+  if(action === "resumeExam"){ if(examActive()){ startExamTimer(); route = "mock"; render(); window.scrollTo(0,0); } return; }
+  if(action === "discardPractice"){
+    if(confirm("Discard the unfinished practice set? Answers already given still count toward the report.")){ practice = null; render(); }
+    return;
+  }
+  if(action === "discardExam"){
+    if(confirm("Discard the paused mock exam? You will need to start a new one from the beginning.")){ clearInterval(exam.timer); exam = null; render(); }
+    return;
+  }
   if(action === "examChoose"){ examChoose(parseInt(el.dataset.i,10)); return; }
   if(action === "examNext"){ examNext(); return; }
   if(action === "continuePart"){ continuePart(); return; }
   if(action === "finishExamPart"){ finishExamPart(); return; }
   if(action === "saveExamWriting"){
     const ta = document.getElementById("examWriting");
-    if(ta){ currentPart().text = ta.value; alert("Draft saved."); }
+    if(ta){ currentPart().text = ta.value; saveSession(); alert("Draft saved."); }
     return;
   }
   if(action === "examWritingNext"){
@@ -2109,6 +2239,7 @@ document.addEventListener("click", (e) => {
     part.ratings[parseInt(el.dataset.i,10)] = parseInt(el.dataset.v,10);
     const nm = document.getElementById("oralRate" + el.dataset.i);
     if(nm) nm.textContent = "saved";
+    saveSession();
     return;
   }
   if(action === "changePrompt"){ return; }
@@ -2172,6 +2303,7 @@ document.addEventListener("input", (e) => {
   if(e.target.id === "examWriting"){
     const part = exam && currentPart();
     if(part) part.text = e.target.value;
+    saveSessionSoon();
     const wc = document.getElementById("examWordCount");
     if(wc){
       const t = e.target.value.trim();
@@ -2180,10 +2312,10 @@ document.addEventListener("input", (e) => {
   }
 });
 
-window.addEventListener("beforeunload", (e) => {
-  if(exam && !exam.finished){ e.preventDefault(); e.returnValue = ""; }
-});
+window.addEventListener("pagehide", saveSession);
+document.addEventListener("visibilitychange", () => { syncClocks(); saveSession(); });
 
+restoreSession();
 render();
 </script>
 </body>
