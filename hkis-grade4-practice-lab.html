@@ -245,7 +245,8 @@ function defaultState(){
     writingDone:0,
     writingLog:{},
     mistakes:{},
-    writingScores:{}
+    writingScores:{},
+    seen:{}
   };
 }
 function loadState(){
@@ -261,6 +262,7 @@ function loadState(){
     s.oralNotes = s.oralNotes || [];
     s.mistakes = s.mistakes || {};
     s.writingScores = s.writingScores || {};
+    s.seen = s.seen || {};
     return s;
   }catch(e){ return defaultState(); }
 }
@@ -608,6 +610,316 @@ Who intimately lives with rain.`,q:`What is the theme of this poem?`,ch:[`Apprec
 {id:`m106`,s:`math`,k:`Data & Probability`,r:217,q:`In a picture graph, each apple symbol stands for 4 apples. Monday shows 5 and a half symbols. How many apples were sold on Monday?`,ch:[`22`,`20`,`24`,`9`],a:0,exp:`5 symbols are 20 apples, and half a symbol is 2 more. 20 + 2 = 22.`}
 ];
 
+/* v4: bank expansion (185 questions, 5 new passages) */
+const P_FOLD = "THE FOLD\n\nEvery New Year's Eve, Grandma Lin made dumplings, and every year Kai begged to help. This year she finally said yes.\n\nShe showed him how to place a spoonful of filling in the center of a round wrapper, wet the edge with a fingertip, and pinch it closed with seven small folds. Her hands moved like a sewing machine. In less than a minute, a neat row of dumplings sat on the tray, each one plump and perfect.\n\nKai's first dumpling looked like a crumpled paper bag. His second one burst open, and the filling squeezed out the side. He pushed the tray away. \"I'm just bad at this,\" he muttered.\n\nGrandma did not answer. Instead, she reached into the cupboard and took out an old tin box. Inside was a dumpling made of clay, lumpy and lopsided, painted a faded white.\n\n\"I made this when I was eight,\" she said. \"My mother kept it for forty years. She always said the first one is supposed to be ugly.\"\n\nKai looked at the clay dumpling for a long time. Then he pulled the tray back and picked up another wrapper.\n\nBy the end of the night, his dumplings were still not as neat as Grandma's. But when the family sat down to eat, Kai could tell which ones were his, and he ate every single one.";
+const P_GARDEN = "Every school should have a garden. Gardens teach students where food comes from. They also give children a reason to spend time outdoors. Finally, the vegetables can be used in the school kitchen.";
+const P_LEAVES = "WHY LEAVES CHANGE COLOR\n\nIn many parts of the world, the leaves of some trees turn yellow, orange, and red in autumn. Where do these bright colors come from?\n\nAll summer long, leaves are busy making food for the tree. To do this, they use a green substance called chlorophyll. Chlorophyll captures energy from sunlight. There is so much of it in the leaves that it hides every other color.\n\nWhen autumn arrives, the days grow shorter and the nights grow cooler. The tree begins to get ready for winter, and it stops making chlorophyll. As the green fades, yellow and orange colors that were in the leaf all along begin to show. In some trees, such as maples, the leaves also make new red colors in the fall.\n\nSoon a thin layer forms where each leaf joins its branch. This layer slowly cuts the leaf off from the tree. Finally, the leaf drops to the ground. Without its leaves, the tree can rest through the cold months and save its energy until spring.";
+const P_MANGROVE = "TREES THAT LIVE IN THE SEA\n\nMost trees would die if their roots sat in salty seawater. Mangroves are different. These tough trees grow along warm coastlines, in muddy places that are covered by the sea when the tide comes in and uncovered when it goes out.\n\nLiving in such a place is not easy. Wet mud holds very little air, and roots need air to stay alive. Some mangroves solve this problem with special roots that poke up out of the mud like pencils. These roots take in air when the tide is low. Mangroves also have ways to deal with salt. Some keep most of the salt out at their roots, and others push extra salt out through their leaves.\n\nMangrove forests are important to people and animals. Their tangled roots slow down waves during storms, which helps protect the land behind them. Young fish hide among the roots, and crabs and mudskippers live in the mud. Many birds come to feed there.\n\nIn Hong Kong, mangroves grow at the Mai Po wetlands, where thousands of birds stop to rest each winter on their long journeys.";
+const P_TRAIN = "THE NIGHT TRAIN\n\nThe night train is a silver snake\nthat slides across the hill;\nits windows are a hundred eyes\nthat blink when all is still.\n\nIt hums a low and sleepy song\nalong the sleeping track;\nit carries dreams to distant towns\nand never brings them back.\n\nAnd I, tucked in beneath my quilt,\ncan hear it rumble by,\na long, bright thread of moving light\nstitched through the dark-blue sky.";
+DB.push(
+  {"id": "r80", "s": "reading", "k": "Informational Text", "r": 206, "q": "This passage mainly explains ...", "ch": ["why people enjoy the autumn season", "why leaves change color and fall in autumn", "how chlorophyll is made in factories", "how to plant a maple tree"], "a": 1, "exp": "Every paragraph is about what happens to leaves in autumn: why colors appear and why leaves drop.","p":P_LEAVES},
+  {"id": "r81", "s": "reading", "k": "Vocabulary", "r": 212, "q": "In paragraph 2, what does the word captures mean?", "ch": ["paints", "catches and holds", "lets go of", "hides"], "a": 1, "exp": "Chlorophyll captures energy from sunlight, so it catches and holds that energy for the leaf to use.","p":P_LEAVES},
+  {"id": "r82", "s": "reading", "k": "Informational Text", "r": 216, "q": "According to the passage, what happens right after the tree stops making chlorophyll?", "ch": ["A thin layer forms where the leaf joins the branch.", "The leaf drops to the ground.", "The days begin to grow longer.", "The green fades, and yellow and orange colors show."], "a": 3, "exp": "Paragraph 3 says that as the green fades, the yellow and orange colors begin to show. The thin layer and the falling leaf come later.","p":P_LEAVES},
+  {"id": "r83", "s": "reading", "k": "Informational Text", "r": 222, "q": "Why can't we see the yellow and orange colors in leaves during summer?", "ch": ["The green chlorophyll covers them up.", "The tree has not made those colors yet.", "Strong sunlight washes the colors out.", "Those colors are only in the branches."], "a": 0, "exp": "The passage says chlorophyll 'hides every other color' and that the yellow and orange were 'in the leaf all along.'","p":P_LEAVES},
+  {"id": "r84", "s": "reading", "k": "Informational Text", "r": 226, "q": "What causes the tree to stop making chlorophyll?", "ch": ["A thin layer cuts the leaf off from the tree.", "The leaves turn red first.", "The tree has used up all of its food.", "Shorter days and cooler nights tell the tree that winter is coming."], "a": 3, "exp": "Paragraph 3: the days grow shorter and the nights cooler, the tree gets ready for winter, and it stops making chlorophyll.","p":P_LEAVES},
+  {"id": "r85", "s": "reading", "k": "Informational Text", "r": 208, "q": "What is the main idea of the passage?", "ch": ["Mangroves grow only in Hong Kong.", "Birds travel long distances every winter.", "Mangroves are special trees that survive in salty, muddy places and help many living things.", "Mud is a good place for most trees to grow."], "a": 2, "exp": "The passage explains how mangroves survive in a hard place and why they matter. The other choices are small details or are not true.","p":P_MANGROVE},
+  {"id": "r86", "s": "reading", "k": "Informational Text", "r": 214, "q": "According to the passage, how do some mangroves get air to their roots?", "ch": ["They grow only on dry hills.", "Crabs dig holes that bring air to the roots.", "Special roots poke up out of the mud and take in air at low tide.", "They pull air in through their leaves."], "a": 2, "exp": "Paragraph 2 describes roots that 'poke up out of the mud like pencils' and take in air when the tide is low.","p":P_MANGROVE},
+  {"id": "r87", "s": "reading", "k": "Informational Text", "r": 220, "q": "How is paragraph 2 mainly organized?", "ch": ["a list of opinions", "problem and solution", "compare and contrast", "time order"], "a": 1, "exp": "Paragraph 2 names problems (too little air, too much salt) and then explains how mangroves solve each one.","p":P_MANGROVE},
+  {"id": "r88", "s": "reading", "k": "Informational Text", "r": 225, "q": "Based on the passage, what would most likely happen to a coastline if its mangroves were cut down?", "ch": ["Storm waves could reach and damage the land more easily.", "The seawater would become less salty.", "The tide would stop coming in.", "More birds would rest there each winter."], "a": 0, "exp": "The roots 'slow down waves during storms' and protect the land. Without them, waves would hit the land harder.","p":P_MANGROVE},
+  {"id": "r89", "s": "reading", "k": "Vocabulary", "r": 218, "q": "In paragraph 3, the word tangled most likely means ...", "ch": ["cut short", "very straight", "twisted together", "brightly colored"], "a": 2, "exp": "Mangrove roots grow in a messy, twisted mass, which is what tangled means.","p":P_MANGROVE},
+  {"id": "r90", "s": "reading", "k": "Literary Text", "r": 207, "q": "\"Her hands moved like a sewing machine.\" What does this simile tell the reader?", "ch": ["Grandma was sewing clothes.", "Grandma's hands moved quickly and skillfully.", "Grandma's hands made a loud noise.", "Grandma's hands were tired."], "a": 1, "exp": "A sewing machine works fast and evenly, so the simile shows Grandma folds dumplings quickly and skillfully.","p":P_FOLD},
+  {"id": "r91", "s": "reading", "k": "Literary Text", "r": 213, "q": "How does Kai feel when he says, \"I'm just bad at this\"?", "ch": ["sleepy", "surprised", "frustrated", "proud"], "a": 2, "exp": "His dumplings went wrong, he pushed the tray away, and he muttered. Those are signs of frustration.","p":P_FOLD},
+  {"id": "r92", "s": "reading", "k": "Literary Text", "r": 219, "q": "Why does Grandma show Kai the clay dumpling?", "ch": ["to tell him to stop helping", "to give him a toy to play with", "to show him that everyone's first try is imperfect", "to prove that clay is better than dough"], "a": 2, "exp": "Grandma's own first dumpling was lumpy, and her mother said 'the first one is supposed to be ugly.' She is encouraging Kai.","p":P_FOLD},
+  {"id": "r93", "s": "reading", "k": "Literary Text", "r": 223, "q": "How does Kai change from the middle of the story to the end?", "ch": ["He goes from helping Grandma to ignoring her.", "He goes from being careful to being careless.", "He goes from loving dumplings to hating them.", "He goes from wanting to quit to trying again and feeling proud."], "a": 3, "exp": "In the middle he pushes the tray away. At the end he keeps making dumplings and proudly eats every one of his own.","p":P_FOLD},
+  {"id": "r94", "s": "reading", "k": "Literary Text", "r": 228, "q": "Which sentence best states a theme of this story?", "ch": ["Making mistakes is a normal part of learning something new.", "It is important to keep old boxes.", "New Year's Eve is the most important holiday.", "Grandmothers always cook the best food."], "a": 0, "exp": "A theme is the big lesson. Kai learns that a messy first try is normal and that he can improve by continuing.","p":P_FOLD},
+  {"id": "r95", "s": "reading", "k": "Literary Text", "r": 210, "q": "\"The night train is a silver snake.\" What kind of figurative language is this?", "ch": ["metaphor", "hyperbole", "simile", "onomatopoeia"], "a": 0, "exp": "It says the train IS a snake without using 'like' or 'as,' so it is a metaphor.","p":P_TRAIN,"poem":true},
+  {"id": "r96", "s": "reading", "k": "Literary Text", "r": 216, "q": "In the first stanza, what are the \"hundred eyes\"?", "ch": ["animals on the hill", "the speaker's family", "the train's lit windows", "the stars in the sky"], "a": 2, "exp": "The poem says 'its windows are a hundred eyes,' so the eyes are the train's windows.","p":P_TRAIN,"poem":true},
+  {"id": "r97", "s": "reading", "k": "Literary Text", "r": 200, "q": "Which word in the first stanza rhymes with hill?", "ch": ["snake", "blink", "still", "eyes"], "a": 2, "exp": "Hill and still end with the same sound, -ill.","p":P_TRAIN,"poem":true},
+  {"id": "r98", "s": "reading", "k": "Literary Text", "r": 224, "q": "Where is the speaker in the last stanza?", "ch": ["waiting at the station", "standing on the hill", "riding on the train", "in bed, listening to the train pass"], "a": 3, "exp": "The speaker is 'tucked in beneath my quilt' and can 'hear it rumble by.'","p":P_TRAIN,"poem":true},
+  {"id": "r99", "s": "reading", "k": "Literary Text", "r": 229, "q": "In the last two lines, what is the moving train compared to?", "ch": ["a thread being stitched through the sky", "a snake hiding in the grass", "a song on the radio", "a quilt on a bed"], "a": 0, "exp": "The poem calls the train 'a long, bright thread of moving light / stitched through the dark-blue sky.'","p":P_TRAIN,"poem":true},
+  {"id": "r100", "s": "reading", "k": "Vocabulary", "r": 204, "q": "Read the sentence. The puppy was so drowsy that it fell asleep in the middle of its dinner. What does drowsy mean?", "ch": ["playful", "sleepy", "noisy", "hungry"], "a": 1, "exp": "Falling asleep during dinner is a clue that drowsy means sleepy."},
+  {"id": "r101", "s": "reading", "k": "Vocabulary", "r": 210, "q": "Read the sentence. Lin was hesitant to jump into the cold pool, so she dipped one toe in first. What does hesitant mean?", "ch": ["angry and loud", "proud and happy", "excited and quick", "unsure and slow to act"], "a": 3, "exp": "Testing the water with one toe instead of jumping shows she was unsure, or hesitant."},
+  {"id": "r102", "s": "reading", "k": "Vocabulary", "r": 199, "q": "What does the prefix pre- mean in the word preview?", "ch": ["not", "before", "again", "after"], "a": 1, "exp": "Pre- means before. A preview is a look at something before it happens."},
+  {"id": "r103", "s": "reading", "k": "Vocabulary", "r": 201, "q": "What does the suffix -ful mean in the word hopeful?", "ch": ["full of", "again", "without", "one who"], "a": 0, "exp": "-ful means full of, so hopeful means full of hope."},
+  {"id": "r104", "s": "reading", "k": "Vocabulary", "r": 208, "q": "Which word is a synonym (same meaning) of rapid?", "ch": ["careful", "quick", "heavy", "quiet"], "a": 1, "exp": "Rapid and quick both mean fast."},
+  {"id": "r105", "s": "reading", "k": "Vocabulary", "r": 214, "q": "Read the sentence. The explorers were famished after walking all day without food. What does famished mean?", "ch": ["very excited", "slightly angry", "completely lost", "extremely hungry"], "a": 3, "exp": "The clue 'without food' tells you famished means extremely hungry."},
+  {"id": "r106", "s": "reading", "k": "Vocabulary", "r": 222, "q": "Read the sentence. The museum guard was vigilant, watching every visitor closely. What does vigilant mean?", "ch": ["tired and bored", "alert and watchful", "forgetful", "rude and unkind"], "a": 1, "exp": "Watching every visitor closely is what a vigilant, alert guard does."},
+  {"id": "r107", "s": "reading", "k": "Vocabulary", "r": 224, "q": "The Latin root port means carry. What does portable most likely mean?", "ch": ["very old", "made of metal", "able to be seen", "able to be carried"], "a": 3, "exp": "Port (carry) + -able (able to be) = able to be carried."},
+  {"id": "r108", "s": "reading", "k": "Vocabulary", "r": 207, "q": "Which word is an antonym (opposite) of ancient?", "ch": ["broken", "modern", "old", "huge"], "a": 1, "exp": "Ancient means very old. Its opposite is modern, meaning new or of today."},
+  {"id": "r109", "s": "reading", "k": "Vocabulary", "r": 220, "q": "In which sentence does the word bark mean the outer covering of a tree?", "ch": ["Please don't bark orders at your sister.", "We heard a loud bark from the yard.", "The dog's bark woke the baby.", "The bark of the oak tree was rough and gray."], "a": 3, "exp": "Only the oak tree sentence uses bark as part of a tree. The others are about a dog's sound or speaking sharply."},
+  {"id": "r110", "s": "reading", "k": "Vocabulary", "r": 226, "q": "Hot is to cold as generous is to ____.", "ch": ["selfish", "kind", "giving", "warm"], "a": 0, "exp": "Hot and cold are opposites, so the answer must be the opposite of generous: selfish."},
+  {"id": "r111", "s": "reading", "k": "Vocabulary", "r": 228, "q": "Read the sentence. The principal commended Ravi for helping a classmate who was lost. What does commended mean?", "ch": ["ignored", "questioned", "punished", "praised"], "a": 3, "exp": "Helping a lost classmate is a good deed, so the principal praised him."},
+  {"id": "r112", "s": "reading", "k": "Vocabulary", "r": 213, "q": "Which word has a prefix that means \"not\"?", "ch": ["improve", "important", "impossible", "imagine"], "a": 2, "exp": "In impossible, im- means not: not possible. The other words do not have a 'not' prefix."},
+  {"id": "r113", "s": "reading", "k": "Vocabulary", "r": 230, "q": "Read the sentence. When Mom asked who broke the vase, Theo gave an evasive answer and quickly changed the subject. What does evasive mean?", "ch": ["honest and complete", "funny and silly", "loud and angry", "avoiding giving a clear answer"], "a": 3, "exp": "Changing the subject is a way to avoid answering, which is what evasive means."},
+  {"id": "r114", "s": "reading", "k": "Vocabulary", "r": 216, "q": "Read the sentence. The two kittens were identical; even their owner could not tell them apart. What does identical mean?", "ch": ["very noisy", "exactly alike", "very small", "different"], "a": 1, "exp": "If no one can tell them apart, they look exactly alike."},
+  {"id": "r115", "s": "reading", "k": "Literary Text", "r": 205, "q": "Read the sentence. The thunder grumbled angrily across the sky. Which kind of figurative language is used?", "ch": ["hyperbole", "personification", "simile", "metaphor"], "a": 1, "exp": "Thunder cannot really grumble angrily like a person. Giving human actions to things is personification."},
+  {"id": "r116", "s": "reading", "k": "Literary Text", "r": 203, "q": "Read the sentence. My backpack weighs a thousand pounds! What is this an example of?", "ch": ["simile", "hyperbole", "a fact", "personification"], "a": 1, "exp": "This is a huge exaggeration to show the bag is heavy. That is hyperbole."},
+  {"id": "r117", "s": "reading", "k": "Literary Text", "r": 211, "q": "Read the passage. I grabbed my umbrella and ran to the bus stop, but the bus was already pulling away. From which point of view is this told?", "ch": ["there is no narrator", "second person", "first person", "third person"], "a": 2, "exp": "The narrator uses I and my, so it is told in first person."},
+  {"id": "r118", "s": "reading", "k": "Literary Text", "r": 209, "q": "Read the sentence. Sam's heart sank when he saw the CLOSED sign on the toy shop. How does Sam feel?", "ch": ["disappointed", "confused", "proud", "excited"], "a": 0, "exp": "'His heart sank' is an expression that means he felt disappointed."},
+  {"id": "r119", "s": "reading", "k": "Literary Text", "r": 214, "q": "In a story, what is the climax?", "ch": ["the very first sentence", "the most exciting part, when the main problem reaches its turning point", "the place where the story happens", "the list of characters"], "a": 1, "exp": "The climax is the high point of the plot, where the problem comes to a head."},
+  {"id": "r120", "s": "reading", "k": "Literary Text", "r": 220, "q": "\"Grandpa is a walking encyclopedia,\" said Mei. What does Mei mean?", "ch": ["Grandpa sells books.", "Grandpa goes for long walks.", "Grandpa knows a lot of facts.", "Grandpa is very tall."], "a": 2, "exp": "An encyclopedia is full of facts, so Mei means Grandpa knows a lot."},
+  {"id": "r121", "s": "reading", "k": "Literary Text", "r": 222, "q": "Read the fable. A thirsty crow found a pitcher, but the water was too low to reach. The crow dropped pebbles in one by one until the water rose high enough to drink. What is the lesson?", "ch": ["It is better to give up than to keep trying.", "Birds are faster than other animals.", "Clever thinking and patience can solve a problem.", "Never share water with others."], "a": 2, "exp": "The crow solved its problem by thinking of a plan and working at it patiently."},
+  {"id": "r122", "s": "reading", "k": "Literary Text", "r": 208, "q": "Which sentence uses onomatopoeia (a word that imitates a sound)?", "ch": ["The bacon was as thin as paper.", "The bacon was the best breakfast ever.", "The bacon smelled smoky and sweet.", "The bacon sizzled in the pan."], "a": 3, "exp": "Sizzled sounds like the noise bacon makes when it cooks."},
+  {"id": "r123", "s": "reading", "k": "Informational Text", "r": 202, "q": "Which sentence is a fact?", "ch": ["Everyone should visit Victoria Peak.", "Hong Kong has more than 200 islands.", "Dim sum is the tastiest breakfast.", "Hong Kong is the most exciting city in the world."], "a": 1, "exp": "A fact can be checked and proved. The other sentences are opinions about what is best or what people should do."},
+  {"id": "r124", "s": "reading", "k": "Informational Text", "r": 205, "q": "In a nonfiction book, where would you look to find the meaning of a word printed in bold?", "ch": ["the table of contents", "the glossary", "the title page", "the front cover"], "a": 1, "exp": "A glossary lists important words from the book and their meanings."},
+  {"id": "r125", "s": "reading", "k": "Informational Text", "r": 212, "q": "Read the paragraph. Plants need sunlight to make food. Without enough light, their leaves turn yellow and they grow slowly. How is this paragraph organized?", "ch": ["compare and contrast", "question and answer", "cause and effect", "steps in order"], "a": 2, "exp": "Not enough light (cause) makes leaves turn yellow and growth slow (effect)."},
+  {"id": "r126", "s": "reading", "k": "Informational Text", "r": 217, "q": "Read the paragraph. A cheetah can run faster than any other land animal, but it can keep its top speed for only a short time. A wolf runs more slowly, but it can travel for many hours. How is this paragraph organized?", "ch": ["problem and solution", "compare and contrast", "time order", "cause and effect"], "a": 1, "exp": "The paragraph shows how cheetahs and wolves are different, which is comparing and contrasting."},
+  {"id": "r127", "s": "reading", "k": "Informational Text", "r": 209, "q": "A poster says, \"Recycle your cans and bottles! It saves energy and keeps our beaches clean. Start today!\" What is the author's main purpose?", "ch": ["to entertain", "to tell a story", "to persuade", "to explain how cans are made"], "a": 2, "exp": "The poster tries to get readers to do something, so its purpose is to persuade."},
+  {"id": "r128", "s": "reading", "k": "Informational Text", "r": 216, "q": "Which sentence states the author's main claim?", "ch": ["Every school should have a garden.", "The vegetables can be used in the school kitchen.", "Gardens teach students where food comes from.", "Gardens give children a reason to spend time outdoors."], "a": 0, "exp": "The claim is the author's main opinion. The other sentences are reasons that support it.","p":P_GARDEN},
+  {"id": "r129", "s": "reading", "k": "Informational Text", "r": 228, "q": "Which evidence best supports the claim that reading every day improves vocabulary?", "ch": ["Libraries are open on Saturdays.", "Many children enjoy reading comic books.", "My friend says reading is boring.", "A study found that children who read 20 minutes a day learned more new words than children who did not."], "a": 3, "exp": "Strong evidence is a fact that directly connects daily reading to learning more words."},
+  {"id": "r130", "s": "reading", "k": "Informational Text", "r": 213, "q": "What is a caption in a science book?", "ch": ["a list of chapters", "the name of the author", "words next to a picture that explain what it shows", "the page number"], "a": 2, "exp": "A caption sits beside or below a photo or diagram and explains it."},
+  {"id": "l65", "s": "language", "k": "Mechanics", "r": 200, "q": "Which sentence uses capital letters correctly?", "ch": ["My Aunt flew to Tokyo on friday.", "My aunt flew to Tokyo on Friday.", "My aunt flew to tokyo on Friday.", "my aunt flew to tokyo on friday."], "a": 1, "exp": "Capitalize the first word, the city name (Tokyo), and the day (Friday). 'aunt' is not a name here."},
+  {"id": "l66", "s": "language", "k": "Mechanics", "r": 192, "q": "What is the correct plural of box?", "ch": ["boxies", "boxs", "boxen", "boxes"], "a": 3, "exp": "Words ending in x add -es to make the plural."},
+  {"id": "l67", "s": "language", "k": "Mechanics", "r": 198, "q": "Which word is spelled correctly?", "ch": ["frend", "friand", "friend", "freind"], "a": 2, "exp": "Friend is spelled f-r-i-e-n-d. Remember: a friend to the end."},
+  {"id": "l68", "s": "language", "k": "Mechanics", "r": 205, "q": "Which sentence uses an apostrophe correctly in a contraction?", "ch": ["They're going to the beach.", "Theyre' going to the beach.", "The'yre going to the beach.", "They'r going to the beach."], "a": 0, "exp": "They're is short for they are. The apostrophe replaces the missing letter a."},
+  {"id": "l69", "s": "language", "k": "Mechanics", "r": 210, "q": "Which shows the correct way to write a date?", "ch": ["october 5 2026", "October 5, 2026", "October 5 2026,", "October, 5 2026"], "a": 1, "exp": "Capitalize the month and put a comma between the day and the year."},
+  {"id": "l70", "s": "language", "k": "Mechanics", "r": 212, "q": "Which sentence uses a comma correctly after an introductory word?", "ch": ["Yes I would, like more rice.", "Yes, I would like more rice.", "Yes I, would like more rice.", "Yes I would like more rice,"], "a": 1, "exp": "Put a comma after an introductory word such as yes, no, or well."},
+  {"id": "l71", "s": "language", "k": "Mechanics", "r": 214, "q": "Which sentence uses a comma correctly when speaking to someone by name?", "ch": ["Ben please, pass the salt.", "Ben, please pass the salt.", "Ben please pass, the salt.", "Ben please pass the, salt."], "a": 1, "exp": "When you speak directly to someone, separate the name from the rest of the sentence with a comma."},
+  {"id": "l72", "s": "language", "k": "Mechanics", "r": 222, "q": "Which word is spelled correctly?", "ch": ["necesary", "necessary", "neccessary", "neccesary"], "a": 1, "exp": "Necessary has one c and two s's: n-e-c-e-s-s-a-r-y."},
+  {"id": "l73", "s": "language", "k": "Mechanics", "r": 204, "q": "Choose the correct word. The children put on ___ coats.", "ch": ["there", "they're", "their", "thier"], "a": 2, "exp": "Their shows ownership: the coats belong to the children."},
+  {"id": "l74", "s": "language", "k": "Mechanics", "r": 224, "q": "Which sentence is punctuated correctly?", "ch": ["\"Can we leave now?\" asked Leo.", "\"Can we leave now.\" asked Leo.", "\"Can we leave now\"? asked Leo.", "\"Can we leave now,\" asked Leo?"], "a": 0, "exp": "The question mark belongs inside the quotation marks because the spoken words are the question."},
+  {"id": "l75", "s": "language", "k": "Mechanics", "r": 226, "q": "Which sentence correctly shows that the toys belong to the children?", "ch": ["The children toy's were on the floor.", "The children's toys were on the floor.", "The childrens' toys were on the floor.", "The childrens toys were on the floor."], "a": 1, "exp": "Children is already plural, so add 's to show ownership: children's."},
+  {"id": "l76", "s": "language", "k": "Mechanics", "r": 230, "q": "Which sentence uses a colon correctly?", "ch": ["Bring these items: a pencil, an eraser, and a ruler.", "Bring these items a pencil: an eraser, and a ruler.", "Bring: these items a pencil, an eraser, and a ruler.", "Bring these: items a pencil, an eraser, and a ruler."], "a": 0, "exp": "A colon can introduce a list after a complete thought, such as 'Bring these items.'"},
+  {"id": "l77", "s": "language", "k": "Mechanics", "r": 202, "q": "Choose the correct word. I ate ___ many cookies and got a stomachache.", "ch": ["two", "to", "too", "tow"], "a": 2, "exp": "Too means more than enough. 'Too many cookies' means more than you should eat."},
+  {"id": "l78", "s": "language", "k": "Parts of Speech", "r": 190, "q": "Find the noun. The tiny kitten slept.", "ch": ["slept", "The", "kitten", "tiny"], "a": 2, "exp": "A noun names a person, place, thing, or animal. Kitten is the animal."},
+  {"id": "l79", "s": "language", "k": "Parts of Speech", "r": 193, "q": "Which word is a verb in this sentence? The girls giggled at the funny clown.", "ch": ["funny", "giggled", "clown", "girls"], "a": 1, "exp": "Giggled is the action the girls did."},
+  {"id": "l80", "s": "language", "k": "Parts of Speech", "r": 196, "q": "Which word is an adjective? We climbed the steep hill.", "ch": ["steep", "We", "hill", "climbed"], "a": 0, "exp": "Steep describes the hill, so it is an adjective."},
+  {"id": "l81", "s": "language", "k": "Parts of Speech", "r": 200, "q": "Which word is an adverb? The baby slept peacefully.", "ch": ["peacefully", "baby", "slept", "The"], "a": 0, "exp": "Peacefully tells how the baby slept. Words that describe verbs are adverbs."},
+  {"id": "l82", "s": "language", "k": "Parts of Speech", "r": 203, "q": "Which word is a pronoun? Mom gave them a ride to school.", "ch": ["gave", "ride", "them", "school"], "a": 2, "exp": "Them takes the place of people's names, so it is a pronoun."},
+  {"id": "l83", "s": "language", "k": "Parts of Speech", "r": 211, "q": "Which word is a helping verb? Lucy is reading a mystery book.", "ch": ["book", "mystery", "is", "reading"], "a": 2, "exp": "Is helps the main verb reading. Together they make 'is reading.'"},
+  {"id": "l84", "s": "language", "k": "Parts of Speech", "r": 218, "q": "Which word is a linking verb? The soup tastes salty.", "ch": ["The", "soup", "tastes", "salty"], "a": 2, "exp": "Tastes links the subject (soup) to a word that describes it (salty). It is not an action here."},
+  {"id": "l85", "s": "language", "k": "Parts of Speech", "r": 207, "q": "In the sentence \"The quick fox jumped over the log,\" what part of speech is quick?", "ch": ["adverb", "verb", "adjective", "noun"], "a": 2, "exp": "Quick describes the fox, which is a noun, so quick is an adjective."},
+  {"id": "l86", "s": "language", "k": "Parts of Speech", "r": 219, "q": "In which sentence is light used as a verb?", "ch": ["The light in the hall is broken.", "She wore a light blue dress.", "Please light the candles on the cake.", "The box is very light."], "a": 2, "exp": "In 'light the candles,' light is an action. In the others it describes something or names a thing."},
+  {"id": "l87", "s": "language", "k": "Parts of Speech", "r": 213, "q": "Which word is an interjection? Wow! That rocket is fast.", "ch": ["Wow", "rocket", "fast", "That"], "a": 0, "exp": "An interjection is a word that shows strong feeling, often followed by an exclamation mark."},
+  {"id": "l88", "s": "language", "k": "Parts of Speech", "r": 216, "q": "Which word is a possessive pronoun? The red bike is mine.", "ch": ["red", "bike", "is", "mine"], "a": 3, "exp": "Mine shows who owns the bike without naming the person."},
+  {"id": "l89", "s": "language", "k": "Parts of Speech", "r": 222, "q": "What is the simple subject of this sentence? The tall girl in the blue coat won the race.", "ch": ["race", "coat", "tall", "girl"], "a": 3, "exp": "The simple subject is the main noun the sentence is about: the girl won the race."},
+  {"id": "l90", "s": "language", "k": "Parts of Speech", "r": 220, "q": "Which word is a coordinating conjunction? We could eat now, or we could wait for Dad.", "ch": ["eat", "wait", "or", "could"], "a": 2, "exp": "Or joins two complete ideas. Coordinating conjunctions include and, but, or, and so."},
+  {"id": "l91", "s": "language", "k": "Parts of Speech", "r": 231, "q": "In the sentence \"She gave the dog a bone,\" which word is the direct object?", "ch": ["dog", "She", "gave", "bone"], "a": 3, "exp": "The direct object receives the action: what did she give? A bone. The dog is who received it (the indirect object)."},
+  {"id": "l92", "s": "language", "k": "Parts of Speech", "r": 206, "q": "Which word is a collective noun (a name for a group)?", "ch": ["nest", "flock", "bird", "feather"], "a": 1, "exp": "A flock is a group of birds, so it is a collective noun."},
+  {"id": "l93", "s": "language", "k": "Grammar & Usage", "r": 193, "q": "Choose the correct verb. My brother ___ soccer every Saturday.", "ch": ["are play", "play", "playing", "plays"], "a": 3, "exp": "Brother is one person, so the verb takes -s: plays."},
+  {"id": "l94", "s": "language", "k": "Grammar & Usage", "r": 197, "q": "Choose the correct past-tense verb. Yesterday we ___ a rainbow.", "ch": ["seen", "see", "saw", "seed"], "a": 2, "exp": "Saw is the past tense of see. Seen needs a helper such as have."},
+  {"id": "l95", "s": "language", "k": "Grammar & Usage", "r": 205, "q": "Choose the correct word. Sara and ___ went to the library.", "ch": ["myself", "me", "I", "us"], "a": 2, "exp": "Take away 'Sara and': you would say 'I went to the library.'"},
+  {"id": "l96", "s": "language", "k": "Grammar & Usage", "r": 201, "q": "Which group of words is a complete sentence?", "ch": ["Because the bus was late.", "Running to the bus stop.", "The bus arrived late.", "After school on Monday."], "a": 2, "exp": "A complete sentence has a subject (the bus) and a verb (arrived) and makes sense by itself."},
+  {"id": "l97", "s": "language", "k": "Grammar & Usage", "r": 207, "q": "Choose the correct word. This is the ___ movie I have ever seen.", "ch": ["most best", "good", "better", "best"], "a": 3, "exp": "Comparing one movie with all others uses the superlative: best."},
+  {"id": "l98", "s": "language", "k": "Grammar & Usage", "r": 220, "q": "Choose the correct word. There are ___ apples in the basket than oranges.", "ch": ["fewer", "little", "less", "least"], "a": 0, "exp": "Use fewer for things you can count, like apples. Use less for amounts, like water."},
+  {"id": "l99", "s": "language", "k": "Grammar & Usage", "r": 218, "q": "Choose the correct verb. Everyone in my class ___ a library card.", "ch": ["have", "were", "are", "has"], "a": 3, "exp": "Everyone is singular, so it takes the singular verb has."},
+  {"id": "l100", "s": "language", "k": "Grammar & Usage", "r": 212, "q": "Which sentence uses the past tense correctly?", "ch": ["Last night, I wrote a letter to my cousin.", "Last night, I writed a letter to my cousin.", "Last night, I write a letter to my cousin.", "Last night, I written a letter to my cousin."], "a": 0, "exp": "Wrote is the past tense of write. Written needs a helper verb such as have."},
+  {"id": "l101", "s": "language", "k": "Grammar & Usage", "r": 217, "q": "Which sentence uses good or well correctly?", "ch": ["Mia sings good.", "Mia sings goodly.", "Mia is a well singer.", "Mia sings well."], "a": 3, "exp": "Well describes how she sings (a verb). Good describes nouns, as in 'a good singer.'"},
+  {"id": "l102", "s": "language", "k": "Grammar & Usage", "r": 228, "q": "Choose the correct verb. Neither the teacher nor the students ___ ready.", "ch": ["was", "has", "were", "is"], "a": 2, "exp": "With neither...nor, the verb agrees with the closer subject. Students is plural, so use were."},
+  {"id": "l103", "s": "language", "k": "Grammar & Usage", "r": 211, "q": "Which is the best way to fix this run-on sentence? The rain stopped the sun came out.", "ch": ["The rain stopped, and the sun came out.", "The rain stopped, the sun came out.", "The rain, stopped the sun came out.", "The rain stopped the, sun came out."], "a": 0, "exp": "Join two complete sentences with a comma and a joining word such as and. A comma alone is not enough."},
+  {"id": "l104", "s": "language", "k": "Grammar & Usage", "r": 230, "q": "Choose the correct word. Between you and ___, I think the test was easy.", "ch": ["mine", "me", "I", "myself"], "a": 1, "exp": "After a word like between, use the object pronoun me."},
+  {"id": "l105", "s": "language", "k": "Grammar & Usage", "r": 225, "q": "Which sentence is a complex sentence?", "ch": ["The students ran outside.", "The bell rang loudly at noon.", "When the bell rang, the students ran outside.", "The bell rang, and the students ran outside."], "a": 2, "exp": "A complex sentence has a part that cannot stand alone (When the bell rang) joined to a complete sentence."},
+  {"id": "l106", "s": "language", "k": "Grammar & Usage", "r": 232, "q": "Choose the correct verb. By next June, I ___ at this school for three years.", "ch": ["studied", "am studying", "have studied", "will have studied"], "a": 3, "exp": "'By next June' points to the future, looking back on time already passed. That needs will have studied."},
+  {"id": "l107", "s": "language", "k": "Grammar & Usage", "r": 209, "q": "Choose the correct pronoun. The coach handed the trophy to Ana and ___.", "ch": ["her", "she", "hers", "herself"], "a": 0, "exp": "Take away 'Ana and': you would say 'handed the trophy to her.'"},
+  {"id": "l108", "s": "language", "k": "Writing Process", "r": 199, "q": "Which detail best supports this topic sentence? Dogs make great pets.", "ch": ["Some cats like to sleep all day.", "Dog food comes in many flavors.", "My cousin lives in London.", "Dogs are loyal and love to play with their owners."], "a": 3, "exp": "A supporting detail gives a reason dogs are great pets. Loyalty and playfulness do that."},
+  {"id": "l109", "s": "language", "k": "Writing Process", "r": 195, "q": "Which word best signals the last step in a set of directions?", "ch": ["Finally", "Next", "First", "Because"], "a": 0, "exp": "Finally tells the reader that this is the last step."},
+  {"id": "l110", "s": "language", "k": "Writing Process", "r": 208, "q": "Which sentence is the best hook to begin a story?", "ch": ["The end.", "I will tell you about my day.", "The moment I opened the door, a parrot flew straight at my face!", "This is a story."], "a": 2, "exp": "A good hook grabs the reader's attention and makes them want to keep reading."},
+  {"id": "l111", "s": "language", "k": "Writing Process", "r": 214, "q": "You are writing to persuade your principal to build a new playground. Which reason is strongest?", "ch": ["Playgrounds have slides.", "Playgrounds are fun.", "My friend wants one.", "A playground would help students get exercise during recess."], "a": 3, "exp": "The strongest reason shows a real benefit for students, not just a personal wish."},
+  {"id": "l112", "s": "language", "k": "Writing Process", "r": 210, "q": "Which sentence uses the most precise (exact) language?", "ch": ["The golden retriever raced across the wet sand.", "The dog went across the place.", "The animal moved somewhere.", "It went fast."], "a": 0, "exp": "Precise words such as 'golden retriever,' 'raced,' and 'wet sand' give a clear picture."},
+  {"id": "l113", "s": "language", "k": "Writing Process", "r": 196, "q": "Which is the best way to combine these sentences? Leo likes math. Leo likes science.", "ch": ["Leo likes math and science.", "Leo likes math, Leo likes science.", "Leo likes math Leo likes science.", "Likes math and science Leo."], "a": 0, "exp": "Joining the two things Leo likes with 'and' removes the repeated words."},
+  {"id": "l114", "s": "language", "k": "Writing Process", "r": 216, "q": "What should a writer do during the revising step?", "ch": ["print the final copy", "choose a topic for the first time", "make the writing clearer by adding, removing, or moving ideas", "draw the cover picture"], "a": 2, "exp": "Revising means improving the ideas and how they are organized."},
+  {"id": "l115", "s": "language", "k": "Writing Process", "r": 206, "q": "What is the main purpose of editing?", "ch": ["to fix spelling, capitalization, and punctuation mistakes", "to think of new ideas", "to make the story longer", "to share the writing with readers"], "a": 0, "exp": "Editing is checking for mistakes in spelling, capitals, and punctuation."},
+  {"id": "l116", "s": "language", "k": "Writing Process", "r": 211, "q": "Choose the best transition. We finished our lunch. ___, we put on our shoes and walked to the park.", "ch": ["For example", "Afterward", "In contrast", "However"], "a": 1, "exp": "Afterward shows time order: one event happened after another."},
+  {"id": "l117", "s": "language", "k": "Writing Process", "r": 221, "q": "Choose the best transition. Penguins cannot fly. ___, they are excellent swimmers.", "ch": ["First", "However", "For example", "Therefore"], "a": 1, "exp": "However shows a contrast between not flying and swimming well."},
+  {"id": "l118", "s": "language", "k": "Writing Process", "r": 222, "q": "Which sentence would make the best conclusion for a report about recycling?", "ch": ["Did you know paper comes from trees?", "By recycling, each of us can help keep our planet clean for the future.", "Glass is made from sand.", "First, collect your bottles."], "a": 1, "exp": "A conclusion wraps up the main idea of the whole report."},
+  {"id": "l119", "s": "language", "k": "Writing Process", "r": 219, "q": "Which sentence uses formal language suitable for a letter to a museum director?", "ch": ["Hey, do you guys do tours?", "I would like to ask whether your museum offers tours for students.", "Gimme info on tours ASAP.", "Yo, tours for kids?"], "a": 1, "exp": "A letter to an adult you do not know should be polite and use complete, formal sentences."},
+  {"id": "l120", "s": "language", "k": "Writing Process", "r": 226, "q": "Which piece of information would be LEAST useful in a report about how volcanoes form?", "ch": ["where Earth's plates meet", "what happens when pressure builds up underground", "how melted rock rises from deep underground", "the writer's favorite volcano movie"], "a": 3, "exp": "A favorite movie is a personal opinion that does not explain how volcanoes form."},
+  {"id": "l121", "s": "language", "k": "Writing Process", "r": 229, "q": "When you use facts from a book in your research report, why should you write them in your own words?", "ch": ["so you do not copy another writer's work", "so the report is shorter", "so readers cannot find your sources", "so the facts are less accurate"], "a": 0, "exp": "Copying another writer's words without credit is not allowed. Putting facts in your own words, and listing your sources, is honest."},
+  {"id": "m107", "s": "math", "k": "Number Sense", "r": 196, "q": "What is the value of the digit 4 in 34,519?", "ch": ["40", "400", "4,000", "40,000"], "a": 2, "exp": "The 4 is in the thousands place, so its value is 4,000."},
+  {"id": "m108", "s": "math", "k": "Number Sense", "r": 201, "q": "Round 6,449 to the nearest thousand.", "ch": ["7,000", "6,500", "6,400", "6,000"], "a": 3, "exp": "Look at the hundreds digit: 4 is less than 5, so round down to 6,000."},
+  {"id": "m109", "s": "math", "k": "Number Sense", "r": 203, "q": "Which number is 1,000 more than 28,945?", "ch": ["38,945", "29,045", "28,955", "29,945"], "a": 3, "exp": "Add 1 to the thousands digit: 28,945 + 1,000 = 29,945."},
+  {"id": "m110", "s": "math", "k": "Number Sense", "r": 199, "q": "Which fraction is equal to 1/2?", "ch": ["2/5", "5/8", "4/8", "3/8"], "a": 2, "exp": "4 is half of 8, so 4/8 = 1/2."},
+  {"id": "m111", "s": "math", "k": "Number Sense", "r": 204, "q": "Which decimal is equal to 7/10?", "ch": ["7.10", "0.07", "7.0", "0.7"], "a": 3, "exp": "Seven tenths is written 0.7."},
+  {"id": "m112", "s": "math", "k": "Number Sense", "r": 212, "q": "Which number is a multiple of both 4 and 6?", "ch": ["16", "24", "18", "30"], "a": 1, "exp": "24 = 4 × 6, so it is a multiple of both. 16 is not a multiple of 6; 18 and 30 are not multiples of 4."},
+  {"id": "m113", "s": "math", "k": "Number Sense", "r": 210, "q": "Which fraction is greater than 1/2?", "ch": ["5/8", "3/8", "4/10", "2/6"], "a": 0, "exp": "Half of 8 is 4, and 5 is more than 4, so 5/8 > 1/2. The others are less than one half."},
+  {"id": "m114", "s": "math", "k": "Number Sense", "r": 214, "q": "Which shows 205,036 in words?", "ch": ["twenty thousand, five hundred thirty-six", "two hundred five thousand, thirty-six", "two hundred five thousand, three hundred six", "two hundred fifty thousand, thirty-six"], "a": 1, "exp": "205 thousands and 36 ones: two hundred five thousand, thirty-six."},
+  {"id": "m115", "s": "math", "k": "Number Sense", "r": 220, "q": "Which mixed number is equal to 11/4?", "ch": ["1 1/4", "2 3/4", "3 1/4", "2 1/4"], "a": 1, "exp": "11 ÷ 4 = 2 remainder 3, so 11/4 = 2 3/4."},
+  {"id": "m116", "s": "math", "k": "Number Sense", "r": 226, "q": "What is the greatest common factor of 18 and 24?", "ch": ["6", "3", "2", "12"], "a": 0, "exp": "Factors of 18: 1, 2, 3, 6, 9, 18. Factors of 24: 1, 2, 3, 4, 6, 8, 12, 24. The greatest shared factor is 6."},
+  {"id": "m117", "s": "math", "k": "Number Sense", "r": 226, "q": "Which list shows the numbers from greatest to least?", "ch": ["0.305, 0.3, 0.25", "0.3, 0.305, 0.25", "0.25, 0.3, 0.305", "0.305, 0.25, 0.3"], "a": 0, "exp": "Write them with the same number of places: 0.305, 0.300, 0.250. Then order: 0.305 > 0.3 > 0.25."},
+  {"id": "m118", "s": "math", "k": "Number Sense", "r": 230, "q": "The temperature is -4°C. It rises 9 degrees. What is the new temperature?", "ch": ["5°C", "-5°C", "13°C", "-13°C"], "a": 0, "exp": "Count up 4 to reach 0, then 5 more: -4 + 9 = 5."},
+  {"id": "m119", "s": "math", "k": "Operations & Fractions", "r": 198, "q": "408 - 159 = ?", "ch": ["259", "249", "349", "351"], "a": 1, "exp": "Regroup carefully: 408 - 159 = 249. Check: 249 + 159 = 408."},
+  {"id": "m120", "s": "math", "k": "Operations & Fractions", "r": 192, "q": "63 ÷ 7 = ?", "ch": ["70", "8", "9", "7"], "a": 2, "exp": "7 × 9 = 63, so 63 ÷ 7 = 9."},
+  {"id": "m121", "s": "math", "k": "Operations & Fractions", "r": 200, "q": "A box holds 12 crayons. How many crayons are in 9 boxes?", "ch": ["108", "118", "96", "21"], "a": 0, "exp": "12 × 9 = 108."},
+  {"id": "m122", "s": "math", "k": "Operations & Fractions", "r": 202, "q": "2/3 + 1/3 = ?", "ch": ["3/6", "2/9", "1/3", "1"], "a": 3, "exp": "Add the numerators: 2/3 + 1/3 = 3/3, which equals 1 whole."},
+  {"id": "m123", "s": "math", "k": "Operations & Fractions", "r": 218, "q": "4 × 3/5 = ?", "ch": ["12/5", "12/20", "7/5", "4/15"], "a": 0, "exp": "Multiply the whole number by the numerator: 4 × 3 = 12, so the answer is 12/5 (which is 2 2/5)."},
+  {"id": "m124", "s": "math", "k": "Operations & Fractions", "r": 212, "q": "Leo has 125 stickers. He gives 38 to his sister and then buys 24 more. How many stickers does he have now?", "ch": ["101", "87", "111", "187"], "a": 2, "exp": "125 - 38 = 87, then 87 + 24 = 111."},
+  {"id": "m125", "s": "math", "k": "Operations & Fractions", "r": 214, "q": "843 ÷ 3 = ?", "ch": ["291", "271", "281", "2,529"], "a": 2, "exp": "8 hundreds ÷ 3 = 2 r 2; 24 tens ÷ 3 = 8; 3 ones ÷ 3 = 1. Answer: 281."},
+  {"id": "m126", "s": "math", "k": "Operations & Fractions", "r": 222, "q": "1.25 × 4 = ?", "ch": ["4.25", "5.2", "0.5", "5"], "a": 3, "exp": "1.25 is 1 and a quarter. Four quarters make 1, so 4 × 1.25 = 4 + 1 = 5."},
+  {"id": "m127", "s": "math", "k": "Operations & Fractions", "r": 221, "q": "A school has 6 classes with 27 students in each. If 19 students are absent, how many students are at school?", "ch": ["181", "133", "162", "143"], "a": 3, "exp": "6 × 27 = 162 students in all. 162 - 19 = 143 are at school."},
+  {"id": "m128", "s": "math", "k": "Operations & Fractions", "r": 224, "q": "Which is the best estimate of 598 × 42?", "ch": ["240,000", "2,400", "30,000", "24,000"], "a": 3, "exp": "Round to 600 × 40 = 24,000."},
+  {"id": "m129", "s": "math", "k": "Operations & Fractions", "r": 225, "q": "7/8 - 1/4 = ?", "ch": ["3/4", "1/2", "5/8", "6/4"], "a": 2, "exp": "Change 1/4 to 2/8. Then 7/8 - 2/8 = 5/8."},
+  {"id": "m130", "s": "math", "k": "Operations & Fractions", "r": 230, "q": "Sam saved $4.50 each week for 6 weeks. Then he spent $12.75 on a book. How much money does he have left?", "ch": ["$14.75", "$27.00", "$14.25", "$15.25"], "a": 2, "exp": "$4.50 × 6 = $27.00. $27.00 - $12.75 = $14.25."},
+  {"id": "m131", "s": "math", "k": "Operations & Fractions", "r": 228, "q": "In a class of 30 students, 2 out of every 5 students walk to school. How many students walk?", "ch": ["10", "18", "15", "12"], "a": 3, "exp": "30 ÷ 5 = 6 groups of 5. Each group has 2 walkers: 6 × 2 = 12."},
+  {"id": "m132", "s": "math", "k": "Algebra & Patterns", "r": 186, "q": "What is the next number? 5, 10, 15, 20, ___", "ch": ["22", "21", "30", "25"], "a": 3, "exp": "The pattern adds 5 each time: 20 + 5 = 25."},
+  {"id": "m133", "s": "math", "k": "Algebra & Patterns", "r": 195, "q": "What is the next number? 3, 7, 11, 15, ___", "ch": ["18", "19", "17", "20"], "a": 1, "exp": "The pattern adds 4 each time: 15 + 4 = 19."},
+  {"id": "m134", "s": "math", "k": "Algebra & Patterns", "r": 200, "q": "48 ÷ ? = 6. What is the missing number?", "ch": ["8", "42", "7", "6"], "a": 0, "exp": "6 × 8 = 48, so 48 ÷ 8 = 6."},
+  {"id": "m135", "s": "math", "k": "Algebra & Patterns", "r": 215, "q": "What is the next number in the pattern? 100, 90, 81, 73, ___", "ch": ["70", "66", "63", "65"], "a": 1, "exp": "The amount subtracted goes down by one each time: -10, -9, -8, so next is -7. 73 - 7 = 66."},
+  {"id": "m136", "s": "math", "k": "Algebra & Patterns", "r": 208, "q": "Ana had some marbles. She got 12 more, and now she has 30. Which number sentence shows this? (m = the marbles she had at first)", "ch": ["m - 12 = 30", "m + 12 = 30", "30 + 12 = m", "12 - m = 30"], "a": 1, "exp": "She started with m, added 12, and ended with 30: m + 12 = 30."},
+  {"id": "m137", "s": "math", "k": "Algebra & Patterns", "r": 207, "q": "If n + n = 18, what is n?", "ch": ["9", "6", "36", "18"], "a": 0, "exp": "Two equal numbers add to 18, so each one is 9."},
+  {"id": "m138", "s": "math", "k": "Algebra & Patterns", "r": 205, "q": "What is the value of 5 × k when k = 7?", "ch": ["57", "2", "35", "12"], "a": 2, "exp": "Put 7 in place of k: 5 × 7 = 35."},
+  {"id": "m139", "s": "math", "k": "Algebra & Patterns", "r": 216, "q": "A pattern starts at 3 and doubles each time. What is the 5th number?", "ch": ["24", "48", "96", "15"], "a": 1, "exp": "3, 6, 12, 24, 48. The 5th number is 48."},
+  {"id": "m140", "s": "math", "k": "Algebra & Patterns", "r": 224, "q": "Which value of x makes this true? 6 × x - 4 = 32", "ch": ["7", "5", "6", "36"], "a": 2, "exp": "Add 4 to both sides: 6 × x = 36, so x = 6."},
+  {"id": "m141", "s": "math", "k": "Algebra & Patterns", "r": 212, "q": "Tickets cost $8 each. Which expression shows the cost of t tickets?", "ch": ["8 × t", "8 + t", "t - 8", "t ÷ 8"], "a": 0, "exp": "Each ticket costs 8, so t tickets cost 8 × t."},
+  {"id": "m142", "s": "math", "k": "Algebra & Patterns", "r": 226, "q": "A rule changes each input to an output. Input 3 gives 10, input 5 gives 16, and input 8 gives 25. What is the rule?", "ch": ["multiply by 3, then add 1", "multiply by 3", "add 7", "multiply by 2, then add 4"], "a": 0, "exp": "Check every pair: 3 × 3 + 1 = 10, 5 × 3 + 1 = 16, 8 × 3 + 1 = 25."},
+  {"id": "m143", "s": "math", "k": "Algebra & Patterns", "r": 228, "q": "Which expression is equal to 4 × (5 + 2)?", "ch": ["4 + 5 × 2", "4 × 5 + 4 × 2", "4 × 5 × 2", "4 × 5 + 2"], "a": 1, "exp": "Multiply 4 by each number in the brackets: 4 × 5 + 4 × 2 = 20 + 8 = 28, the same as 4 × 7."},
+  {"id": "m144", "s": "math", "k": "Algebra & Patterns", "r": 227, "q": "Mia's age is 3 more than twice her brother's age. Her brother is 5. How old is Mia?", "ch": ["16", "10", "13", "11"], "a": 2, "exp": "Twice 5 is 10, and 3 more is 13."},
+  {"id": "m145", "s": "math", "k": "Algebra & Patterns", "r": 232, "q": "The sum of two numbers is 20. One number is 4 more than the other. What is the larger number?", "ch": ["16", "10", "8", "12"], "a": 3, "exp": "Take away the extra 4: 20 - 4 = 16. Split equally: 8 and 8. Give the 4 back to one: 8 and 12. The larger is 12."},
+  {"id": "m146", "s": "math", "k": "Geometry", "r": 190, "q": "How many sides does a hexagon have?", "ch": ["5", "8", "7", "6"], "a": 3, "exp": "Hexa- means six. A hexagon has 6 sides."},
+  {"id": "m147", "s": "math", "k": "Geometry", "r": 196, "q": "Which angle is acute?", "ch": ["90°", "120°", "180°", "45°"], "a": 3, "exp": "An acute angle is less than 90°."},
+  {"id": "m148", "s": "math", "k": "Geometry", "r": 200, "q": "A square has sides of 7 cm. What is its perimeter?", "ch": ["14 cm", "21 cm", "49 cm", "28 cm"], "a": 3, "exp": "A square has 4 equal sides: 4 × 7 = 28 cm."},
+  {"id": "m149", "s": "math", "k": "Geometry", "r": 214, "q": "How many vertices (corners) does a triangular prism have?", "ch": ["6", "5", "9", "3"], "a": 0, "exp": "There are 3 corners on the top triangle and 3 on the bottom triangle: 6 in all."},
+  {"id": "m150", "s": "math", "k": "Geometry", "r": 218, "q": "Which shape is a quadrilateral with exactly one pair of parallel sides?", "ch": ["square", "rhombus", "trapezoid", "rectangle"], "a": 2, "exp": "Squares, rectangles, and rhombuses have two pairs of parallel sides. A trapezoid has exactly one pair."},
+  {"id": "m151", "s": "math", "k": "Geometry", "r": 205, "q": "What is the area of a square with sides of 9 m?", "ch": ["72 square m", "18 square m", "36 square m", "81 square m"], "a": 3, "exp": "Area = side × side = 9 × 9 = 81 square meters."},
+  {"id": "m152", "s": "math", "k": "Geometry", "r": 222, "q": "A rectangle is 12 cm long and has a perimeter of 34 cm. How wide is it?", "ch": ["5 cm", "10 cm", "11 cm", "22 cm"], "a": 0, "exp": "Half the perimeter is one length plus one width: 34 ÷ 2 = 17. Then 17 - 12 = 5 cm."},
+  {"id": "m153", "s": "math", "k": "Geometry", "r": 220, "q": "Two angles together make a straight line. One angle is 110°. What is the other angle?", "ch": ["80°", "90°", "250°", "70°"], "a": 3, "exp": "A straight line is 180°: 180 - 110 = 70°."},
+  {"id": "m154", "s": "math", "k": "Geometry", "r": 192, "q": "How many right angles does a rectangle have?", "ch": ["4", "2", "1", "0"], "a": 0, "exp": "Every corner of a rectangle is a right angle, and it has 4 corners."},
+  {"id": "m155", "s": "math", "k": "Geometry", "r": 206, "q": "Two lines that meet to form a right angle are called ...", "ch": ["perpendicular", "parallel", "curved", "equal"], "a": 0, "exp": "Perpendicular lines meet at a right angle (90°)."},
+  {"id": "m156", "s": "math", "k": "Geometry", "r": 233, "q": "A rectangular garden is 8 m by 5 m. A path 1 m wide goes all the way around the outside of the garden. What is the area of the path?", "ch": ["70 square m", "26 square m", "40 square m", "30 square m"], "a": 3, "exp": "The garden plus path is 10 m by 7 m = 70 square m. Take away the garden, 8 × 5 = 40. The path is 70 - 40 = 30 square m."},
+  {"id": "m157", "s": "math", "k": "Geometry", "r": 212, "q": "A triangle has a perimeter of 30 cm. Two of its sides are 8 cm and 12 cm. How long is the third side?", "ch": ["20 cm", "4 cm", "50 cm", "10 cm"], "a": 3, "exp": "30 - 8 - 12 = 10 cm."},
+  {"id": "m158", "s": "math", "k": "Geometry", "r": 225, "q": "How many cubes with 1 cm edges fit exactly inside a box that is 3 cm by 2 cm by 4 cm?", "ch": ["24", "9", "26", "12"], "a": 0, "exp": "Volume = 3 × 2 × 4 = 24 cubic cm, so 24 small cubes fit."},
+  {"id": "m159", "s": "math", "k": "Measurement", "r": 192, "q": "How many minutes are in 2 hours?", "ch": ["100", "200", "120", "60"], "a": 2, "exp": "Each hour has 60 minutes: 2 × 60 = 120."},
+  {"id": "m160", "s": "math", "k": "Measurement", "r": 190, "q": "1 meter = ? centimeters", "ch": ["1,000", "50", "10", "100"], "a": 3, "exp": "There are 100 centimeters in 1 meter."},
+  {"id": "m161", "s": "math", "k": "Measurement", "r": 191, "q": "How many days are in 3 weeks?", "ch": ["18", "24", "14", "21"], "a": 3, "exp": "A week has 7 days: 3 × 7 = 21."},
+  {"id": "m162", "s": "math", "k": "Measurement", "r": 198, "q": "Which unit is best for measuring the amount of water in a bathtub?", "ch": ["milliliters", "liters", "meters", "grams"], "a": 1, "exp": "A bathtub holds a lot of water, so liters are the best unit. Milliliters are for small amounts."},
+  {"id": "m163", "s": "math", "k": "Measurement", "r": 199, "q": "4 kilograms = ? grams", "ch": ["400", "40,000", "4,000", "40"], "a": 2, "exp": "1 kilogram = 1,000 grams, so 4 kilograms = 4,000 grams."},
+  {"id": "m164", "s": "math", "k": "Measurement", "r": 208, "q": "A bus leaves at 8:35 a.m. The trip takes 45 minutes. When does the bus arrive?", "ch": ["9:25 a.m.", "9:10 a.m.", "8:80 a.m.", "9:20 a.m."], "a": 3, "exp": "8:35 + 25 minutes = 9:00. Then 20 more minutes = 9:20 a.m."},
+  {"id": "m165", "s": "math", "k": "Measurement", "r": 214, "q": "350 cm = ? m", "ch": ["35 m", "3,500 m", "0.35 m", "3.5 m"], "a": 3, "exp": "100 cm = 1 m, so 350 cm = 3.5 m."},
+  {"id": "m166", "s": "math", "k": "Measurement", "r": 210, "q": "A water bottle holds 750 mL. How many milliliters do 4 bottles hold?", "ch": ["2,800 mL", "3,750 mL", "754 mL", "3,000 mL"], "a": 3, "exp": "750 × 4 = 3,000 mL (which is 3 liters)."},
+  {"id": "m167", "s": "math", "k": "Measurement", "r": 206, "q": "Which is longer: 1 kilometer or 900 meters?", "ch": ["They are the same length.", "1 kilometer", "You cannot tell.", "900 meters"], "a": 1, "exp": "1 kilometer = 1,000 meters, which is more than 900 meters."},
+  {"id": "m168", "s": "math", "k": "Measurement", "r": 216, "q": "A party starts at 6:15 p.m. and ends at 9:00 p.m. How long is the party?", "ch": ["2 hours 45 minutes", "3 hours 45 minutes", "3 hours 15 minutes", "2 hours 15 minutes"], "a": 0, "exp": "6:15 to 8:15 is 2 hours. 8:15 to 9:00 is 45 minutes. Total: 2 hours 45 minutes."},
+  {"id": "m169", "s": "math", "k": "Measurement", "r": 224, "q": "A baby weighed 3 kg 600 g. A month later she weighed 4 kg 150 g. How much weight did she gain?", "ch": ["450 g", "1 kg 550 g", "550 g", "650 g"], "a": 2, "exp": "Change to grams: 4,150 g - 3,600 g = 550 g."},
+  {"id": "m170", "s": "math", "k": "Measurement", "r": 204, "q": "How many seconds are in 4 minutes?", "ch": ["160", "240", "400", "60"], "a": 1, "exp": "Each minute has 60 seconds: 4 × 60 = 240."},
+  {"id": "m171", "s": "math", "k": "Measurement", "r": 229, "q": "A bottle of juice costs $1.20. What is the greatest number of bottles you can buy with $10?", "ch": ["8", "9", "10", "12"], "a": 0, "exp": "8 bottles cost $9.60. 9 bottles would cost $10.80, which is more than $10."},
+  {"id": "m172", "s": "math", "k": "Data & Probability", "r": 188, "q": "A tally chart shows votes for favorite colors: red 4, blue 7, green 3. Which color got the most votes?", "ch": ["blue", "They all got the same.", "green", "red"], "a": 0, "exp": "7 is the greatest number, so blue got the most votes."},
+  {"id": "m173", "s": "math", "k": "Data & Probability", "r": 198, "q": "What is the mode of 6, 8, 8, 9, 10, 10, 10?", "ch": ["8", "6", "10", "9"], "a": 2, "exp": "The mode is the number that appears most often. 10 appears three times."},
+  {"id": "m174", "s": "math", "k": "Data & Probability", "r": 194, "q": "You flip a fair coin. What is the probability that it lands on heads?", "ch": ["2", "1", "1/4", "1/2"], "a": 3, "exp": "There are 2 equally likely outcomes, and 1 of them is heads: 1/2."},
+  {"id": "m175", "s": "math", "k": "Data & Probability", "r": 206, "q": "Four plants are 12 cm, 15 cm, 9 cm, and 20 cm tall. What is the range of their heights?", "ch": ["11 cm", "56 cm", "8 cm", "20 cm"], "a": 0, "exp": "Range = greatest - least = 20 - 9 = 11 cm."},
+  {"id": "m176", "s": "math", "k": "Data & Probability", "r": 200, "q": "A bag holds 5 red marbles and nothing else. How likely is it that you pick a blue marble?", "ch": ["likely", "impossible", "certain", "unlikely"], "a": 1, "exp": "There are no blue marbles in the bag, so picking one is impossible."},
+  {"id": "m177", "s": "math", "k": "Data & Probability", "r": 213, "q": "In a pictograph, each star stands for 5 votes. Pizza has 6 stars and pasta has 4 stars. How many more votes did pizza get?", "ch": ["20", "10", "2", "50"], "a": 1, "exp": "Pizza has 2 more stars than pasta, and each star is 5 votes: 2 × 5 = 10."},
+  {"id": "m178", "s": "math", "k": "Data & Probability", "r": 226, "q": "What is the median of 4, 9, 2, 7, 6, 14?", "ch": ["8", "6", "7", "6.5"], "a": 3, "exp": "Put them in order: 2, 4, 6, 7, 9, 14. There are two middle numbers, 6 and 7. Halfway between them is 6.5."},
+  {"id": "m179", "s": "math", "k": "Data & Probability", "r": 214, "q": "A spinner has 8 equal sections. 3 of them are yellow. What is the probability of landing on yellow?", "ch": ["5/8", "3/8", "1/3", "3/5"], "a": 1, "exp": "3 yellow sections out of 8 equal sections: 3/8."},
+  {"id": "m180", "s": "math", "k": "Data & Probability", "r": 229, "q": "The mean (average) of three numbers is 10. Two of the numbers are 8 and 9. What is the third number?", "ch": ["10", "27", "13", "7"], "a": 2, "exp": "The three numbers add to 3 × 10 = 30. 30 - 8 - 9 = 13."},
+  {"id": "m181", "s": "math", "k": "Data & Probability", "r": 223, "q": "In a survey, 12 students like cats, 18 like dogs, and 6 like fish. What fraction of the students like dogs?", "ch": ["1/3", "1/6", "18/12", "1/2"], "a": 3, "exp": "There are 12 + 18 + 6 = 36 students. 18 out of 36 is 1/2."},
+  {"id": "m182", "s": "math", "k": "Data & Probability", "r": 222, "q": "You roll a fair six-sided die. What is the probability of rolling a number greater than 4?", "ch": ["1/2", "1/3", "1/6", "2/3"], "a": 1, "exp": "Only 5 and 6 are greater than 4. That is 2 out of 6 outcomes, which is 1/3."},
+  {"id": "m183", "s": "math", "k": "Data & Probability", "r": 218, "q": "A line graph shows the temperature: 8 a.m. 18°C, 10 a.m. 21°C, noon 25°C, 2 p.m. 24°C. Between which two readings next to each other did the temperature rise the most?", "ch": ["noon and 2 p.m.", "8 a.m. and 10 a.m.", "10 a.m. and noon", "It rose the same amount each time."], "a": 2, "exp": "From 10 a.m. to noon it rose 4 degrees (21 to 25). From 8 to 10 it rose 3, and from noon to 2 it fell 1."}
+);
+/* v5: bank expansion (110 questions, 2 new passages) */
+const P_BAMBOO = "BAMBOO: THE GIANT GRASS\n\nBamboo looks like a tree, with a tall, hard stem and green leaves. But bamboo is actually a kind of grass. In fact, it is the largest grass in the world. Some kinds grow taller than a five-story building.\n\nBamboo is also one of the fastest-growing plants on Earth. A young bamboo shoot of some kinds can grow more than half a meter in a single day. Unlike a tree trunk, a bamboo stem does not get wider each year. It reaches its full height in just a few months, and then it hardens.\n\nPeople have used bamboo for thousands of years. Because it is strong but light, it is used to build houses, bridges, and furniture. In Hong Kong, workers have tied bamboo poles together for many years to make scaffolding, the frames that let them climb up the outside of tall buildings. Bamboo is also used to make paper, baskets, and even bicycles.\n\nBamboo is important to animals, too. Giant pandas eat almost nothing but bamboo. An adult panda may spend more than half of each day eating.";
+const P_LIGHTHOUSE = "THE LIGHTHOUSE CAT\n\nOld Mr. Haddad had kept the lighthouse on Gull Rock for thirty years, and for twenty of them, a gray cat named Pepper had kept Mr. Haddad.\n\nEvery evening at sunset, Mr. Haddad climbed the one hundred and twelve steps to light the great lamp. Every evening, Pepper climbed beside him, one step behind, her tail held high like a flag.\n\nOne stormy night in October, Mr. Haddad slipped on the wet stairs and twisted his ankle. He could not climb. Rain hammered the windows, and somewhere out in the dark, a fishing boat was trying to find its way home.\n\nPepper looked at Mr. Haddad. Then she looked up the stairs. Then she began to yowl, louder than the wind, louder than the waves.\n\nDown in the village, ten-year-old Rosa heard the strange sound drifting across the water. She knew that cat. She grabbed her coat and her father's flashlight and ran.\n\nWhen Rosa and her father reached the lighthouse, the lamp should have been burning for an hour. Rosa's father helped Mr. Haddad to a chair. Then Rosa climbed the one hundred and twelve steps herself, with Pepper one step ahead, and together they lit the lamp.\n\nFar out on the black water, a small boat turned toward the light.";
+DB.push(
+  {"id": "r131", "s": "reading", "k": "Informational Text", "r": 207, "q": "What is the main idea of the passage?", "ch": ["Bamboo is a fast-growing giant grass that is useful to people and animals.", "Pandas spend most of the day sleeping.", "Trees grow wider every year.", "Hong Kong has many tall buildings."], "a": 0, "exp": "Each paragraph tells something about bamboo: what it is, how it grows, and how people and animals use it.","p":P_BAMBOO},
+  {"id": "r132", "s": "reading", "k": "Vocabulary", "r": 215, "q": "In paragraph 3, what is scaffolding?", "ch": ["a home for giant pandas", "a type of bicycle", "a kind of paper made from bamboo", "a frame that lets workers climb up the outside of a building"], "a": 3, "exp": "The passage explains the word right after it: 'the frames that let them climb up the outside of tall buildings.'","p":P_BAMBOO},
+  {"id": "r133", "s": "reading", "k": "Informational Text", "r": 219, "q": "According to the passage, how is a bamboo stem different from a tree trunk?", "ch": ["It is softer than other grasses.", "It takes hundreds of years to grow tall.", "It has no leaves at all.", "It does not get wider each year."], "a": 3, "exp": "Paragraph 2 says, 'Unlike a tree trunk, a bamboo stem does not get wider each year.'","p":P_BAMBOO},
+  {"id": "r134", "s": "reading", "k": "Informational Text", "r": 223, "q": "According to the passage, why is bamboo good for building?", "ch": ["It gets wider every year.", "It is strong but light.", "It grows only in Hong Kong.", "Pandas will not eat it."], "a": 1, "exp": "Paragraph 3: 'Because it is strong but light, it is used to build houses, bridges, and furniture.'","p":P_BAMBOO},
+  {"id": "r135", "s": "reading", "k": "Informational Text", "r": 227, "q": "Which detail best supports the idea that bamboo is important to animals?", "ch": ["Bamboo is used to make bicycles.", "Giant pandas eat almost nothing but bamboo.", "Bamboo is the largest grass in the world.", "A bamboo stem hardens after a few months."], "a": 1, "exp": "Only the panda detail shows an animal that depends on bamboo.","p":P_BAMBOO},
+  {"id": "r136", "s": "reading", "k": "Literary Text", "r": 206, "q": "Why couldn't Mr. Haddad light the lamp that night?", "ch": ["Pepper had hidden the matches.", "He was asleep in the village.", "He twisted his ankle and could not climb the stairs.", "The lamp was broken."], "a": 2, "exp": "The story says he slipped on the wet stairs, twisted his ankle, and 'could not climb.'","p":P_LIGHTHOUSE},
+  {"id": "r137", "s": "reading", "k": "Literary Text", "r": 214, "q": "\"Her tail held high like a flag.\" What kind of figurative language is this?", "ch": ["personification", "simile", "metaphor", "onomatopoeia"], "a": 1, "exp": "It compares the tail to a flag using the word 'like,' so it is a simile.","p":P_LIGHTHOUSE},
+  {"id": "r138", "s": "reading", "k": "Literary Text", "r": 220, "q": "Why does Pepper most likely yowl so loudly?", "ch": ["because she was hungry for dinner", "because she wanted to go outside to play", "to call for help because the lamp was not lit", "because she saw a fish in the water"], "a": 2, "exp": "Pepper looks at the hurt Mr. Haddad, then up the stairs to the lamp, and then yowls. Her yowling brings Rosa to help.","p":P_LIGHTHOUSE},
+  {"id": "r139", "s": "reading", "k": "Literary Text", "r": 225, "q": "The story says Pepper \"had kept Mr. Haddad.\" What does this suggest?", "ch": ["Pepper looked after Mr. Haddad, just as he looked after the lighthouse.", "Mr. Haddad worked for Pepper.", "Pepper kept Mr. Haddad locked inside.", "Pepper owned the lighthouse."], "a": 0, "exp": "The author plays with the word 'kept': Mr. Haddad kept (cared for) the lighthouse, and Pepper cared for him.","p":P_LIGHTHOUSE},
+  {"id": "r140", "s": "reading", "k": "Literary Text", "r": 229, "q": "What is the most important result of what Rosa does at the end?", "ch": ["The storm stops right away.", "Pepper learns to climb the stairs.", "The fishing boat can see the light and find its way home.", "Mr. Haddad's ankle gets better."], "a": 2, "exp": "The last sentence shows the boat turning toward the light that Rosa and Pepper lit.","p":P_LIGHTHOUSE},
+  {"id": "r141", "s": "reading", "k": "Vocabulary", "r": 203, "q": "Read the sentence. The soup was so scalding that Ben had to wait for it to cool. What does scalding mean?", "ch": ["very salty", "very cold", "very thick", "very hot"], "a": 3, "exp": "He had to wait for it to cool, so scalding means very hot."},
+  {"id": "r142", "s": "reading", "k": "Vocabulary", "r": 209, "q": "What does the suffix -er mean in the word teacher?", "ch": ["not", "again", "a person who", "more than"], "a": 2, "exp": "A teacher is a person who teaches."},
+  {"id": "r143", "s": "reading", "k": "Vocabulary", "r": 211, "q": "Read the sentence. After the long hike, the thirsty children gulped their water. What does gulped mean?", "ch": ["sipped slowly", "shared with friends", "drank quickly in big swallows", "spilled on the ground"], "a": 2, "exp": "Thirsty children after a hike would drink fast in big swallows."},
+  {"id": "r144", "s": "reading", "k": "Vocabulary", "r": 205, "q": "Which word means almost the same as brave?", "ch": ["gentle", "courageous", "lazy", "frightened"], "a": 1, "exp": "Brave and courageous both mean not afraid to face danger."},
+  {"id": "r145", "s": "reading", "k": "Vocabulary", "r": 206, "q": "The prefix dis- can mean \"not.\" What does disagree mean?", "ch": ["to agree before", "to not agree", "to agree again", "to agree loudly"], "a": 1, "exp": "Dis- + agree = not agree."},
+  {"id": "r146", "s": "reading", "k": "Vocabulary", "r": 217, "q": "Read the sentence. The writing on the old map was so faint that we could barely read the names. What does faint mean?", "ch": ["brightly colored", "hard to see", "very large", "brand new"], "a": 1, "exp": "If you can barely read it, the writing is hard to see."},
+  {"id": "r147", "s": "reading", "k": "Vocabulary", "r": 224, "q": "Which word is an antonym (opposite) of ascend?", "ch": ["rise", "descend", "float", "climb"], "a": 1, "exp": "Ascend means go up. Descend means go down."},
+  {"id": "r148", "s": "reading", "k": "Vocabulary", "r": 221, "q": "In which sentence does the word fair mean \"treating everyone equally\"?", "ch": ["The weather will be fair tomorrow.", "The teacher made a fair rule for the game.", "We rode the Ferris wheel at the fair.", "She has fair hair and blue eyes."], "a": 1, "exp": "A fair rule treats every player the same way."},
+  {"id": "r149", "s": "reading", "k": "Vocabulary", "r": 213, "q": "Read the sentence. The tiny seed would eventually become a towering tree. What does eventually mean?", "ch": ["by accident", "never", "after a long time", "right away"], "a": 2, "exp": "A seed takes years to become a tall tree, so eventually means after a long time."},
+  {"id": "r150", "s": "reading", "k": "Vocabulary", "r": 220, "q": "Read the sentence. Mira was elated when she heard she had won the contest. What does elated mean?", "ch": ["very happy", "worried", "very tired", "confused"], "a": 0, "exp": "Winning a contest makes someone very happy."},
+  {"id": "r151", "s": "reading", "k": "Literary Text", "r": 199, "q": "What is the setting of a story?", "ch": ["the person who tells the story", "the main problem", "where and when the story happens", "the lesson of the story"], "a": 2, "exp": "The setting is the time and place of a story."},
+  {"id": "r152", "s": "reading", "k": "Literary Text", "r": 215, "q": "Read the sentence. The old car coughed and sputtered up the hill. What does the author make the car seem like?", "ch": ["a fast horse", "a sick person", "a quiet mouse", "a flying bird"], "a": 1, "exp": "Coughing is something a sick person does. This is personification."},
+  {"id": "r153", "s": "reading", "k": "Literary Text", "r": 219, "q": "Read the passage. Nadia stared at the empty page. Her pencil tapped, tapped, tapped. The clock ticked louder and louder. How does Nadia most likely feel?", "ch": ["sleepy and ready for bed", "angry at the clock", "excited to go outside", "nervous because she does not know what to write"], "a": 3, "exp": "An empty page, a tapping pencil, and a clock that seems loud are clues that she is stuck and nervous."},
+  {"id": "r154", "s": "reading", "k": "Literary Text", "r": 213, "q": "Which sentence is told from the third-person point of view?", "ch": ["My sister and I opened the gift and gasped.", "He opened the gift and gasped.", "I opened the gift and gasped.", "We opened the gift and gasped."], "a": 1, "exp": "Third person uses he, she, or they, not I or we."},
+  {"id": "r155", "s": "reading", "k": "Literary Text", "r": 216, "q": "Read the fable. A dog carrying a bone saw his reflection in a pond. Thinking it was another dog with a bigger bone, he barked at it, and his own bone fell into the water. What is the lesson?", "ch": ["Being greedy can make you lose what you already have.", "Always bark at strangers.", "Dogs should not swim in ponds.", "Bigger things are always better."], "a": 0, "exp": "The dog wanted more and lost the bone he had."},
+  {"id": "r156", "s": "reading", "k": "Literary Text", "r": 218, "q": "Read the sentence. The news hit Leo like a ton of bricks. What does this mean?", "ch": ["Leo built a brick wall.", "The news made Leo laugh.", "Bricks fell on Leo.", "The news shocked and upset Leo."], "a": 3, "exp": "This is an expression. Being hit by heavy bricks stands for a big, painful surprise."},
+  {"id": "r157", "s": "reading", "k": "Informational Text", "r": 199, "q": "What is the purpose of a table of contents?", "ch": ["to show photographs", "to show the chapters and the pages where they start", "to list where the author found facts", "to explain the meaning of hard words"], "a": 1, "exp": "A table of contents at the front of a book lists the chapters and their page numbers."},
+  {"id": "r158", "s": "reading", "k": "Informational Text", "r": 205, "q": "Read the paragraph. Some animals sleep through the winter. This is called hibernation. Bears, bats, and some frogs hibernate. Their hearts beat slowly, and they use very little energy. What is this paragraph mainly about?", "ch": ["why frogs are green", "how bears catch fish", "how people keep warm", "animals that hibernate in winter"], "a": 3, "exp": "Every sentence is about hibernation."},
+  {"id": "r159", "s": "reading", "k": "Informational Text", "r": 210, "q": "A student wants to know tomorrow's weather in Hong Kong. Which source is best?", "ch": ["the Hong Kong Observatory website", "a storybook about rain", "a newspaper from last year", "a dictionary"], "a": 0, "exp": "The Hong Kong Observatory gives up-to-date weather forecasts."},
+  {"id": "r160", "s": "reading", "k": "Informational Text", "r": 214, "q": "Which sentence from a report is an opinion?", "ch": ["Cats use their whiskers to sense things nearby.", "Cats are the best pets for small apartments.", "Cats usually sleep for many hours each day.", "A group of kittens is called a litter."], "a": 1, "exp": "'The best' is a judgment that people can disagree about. The others can be checked."},
+  {"id": "r161", "s": "reading", "k": "Informational Text", "r": 212, "q": "Read the paragraph. First, water in lakes and oceans warms up and turns into vapor. Next, the vapor rises and cools to form clouds. Finally, the water falls back down as rain or snow. What text structure does the author use?", "ch": ["description of a person", "sequence (steps in order)", "compare and contrast", "problem and solution"], "a": 1, "exp": "The words first, next, and finally show steps in order."},
+  {"id": "r162", "s": "reading", "k": "Informational Text", "r": 228, "q": "Read the paragraph. Many people believe that goldfish can remember things for only a few seconds. However, scientists have trained goldfish to push a lever for food, and the fish remembered the trick for months. What is the author's main purpose?", "ch": ["to explain how to buy a goldfish", "to tell a funny story about a pet", "to show that a common belief about goldfish is wrong", "to describe the colors of goldfish"], "a": 2, "exp": "The word 'However' introduces evidence that goes against what many people believe."},
+  {"id": "l122", "s": "language", "k": "Mechanics", "r": 192, "q": "Which word in this sentence needs a capital letter? My cousin goes to school in canada.", "ch": ["canada", "cousin", "goes", "school"], "a": 0, "exp": "Canada is the name of a country, so it needs a capital letter."},
+  {"id": "l123", "s": "language", "k": "Mechanics", "r": 196, "q": "What is the correct plural of baby?", "ch": ["babies", "babyes", "babyies", "babys"], "a": 0, "exp": "For words ending in a consonant + y, change y to i and add -es."},
+  {"id": "l124", "s": "language", "k": "Mechanics", "r": 194, "q": "Which is the correct contraction for do not?", "ch": ["dont'", "do'nt", "dont", "don't"], "a": 3, "exp": "The apostrophe goes where the letter o in not was taken out: don't."},
+  {"id": "l125", "s": "language", "k": "Mechanics", "r": 200, "q": "Which word is spelled correctly?", "ch": ["becuase", "beacause", "because", "becaus"], "a": 2, "exp": "Because is spelled b-e-c-a-u-s-e."},
+  {"id": "l126", "s": "language", "k": "Mechanics", "r": 190, "q": "Which sentence should end with a question mark?", "ch": ["Where did you put my shoes", "My shoes are under the bed", "I put on my shoes", "Please put on your shoes"], "a": 0, "exp": "Only 'Where did you put my shoes' asks a question."},
+  {"id": "l127", "s": "language", "k": "Mechanics", "r": 224, "q": "Which sentence uses commas correctly?", "ch": ["On May 3 2025, we flew to Seoul South Korea.", "On May, 3 2025 we flew to Seoul, South Korea.", "On May 3, 2025, we flew to Seoul, South Korea.", "On May 3, 2025 we flew, to Seoul South Korea."], "a": 2, "exp": "Put commas between the day and year, after the year, and between the city and country."},
+  {"id": "l128", "s": "language", "k": "Mechanics", "r": 210, "q": "Which word is spelled correctly?", "ch": ["librery", "libary", "liberry", "library"], "a": 3, "exp": "Library has two r's: l-i-b-r-a-r-y."},
+  {"id": "l129", "s": "language", "k": "Mechanics", "r": 217, "q": "Which book title is written correctly?", "ch": ["Charlotte's web", "charlotte's web", "Charlottes Web", "Charlotte's Web"], "a": 3, "exp": "Capitalize the important words in a title and use 's to show ownership."},
+  {"id": "l130", "s": "language", "k": "Mechanics", "r": 212, "q": "Which sentence uses an apostrophe correctly?", "ch": ["Mr. Lee's car is blue.", "Mr. Lee's' car is blue.", "Mr. Lees' car is blue.", "Mr. Lees car is blue."], "a": 0, "exp": "The car belongs to one person, Mr. Lee, so add 's."},
+  {"id": "l131", "s": "language", "k": "Parts of Speech", "r": 188, "q": "Which word is a noun? The children laughed loudly.", "ch": ["The", "loudly", "children", "laughed"], "a": 2, "exp": "Children names people, so it is a noun."},
+  {"id": "l132", "s": "language", "k": "Parts of Speech", "r": 192, "q": "Which word is an adjective? The noisy parrot talked all day.", "ch": ["talked", "noisy", "parrot", "day"], "a": 1, "exp": "Noisy describes the parrot."},
+  {"id": "l133", "s": "language", "k": "Parts of Speech", "r": 194, "q": "Which word is a verb? Grandma knits warm scarves.", "ch": ["scarves", "knits", "warm", "Grandma"], "a": 1, "exp": "Knits is the action Grandma does."},
+  {"id": "l134", "s": "language", "k": "Parts of Speech", "r": 198, "q": "Which word is a pronoun? Leo and Amy said they were hungry.", "ch": ["Leo", "hungry", "they", "said"], "a": 2, "exp": "They takes the place of the names Leo and Amy."},
+  {"id": "l135", "s": "language", "k": "Parts of Speech", "r": 206, "q": "Which word is a preposition? The ball rolled behind the sofa.", "ch": ["ball", "behind", "rolled", "sofa"], "a": 1, "exp": "Behind shows where the ball is in relation to the sofa."},
+  {"id": "l136", "s": "language", "k": "Parts of Speech", "r": 214, "q": "Which word is an adverb that tells WHEN? We will visit the museum tomorrow.", "ch": ["will", "museum", "visit", "tomorrow"], "a": 3, "exp": "Tomorrow tells when we will visit."},
+  {"id": "l137", "s": "language", "k": "Parts of Speech", "r": 218, "q": "What part of speech is the word happiness?", "ch": ["verb", "noun", "adverb", "adjective"], "a": 1, "exp": "Happiness names a feeling, so it is an (abstract) noun. The adjective is happy."},
+  {"id": "l138", "s": "language", "k": "Parts of Speech", "r": 197, "q": "Which word is a proper noun?", "ch": ["Japan", "city", "country", "ocean"], "a": 0, "exp": "Japan names one particular country, so it is a proper noun and starts with a capital."},
+  {"id": "l139", "s": "language", "k": "Parts of Speech", "r": 220, "q": "Which word is a comparative adjective? This rope is longer than that one.", "ch": ["longer", "than", "rope", "one"], "a": 0, "exp": "Longer compares two things. Comparative adjectives often end in -er."},
+  {"id": "l140", "s": "language", "k": "Grammar & Usage", "r": 190, "q": "Choose the correct verb. The birds ___ in the tree.", "ch": ["singing", "sing", "sings", "is sing"], "a": 1, "exp": "Birds is plural, so use sing (no -s)."},
+  {"id": "l141", "s": "language", "k": "Grammar & Usage", "r": 195, "q": "Choose the correct word. ___ elephant is a huge animal.", "ch": ["Two", "Many", "A", "An"], "a": 3, "exp": "Use an before a word that starts with a vowel sound, like elephant."},
+  {"id": "l142", "s": "language", "k": "Grammar & Usage", "r": 201, "q": "Choose the correct past-tense verb. Last week, Mia ___ a picture of her cat.", "ch": ["drawed", "drew", "draw", "drawn"], "a": 1, "exp": "Drew is the past tense of draw. Drawn needs a helper such as has."},
+  {"id": "l143", "s": "language", "k": "Grammar & Usage", "r": 193, "q": "Which sentence is written correctly?", "ch": ["The girls be playing tag.", "The girls am playing tag.", "The girls is playing tag.", "The girls are playing tag."], "a": 3, "exp": "Girls is plural, so use are."},
+  {"id": "l144", "s": "language", "k": "Grammar & Usage", "r": 203, "q": "Choose the correct word. My dog is ___ than your dog.", "ch": ["bigest", "biggest", "bigger", "more big"], "a": 2, "exp": "Comparing two dogs uses -er: bigger. Remember to double the g."},
+  {"id": "l145", "s": "language", "k": "Grammar & Usage", "r": 207, "q": "Which sentence is in the future tense?", "ch": ["We have traveled to Singapore before.", "We travel to Singapore every year.", "We traveled to Singapore last month.", "We will travel to Singapore next month."], "a": 3, "exp": "Will + verb shows that something is going to happen."},
+  {"id": "l146", "s": "language", "k": "Grammar & Usage", "r": 205, "q": "Choose the correct word. Who ___ the cookies from the jar?", "ch": ["took", "take", "taken", "taked"], "a": 0, "exp": "Took is the past tense of take. Taken needs a helper such as has."},
+  {"id": "l147", "s": "language", "k": "Grammar & Usage", "r": 219, "q": "Which sentence uses than or then correctly?", "ch": ["First we ate, than we left.", "Finish your homework, and then you can play.", "My sister is taller then me.", "Finish your homework, and than you can play."], "a": 1, "exp": "Then is about time (what happens next). Than is for comparing."},
+  {"id": "l148", "s": "language", "k": "Grammar & Usage", "r": 226, "q": "Choose the correct verb. One of my pencils ___ broken.", "ch": ["be", "were", "are", "is"], "a": 3, "exp": "The subject is one, not pencils, so use the singular verb is."},
+  {"id": "l149", "s": "language", "k": "Writing Process", "r": 198, "q": "What is usually the first step in the writing process?", "ch": ["planning and brainstorming ideas", "publishing", "revising", "editing"], "a": 0, "exp": "Writers start by planning what they will write."},
+  {"id": "l150", "s": "language", "k": "Writing Process", "r": 196, "q": "Which sentence would be the best topic sentence for a paragraph about why exercise is important?", "ch": ["Exercise keeps our bodies and minds healthy.", "My shoes are blue.", "I like to eat noodles.", "Last summer I went to Thailand."], "a": 0, "exp": "A topic sentence states the main idea of the paragraph."},
+  {"id": "l151", "s": "language", "k": "Writing Process", "r": 204, "q": "Which transition introduces an example?", "ch": ["For example", "Instead", "However", "Finally"], "a": 0, "exp": "For example tells the reader that an example is coming."},
+  {"id": "l152", "s": "language", "k": "Writing Process", "r": 207, "q": "Which sentence adds the most interesting detail to \"The cake was good\"?", "ch": ["The cake was good and nice.", "The chocolate cake was so soft and sweet that I asked for a second slice.", "The cake was very good.", "It was a good cake."], "a": 1, "exp": "Specific details (chocolate, soft, sweet, a second slice) help the reader picture it."},
+  {"id": "l153", "s": "language", "k": "Writing Process", "r": 199, "q": "Which is the best way to combine these sentences? The park is big. The park is green.", "ch": ["The park is big and green.", "The park is big the park is green.", "The park is big, the park is green.", "Big and green the park is it."], "a": 0, "exp": "Join the two describing words with and."},
+  {"id": "l154", "s": "language", "k": "Writing Process", "r": 210, "q": "A paragraph is about sea turtles. Which sentence does NOT belong in it?", "ch": ["Many baby turtles are eaten by birds.", "My favorite color is green.", "The babies hatch and crawl to the sea.", "Sea turtles lay their eggs on beaches."], "a": 1, "exp": "Every sentence should be about sea turtles. A favorite color is off topic."},
+  {"id": "l155", "s": "language", "k": "Writing Process", "r": 201, "q": "You are writing a letter to thank your aunt for a gift. Which is the best closing?", "ch": ["Love, Lily", "Dear Aunt May,", "Once upon a time", "The End"], "a": 0, "exp": "A closing comes before your name at the end of a letter. 'Dear Aunt May,' is a greeting."},
+  {"id": "l156", "s": "language", "k": "Writing Process", "r": 215, "q": "Claim: Students should drink water during class. Which sentence gives the best reason?", "ch": ["Water is clear.", "Drinking water helps students stay alert and focused.", "I drank juice yesterday.", "Some water bottles are pink."], "a": 1, "exp": "A good reason explains why the claim helps students."},
+  {"id": "l157", "s": "language", "k": "Writing Process", "r": 225, "q": "What should a student list in a bibliography (list of sources) for a report?", "ch": ["their favorite songs", "the names of their friends", "the books and websites where the facts came from", "their birthday"], "a": 2, "exp": "A bibliography lists the sources the writer used."},
+  {"id": "m184", "s": "math", "k": "Number Sense", "r": 194, "q": "Which number has a 6 in the tens place?", "ch": ["4,368", "6,432", "3,846", "4,632"], "a": 0, "exp": "In 4,368 the digits are 4 thousands, 3 hundreds, 6 tens, 8 ones."},
+  {"id": "m185", "s": "math", "k": "Number Sense", "r": 192, "q": "Round 852 to the nearest ten.", "ch": ["860", "800", "900", "850"], "a": 3, "exp": "The ones digit is 2, which is less than 5, so round down to 850."},
+  {"id": "m186", "s": "math", "k": "Number Sense", "r": 186, "q": "Which number is even?", "ch": ["247", "358", "591", "763"], "a": 1, "exp": "Even numbers end in 0, 2, 4, 6, or 8. 358 ends in 8."},
+  {"id": "m187", "s": "math", "k": "Number Sense", "r": 198, "q": "Which number is between 3,450 and 3,500?", "ch": ["3,045", "3,478", "3,510", "3,405"], "a": 1, "exp": "3,478 is greater than 3,450 and less than 3,500."},
+  {"id": "m188", "s": "math", "k": "Number Sense", "r": 210, "q": "Which fraction is equivalent to 3/5?", "ch": ["3/10", "6/5", "5/3", "6/10"], "a": 3, "exp": "Multiply the top and bottom by 2: 3/5 = 6/10."},
+  {"id": "m189", "s": "math", "k": "Number Sense", "r": 218, "q": "What is 0.4 written as a fraction in simplest form?", "ch": ["4/5", "1/4", "2/5", "4/100"], "a": 2, "exp": "0.4 = 4/10, which simplifies to 2/5."},
+  {"id": "m190", "s": "math", "k": "Number Sense", "r": 224, "q": "Which number is a factor of 36 but NOT a factor of 24?", "ch": ["4", "12", "6", "9"], "a": 3, "exp": "36 ÷ 9 = 4, but 24 ÷ 9 is not a whole number. 6, 4, and 12 are factors of both."},
+  {"id": "m191", "s": "math", "k": "Operations & Fractions", "r": 186, "q": "56 + 37 = ?", "ch": ["83", "813", "93", "94"], "a": 2, "exp": "6 + 7 = 13, write 3 and carry 1. 5 + 3 + 1 = 9. Answer: 93."},
+  {"id": "m192", "s": "math", "k": "Operations & Fractions", "r": 188, "q": "9 × 7 = ?", "ch": ["63", "72", "56", "16"], "a": 0, "exp": "9 × 7 = 63."},
+  {"id": "m193", "s": "math", "k": "Operations & Fractions", "r": 202, "q": "500 - 268 = ?", "ch": ["242", "232", "332", "768"], "a": 1, "exp": "500 - 268 = 232. Check: 232 + 268 = 500."},
+  {"id": "m194", "s": "math", "k": "Operations & Fractions", "r": 206, "q": "A baker makes 84 muffins and puts 6 in each box. How many boxes does she fill?", "ch": ["16", "78", "14", "12"], "a": 2, "exp": "84 ÷ 6 = 14."},
+  {"id": "m195", "s": "math", "k": "Operations & Fractions", "r": 199, "q": "3/10 + 4/10 = ?", "ch": ["12/10", "1/10", "7/20", "7/10"], "a": 3, "exp": "Same denominators: add the numerators. 3 + 4 = 7, so 7/10."},
+  {"id": "m196", "s": "math", "k": "Operations & Fractions", "r": 216, "q": "2.4 + 3.75 = ?", "ch": ["3.99", "6.15", "5.79", "6.79"], "a": 1, "exp": "Line up the decimal points: 2.40 + 3.75 = 6.15."},
+  {"id": "m197", "s": "math", "k": "Operations & Fractions", "r": 222, "q": "What is 3/4 of 24?", "ch": ["21", "6", "18", "32"], "a": 2, "exp": "1/4 of 24 is 6, so 3/4 of 24 is 3 × 6 = 18."},
+  {"id": "m198", "s": "math", "k": "Algebra & Patterns", "r": 190, "q": "What is the next number? 40, 35, 30, 25, ___", "ch": ["22", "30", "15", "20"], "a": 3, "exp": "The pattern subtracts 5 each time: 25 - 5 = 20."},
+  {"id": "m199", "s": "math", "k": "Algebra & Patterns", "r": 189, "q": "7 + ? = 15. What is the missing number?", "ch": ["9", "8", "22", "7"], "a": 1, "exp": "15 - 7 = 8."},
+  {"id": "m200", "s": "math", "k": "Algebra & Patterns", "r": 197, "q": "9 × ? = 72. What is the missing number?", "ch": ["8", "9", "7", "63"], "a": 0, "exp": "9 × 8 = 72."},
+  {"id": "m201", "s": "math", "k": "Algebra & Patterns", "r": 212, "q": "What is the 10th number in the pattern 4, 8, 12, 16, ...?", "ch": ["36", "44", "40", "20"], "a": 2, "exp": "Each number is 4 times its position, so the 10th is 4 × 10 = 40."},
+  {"id": "m202", "s": "math", "k": "Algebra & Patterns", "r": 210, "q": "Each box has 12 eggs. Which expression shows the number of eggs in b boxes?", "ch": ["12 × b", "12 + b", "b - 12", "b ÷ 12"], "a": 0, "exp": "b boxes with 12 eggs each: 12 × b."},
+  {"id": "m203", "s": "math", "k": "Algebra & Patterns", "r": 220, "q": "What is the value of 30 - 2 × 9?", "ch": ["18", "21", "12", "252"], "a": 2, "exp": "Multiply first: 2 × 9 = 18. Then 30 - 18 = 12."},
+  {"id": "m204", "s": "math", "k": "Algebra & Patterns", "r": 221, "q": "3 × ? = 4 × 6. What is the missing number?", "ch": ["24", "8", "2", "6"], "a": 1, "exp": "4 × 6 = 24, and 3 × 8 = 24."},
+  {"id": "m205", "s": "math", "k": "Geometry", "r": 182, "q": "How many corners does a triangle have?", "ch": ["2", "4", "3", "5"], "a": 2, "exp": "Tri- means three. A triangle has 3 corners and 3 sides."},
+  {"id": "m206", "s": "math", "k": "Geometry", "r": 193, "q": "Which shape has exactly 5 sides?", "ch": ["pentagon", "octagon", "rectangle", "hexagon"], "a": 0, "exp": "Penta- means five."},
+  {"id": "m207", "s": "math", "k": "Geometry", "r": 202, "q": "A rectangle is 9 cm long and 3 cm wide. What is its area?", "ch": ["12 square cm", "27 square cm", "24 square cm", "18 square cm"], "a": 1, "exp": "Area = length × width = 9 × 3 = 27 square cm."},
+  {"id": "m208", "s": "math", "k": "Geometry", "r": 191, "q": "An angle measures exactly 90°. What kind of angle is it?", "ch": ["right", "obtuse", "acute", "straight"], "a": 0, "exp": "A 90° angle is a right angle."},
+  {"id": "m209", "s": "math", "k": "Geometry", "r": 216, "q": "How many edges does a cube have?", "ch": ["8", "12", "6", "10"], "a": 1, "exp": "A cube has 4 edges on top, 4 on the bottom, and 4 standing up: 12."},
+  {"id": "m210", "s": "math", "k": "Geometry", "r": 214, "q": "A square has a perimeter of 36 cm. How long is one side?", "ch": ["9 cm", "6 cm", "12 cm", "18 cm"], "a": 0, "exp": "A square has 4 equal sides: 36 ÷ 4 = 9 cm."},
+  {"id": "m211", "s": "math", "k": "Geometry", "r": 221, "q": "All three angles of a triangle are equal. How big is each angle?", "ch": ["60°", "45°", "90°", "30°"], "a": 0, "exp": "The angles of a triangle add to 180°: 180 ÷ 3 = 60°."},
+  {"id": "m212", "s": "math", "k": "Measurement", "r": 205, "q": "Which is the best estimate for the height of a classroom door?", "ch": ["20 meters", "2 kilometers", "2 centimeters", "2 meters"], "a": 3, "exp": "A door is a little taller than an adult, about 2 meters."},
+  {"id": "m213", "s": "math", "k": "Measurement", "r": 190, "q": "How many months are in 2 years?", "ch": ["20", "24", "12", "36"], "a": 1, "exp": "Each year has 12 months: 2 × 12 = 24."},
+  {"id": "m214", "s": "math", "k": "Measurement", "r": 208, "q": "6,000 meters = ? kilometers", "ch": ["60", "600", "6", "0.6"], "a": 2, "exp": "1,000 meters = 1 kilometer, so 6,000 meters = 6 kilometers."},
+  {"id": "m215", "s": "math", "k": "Measurement", "r": 211, "q": "A movie lasts 95 minutes. How long is that in hours and minutes?", "ch": ["9 hours 5 minutes", "1 hour 55 minutes", "1 hour 35 minutes", "1 hour 45 minutes"], "a": 2, "exp": "60 minutes is 1 hour. 95 - 60 = 35, so 1 hour 35 minutes."},
+  {"id": "m216", "s": "math", "k": "Measurement", "r": 213, "q": "Ella has two $2 coins, one 50-cent coin, and three 10-cent coins. How much money does she have?", "ch": ["$5.30", "$4.30", "$2.80", "$4.80"], "a": 3, "exp": "$4.00 + $0.50 + $0.30 = $4.80."},
+  {"id": "m217", "s": "math", "k": "Measurement", "r": 203, "q": "At what temperature does water freeze, in degrees Celsius?", "ch": ["10°C", "32°C", "100°C", "0°C"], "a": 3, "exp": "Water freezes at 0°C and boils at 100°C. (32 degrees is the freezing point in Fahrenheit.)"},
+  {"id": "m218", "s": "math", "k": "Measurement", "r": 219, "q": "A ribbon is 2 m long. Mia cuts off 65 cm. How much ribbon is left?", "ch": ["65 cm", "135 cm", "265 cm", "145 cm"], "a": 1, "exp": "2 m = 200 cm. 200 - 65 = 135 cm."},
+  {"id": "m219", "s": "math", "k": "Data & Probability", "r": 197, "q": "In a pictograph, each sun stands for 2 sunny hours. Monday shows 3 suns. How many sunny hours were there on Monday?", "ch": ["6", "5", "2", "3"], "a": 0, "exp": "3 suns × 2 hours each = 6 hours."},
+  {"id": "m220", "s": "math", "k": "Data & Probability", "r": 211, "q": "You roll a regular six-sided die. Which outcome is certain?", "ch": ["rolling a number less than 7", "rolling a 7", "rolling an even number", "rolling a 6"], "a": 0, "exp": "Every face (1 to 6) is less than 7, so this always happens."},
+  {"id": "m221", "s": "math", "k": "Data & Probability", "r": 205, "q": "What is the mean (average) of 5, 7, and 9?", "ch": ["7", "9", "21", "5"], "a": 0, "exp": "5 + 7 + 9 = 21, and 21 ÷ 3 = 7."},
+  {"id": "m222", "s": "math", "k": "Data & Probability", "r": 195, "q": "Scores: 8, 3, 8, 5, 6. What is the mode?", "ch": ["6", "5", "3", "8"], "a": 3, "exp": "8 appears twice, more than any other score."},
+  {"id": "m223", "s": "math", "k": "Data & Probability", "r": 200, "q": "A bag has 2 red, 3 blue, and 5 yellow cubes. Which color are you most likely to pick without looking?", "ch": ["yellow", "All are equally likely.", "blue", "red"], "a": 0, "exp": "There are more yellow cubes (5) than any other color."},
+  {"id": "m224", "s": "math", "k": "Data & Probability", "r": 207, "q": "A bar graph shows cans collected: Class A 45, Class B 30, Class C 55. How many cans did the three classes collect altogether?", "ch": ["120", "130", "140", "85"], "a": 1, "exp": "45 + 30 + 55 = 130."},
+  {"id": "m225", "s": "math", "k": "Data & Probability", "r": 226, "q": "Five numbers have a mean (average) of 6. What is the total of the five numbers?", "ch": ["30", "6", "11", "1.2"], "a": 0, "exp": "Mean = total ÷ how many, so total = 6 × 5 = 30."}
+);
+
+
 const TIPS = {
   "Vocabulary":"Use context clues: read the sentences around the word and look for examples, synonyms, or opposites.",
   "Literary Text":"Before answering, ask: Who? What do they want? What is the problem? What is the lesson?",
@@ -685,6 +997,96 @@ const WRITING_RUBRIC = [
   ["Sentences", "Complete sentences that start in different ways and have different lengths."],
   ["Conventions", "Capital letters, end punctuation, commas, and spelling are checked."]
 ];
+
+/* v7: questions aimed at recorded mistakes: 86 questions */
+DB.push(
+  {"id": "m226", "s": "math", "k": "Data & Probability", "r": 205, "q": "What is the range of 3, 8, 5, 12, 6?", "ch": ["9", "6", "34", "12"], "a": 0, "exp": "Range = greatest - least = 12 - 3 = 9."},
+  {"id": "m227", "s": "math", "k": "Data & Probability", "r": 210, "q": "Temperatures this week were 18°C, 25°C, 21°C, 30°C, and 16°C. What is the range?", "ch": ["16°C", "9°C", "21°C", "14°C"], "a": 3, "exp": "Greatest minus least: 30 - 16 = 14. (21 is the median, not the range.)"},
+  {"id": "m228", "s": "math", "k": "Data & Probability", "r": 213, "q": "The range of a set of numbers is ...", "ch": ["the middle number when they are in order", "the number that appears most often", "the total divided by how many numbers there are", "the greatest number minus the least number"], "a": 3, "exp": "Range = greatest - least. Middle number = median. Most often = mode. Total ÷ count = mean."},
+  {"id": "m229", "s": "math", "k": "Data & Probability", "r": 208, "q": "The median of a set of numbers is ...", "ch": ["the total of all the numbers", "the middle number when the numbers are in order", "the greatest number minus the least number", "the number that appears most often"], "a": 1, "exp": "Put the numbers in order. The median is the one in the middle."},
+  {"id": "m230", "s": "math", "k": "Data & Probability", "r": 212, "q": "What is the median of 8, 3, 10, 5, 7?", "ch": ["10", "7", "6.6", "5"], "a": 1, "exp": "Order them first: 3, 5, 7, 8, 10. The middle number is 7. (6.6 is the mean.)"},
+  {"id": "m231", "s": "math", "k": "Data & Probability", "r": 222, "q": "What is the median of 6, 2, 9, 4?", "ch": ["5.25", "4", "5", "6"], "a": 2, "exp": "In order: 2, 4, 6, 9. Two numbers are in the middle (4 and 6), so the median is halfway between them: 5."},
+  {"id": "m232", "s": "math", "k": "Data & Probability", "r": 207, "q": "What is the mean (average) of 2, 3, 7, and 12?", "ch": ["24", "6", "5", "10"], "a": 1, "exp": "Add them: 2 + 3 + 7 + 12 = 24. Divide by how many numbers (4): 24 ÷ 4 = 6."},
+  {"id": "m233", "s": "math", "k": "Data & Probability", "r": 216, "q": "Mia's spelling scores were 8, 9, 7, 10, and 6. What was her mean score?", "ch": ["40", "4", "8", "10"], "a": 2, "exp": "Total = 40. There are 5 scores, so the mean is 40 ÷ 5 = 8."},
+  {"id": "m234", "s": "math", "k": "Data & Probability", "r": 211, "q": "What is the mode of 4, 7, 7, 2, 9, 4, 7?", "ch": ["7", "9", "2", "4"], "a": 0, "exp": "7 appears three times, more than any other number."},
+  {"id": "m235", "s": "math", "k": "Data & Probability", "r": 219, "q": "What is the mode of 12, 15, 12, 18, 15, 12?", "ch": ["6", "14", "12", "15"], "a": 2, "exp": "12 appears three times. (14 is the mean and 6 is the range.)"},
+  {"id": "m236", "s": "math", "k": "Data & Probability", "r": 224, "q": "For the data 5, 9, 9, 12, 15, which statement is true?", "ch": ["The mode is 12 and the range is 10.", "The median is 12 and the mean is 9.", "The range is 15 and the mode is 5.", "The mode is 9 and the range is 10."], "a": 3, "exp": "Mode: 9 appears twice. Range: 15 - 5 = 10. (The median is 9 and the mean is 10.)"},
+  {"id": "m237", "s": "math", "k": "Data & Probability", "r": 227, "q": "Four numbers have a mean of 7. Three of them are 5, 6, and 9. What is the fourth number?", "ch": ["20", "28", "8", "7"], "a": 2, "exp": "The four numbers add to 4 × 7 = 28. 28 - 5 - 6 - 9 = 8."},
+  {"id": "m238", "s": "math", "k": "Data & Probability", "r": 214, "q": "A bag has 3 red, 5 blue, and 2 yellow marbles. What is the probability of picking a red marble?", "ch": ["3/7", "3/5", "3/10", "1/3"], "a": 2, "exp": "There are 3 + 5 + 2 = 10 marbles in all, and 3 are red: 3/10. Always divide by ALL the marbles."},
+  {"id": "m239", "s": "math", "k": "Data & Probability", "r": 220, "q": "A bag has 6 green cubes and 4 purple cubes. What is the probability of picking a purple cube?", "ch": ["3/5", "2/5", "1/4", "4/6"], "a": 1, "exp": "4 purple out of 10 cubes in all = 4/10, which simplifies to 2/5."},
+  {"id": "m240", "s": "math", "k": "Data & Probability", "r": 225, "q": "A spinner has 10 equal parts: 4 red, 3 blue, 2 green, and 1 yellow. What is the probability of NOT landing on red?", "ch": ["1/4", "3/5", "2/5", "1/10"], "a": 1, "exp": "6 of the 10 parts are not red: 6/10 = 3/5."},
+  {"id": "m241", "s": "math", "k": "Data & Probability", "r": 209, "q": "A bar graph shows votes: soccer 12, swimming 8, tennis 5. How many more votes did soccer get than tennis?", "ch": ["25", "7", "4", "17"], "a": 1, "exp": "12 - 5 = 7."},
+  {"id": "m242", "s": "math", "k": "Data & Probability", "r": 218, "q": "A bar graph shows books read: Amy 9, Ben 14, Cara 11. How many more books did Ben and Cara read together than Amy?", "ch": ["5", "16", "34", "25"], "a": 1, "exp": "Ben and Cara together: 14 + 11 = 25. Then 25 - 9 = 16."},
+  {"id": "m243", "s": "math", "k": "Data & Probability", "r": 223, "q": "In a pictograph, each star stands for 4 students. Red has 3 and a half stars. How many students chose red?", "ch": ["16", "14", "12", "7"], "a": 1, "exp": "3 stars = 12 students, and half a star = 2 more. 12 + 2 = 14."},
+  {"id": "m244", "s": "math", "k": "Data & Probability", "r": 228, "q": "Five students are 132 cm, 128 cm, 145 cm, 135 cm, and 125 cm tall. What is the median height?", "ch": ["135 cm", "133 cm", "132 cm", "20 cm"], "a": 2, "exp": "In order: 125, 128, 132, 135, 145. The middle one is 132 cm. (133 is the mean and 20 is the range.)"},
+  {"id": "m245", "s": "math", "k": "Data & Probability", "r": 230, "q": "A bag has 9 blue marbles and 1 white marble. Which event is likely but NOT certain?", "ch": ["picking a blue marble", "picking a blue or a white marble", "picking a white marble", "picking a red marble"], "a": 0, "exp": "Blue is 9 out of 10, so it is likely but could fail. White is unlikely, red is impossible, and blue-or-white is certain."},
+  {"id": "m246", "s": "math", "k": "Operations & Fractions", "r": 206, "q": "6 - 2.4 = ?", "ch": ["8.4", "4.4", "3.6", "4.6"], "a": 2, "exp": "Line up the decimal points and fill the empty places with zeros, then regroup carefully: 6 - 2.4 = 3.6. Check: 3.6 + 2.4 = 6."},
+  {"id": "m247", "s": "math", "k": "Operations & Fractions", "r": 210, "q": "5 - 1.75 = ?", "ch": ["4.75", "3.25", "4.35", "3.35"], "a": 1, "exp": "Line up the decimal points and fill the empty places with zeros, then regroup carefully: 5 - 1.75 = 3.25. Check: 3.25 + 1.75 = 5."},
+  {"id": "m248", "s": "math", "k": "Operations & Fractions", "r": 214, "q": "10 - 4.38 = ?", "ch": ["6.38", "5.72", "6.62", "5.62"], "a": 3, "exp": "Line up the decimal points and fill the empty places with zeros, then regroup carefully: 10 - 4.38 = 5.62. Check: 5.62 + 4.38 = 10."},
+  {"id": "m249", "s": "math", "k": "Operations & Fractions", "r": 218, "q": "20 - 7.45 = ?", "ch": ["12.65", "12.55", "13.55", "13.45"], "a": 1, "exp": "Line up the decimal points and fill the empty places with zeros, then regroup carefully: 20 - 7.45 = 12.55. Check: 12.55 + 7.45 = 20."},
+  {"id": "m250", "s": "math", "k": "Operations & Fractions", "r": 221, "q": "8.2 - 3.57 = ?", "ch": ["4.63", "5.63", "5.37", "4.73"], "a": 0, "exp": "Line up the decimal points and fill the empty places with zeros, then regroup carefully: 8.2 - 3.57 = 4.63. Check: 4.63 + 3.57 = 8.2."},
+  {"id": "m251", "s": "math", "k": "Operations & Fractions", "r": 212, "q": "3.4 + 2.85 = ?", "ch": ["6.15", "3.69", "5.89", "6.25"], "a": 3, "exp": "Write 3.4 as 3.40, then add: 3.40 + 2.85 = 6.25."},
+  {"id": "m252", "s": "math", "k": "Operations & Fractions", "r": 216, "q": "Leo has $10. He buys a book for $6.35. How much money does he have left?", "ch": ["$16.35", "$3.65", "$4.35", "$4.65"], "a": 1, "exp": "$10.00 - $6.35 = $3.65. Check: $3.65 + $6.35 = $10.00."},
+  {"id": "m253", "s": "math", "k": "Operations & Fractions", "r": 209, "q": "1/2 + 1/3 = ?", "ch": ["1/5", "2/5", "2/6", "5/6"], "a": 3, "exp": "Use sixths: 1/2 = 3/6 and 1/3 = 2/6. 3/6 + 2/6 = 5/6. Never add the bottom numbers."},
+  {"id": "m254", "s": "math", "k": "Operations & Fractions", "r": 213, "q": "3/4 - 1/2 = ?", "ch": ["1/4", "2/2", "3/8", "1/2"], "a": 0, "exp": "1/2 = 2/4. Then 3/4 - 2/4 = 1/4."},
+  {"id": "m255", "s": "math", "k": "Operations & Fractions", "r": 219, "q": "2/3 + 1/6 = ?", "ch": ["3/6", "5/6", "3/9", "1/3"], "a": 1, "exp": "2/3 = 4/6. Then 4/6 + 1/6 = 5/6."},
+  {"id": "m256", "s": "math", "k": "Operations & Fractions", "r": 224, "q": "5/8 - 1/4 = ?", "ch": ["6/8", "3/8", "4/4", "1/2"], "a": 1, "exp": "1/4 = 2/8. Then 5/8 - 2/8 = 3/8."},
+  {"id": "m257", "s": "math", "k": "Operations & Fractions", "r": 222, "q": "1 - 2/5 - 1/5 = ?", "ch": ["3/5", "1/5", "2/5", "4/5"], "a": 2, "exp": "1 whole = 5/5. 5/5 - 2/5 - 1/5 = 2/5."},
+  {"id": "m258", "s": "math", "k": "Operations & Fractions", "r": 226, "q": "A book has 120 pages. Sam read 1/4 of it on Monday and 1/3 of it on Tuesday. How many pages has he read so far?", "ch": ["70", "50", "60", "84"], "a": 0, "exp": "1/4 of 120 = 30 and 1/3 of 120 = 40. 30 + 40 = 70 pages. (50 is the number of pages left.)"},
+  {"id": "m259", "s": "math", "k": "Operations & Fractions", "r": 228, "q": "A ribbon is 3 m long. Jo uses 3/5 of it. How many centimeters of ribbon are left?", "ch": ["120 cm", "60 cm", "200 cm", "180 cm"], "a": 0, "exp": "3 m = 300 cm. If 3/5 is used, 2/5 is left. 1/5 of 300 = 60, so 2/5 = 120 cm."},
+  {"id": "m260", "s": "math", "k": "Operations & Fractions", "r": 215, "q": "8 + 3 × 5 = ?", "ch": ["26", "16", "55", "23"], "a": 3, "exp": "Multiply before adding: 3 × 5 = 15, then 8 + 15 = 23."},
+  {"id": "m261", "s": "math", "k": "Operations & Fractions", "r": 223, "q": "(12 - 4) × 3 + 2 = ?", "ch": ["40", "30", "26", "22"], "a": 2, "exp": "Brackets first: 12 - 4 = 8. Then multiply: 8 × 3 = 24. Then add: 24 + 2 = 26."},
+  {"id": "m262", "s": "math", "k": "Operations & Fractions", "r": 227, "q": "50 - 6 × (4 + 3) = ?", "ch": ["8", "45", "29", "308"], "a": 0, "exp": "Brackets: 4 + 3 = 7. Multiply: 6 × 7 = 42. Subtract: 50 - 42 = 8."},
+  {"id": "m263", "s": "math", "k": "Operations & Fractions", "r": 220, "q": "75 children are going on a trip. Each bus holds 20 children. How many buses are needed?", "ch": ["3", "3.75", "4", "5"], "a": 2, "exp": "75 ÷ 20 = 3 remainder 15. The 15 extra children still need a bus, so 4 buses."},
+  {"id": "m264", "s": "math", "k": "Number Sense", "r": 205, "q": "Which number is prime?", "ch": ["9", "15", "21", "13"], "a": 3, "exp": "13 has only two factors, 1 and 13. 15 = 3 × 5, 21 = 3 × 7, 9 = 3 × 3."},
+  {"id": "m265", "s": "math", "k": "Number Sense", "r": 211, "q": "Which number is NOT prime?", "ch": ["29", "23", "31", "27"], "a": 3, "exp": "27 = 3 × 9, so it has more than two factors."},
+  {"id": "m266", "s": "math", "k": "Number Sense", "r": 214, "q": "Which list shows only prime numbers?", "ch": ["2, 3, 5, 7", "2, 4, 6, 8", "1, 3, 5, 7", "3, 5, 7, 9"], "a": 0, "exp": "1 is not prime, 9 = 3 × 3, and 4, 6, 8 are even numbers greater than 2."},
+  {"id": "m267", "s": "math", "k": "Number Sense", "r": 217, "q": "How many factors does 12 have?", "ch": ["12", "5", "6", "4"], "a": 2, "exp": "The factors of 12 are 1, 2, 3, 4, 6, and 12: six factors."},
+  {"id": "m268", "s": "math", "k": "Number Sense", "r": 219, "q": "What is the least common multiple of 4 and 6?", "ch": ["2", "12", "24", "10"], "a": 1, "exp": "Multiples of 4: 4, 8, 12. Multiples of 6: 6, 12. The first one they share is 12."},
+  {"id": "m269", "s": "math", "k": "Number Sense", "r": 222, "q": "What is the least common multiple of 3 and 5?", "ch": ["30", "15", "1", "8"], "a": 1, "exp": "Multiples of 5: 5, 10, 15. 15 is also a multiple of 3."},
+  {"id": "m270", "s": "math", "k": "Number Sense", "r": 225, "q": "What is the least common multiple of 8 and 12?", "ch": ["96", "4", "24", "48"], "a": 2, "exp": "Multiples of 12: 12, 24. 24 is also a multiple of 8 (8 × 3). 96 is a common multiple, but not the least."},
+  {"id": "m271", "s": "math", "k": "Number Sense", "r": 216, "q": "What is the greatest common factor of 12 and 18?", "ch": ["36", "6", "3", "2"], "a": 1, "exp": "Factors of 12: 1, 2, 3, 4, 6, 12. Factors of 18: 1, 2, 3, 6, 9, 18. The greatest shared one is 6."},
+  {"id": "m272", "s": "math", "k": "Number Sense", "r": 213, "q": "Which temperature is colder: -5°C or -2°C?", "ch": ["You cannot tell.", "They are the same.", "-2°C", "-5°C"], "a": 3, "exp": "On a number line, -5 is farther below zero than -2, so -5°C is colder."},
+  {"id": "m273", "s": "math", "k": "Number Sense", "r": 220, "q": "Which list is in order from least to greatest?", "ch": ["0, -2, -6, 3", "-6, -2, 0, 3", "3, 0, -2, -6", "-2, -6, 0, 3"], "a": 1, "exp": "The farther left on the number line, the smaller: -6 < -2 < 0 < 3."},
+  {"id": "m274", "s": "math", "k": "Number Sense", "r": 226, "q": "Which comparison is true?", "ch": ["-7 < -4", "-4 < -7", "-7 > -4", "-7 = -4"], "a": 0, "exp": "-7 is farther below zero than -4, so -7 is less than -4."},
+  {"id": "m275", "s": "math", "k": "Number Sense", "r": 218, "q": "What is 0.25 written as a fraction in simplest form?", "ch": ["1/4", "2/5", "25/10", "1/25"], "a": 0, "exp": "0.25 = 25/100, which simplifies to 1/4."},
+  {"id": "m276", "s": "math", "k": "Number Sense", "r": 221, "q": "Which decimal is equal to 3/5?", "ch": ["3.5", "0.6", "0.35", "0.53"], "a": 1, "exp": "3/5 = 6/10 = 0.6."},
+  {"id": "m277", "s": "math", "k": "Number Sense", "r": 228, "q": "Which number is a multiple of both 6 and 9?", "ch": ["27", "30", "12", "18"], "a": 3, "exp": "18 = 6 × 3 = 9 × 2. 12 and 30 are not multiples of 9; 27 is not a multiple of 6."},
+  {"id": "m278", "s": "math", "k": "Algebra & Patterns", "r": 208, "q": "What is the next number? 1, 4, 9, 16, 25, ___", "ch": ["34", "36", "30", "49"], "a": 1, "exp": "These are square numbers: 1×1, 2×2, 3×3, 4×4, 5×5. Next is 6 × 6 = 36."},
+  {"id": "m279", "s": "math", "k": "Algebra & Patterns", "r": 212, "q": "What is the next number? 3, 6, 12, 24, ___", "ch": ["72", "36", "30", "48"], "a": 3, "exp": "Each number is doubled: 24 × 2 = 48."},
+  {"id": "m280", "s": "math", "k": "Algebra & Patterns", "r": 215, "q": "A rule changes each input to an output. Input 1 gives 5, input 2 gives 8, and input 3 gives 11. What is the output for input 5?", "ch": ["20", "14", "17", "15"], "a": 2, "exp": "The rule is multiply by 3, then add 2 (1 → 5, 2 → 8, 3 → 11). For 5: 5 × 3 + 2 = 17."},
+  {"id": "m281", "s": "math", "k": "Algebra & Patterns", "r": 219, "q": "Input 2 gives 9, input 3 gives 13, and input 5 gives 21. Which rule works for ALL of them?", "ch": ["multiply by 5, then subtract 1", "multiply by 3, then add 3", "add 7", "multiply by 4, then add 1"], "a": 3, "exp": "Check every pair, not just the first. 4 × 2 + 1 = 9, 4 × 3 + 1 = 13, 4 × 5 + 1 = 21. The other rules only work for input 2."},
+  {"id": "m282", "s": "math", "k": "Algebra & Patterns", "r": 223, "q": "Input 4 gives 11, input 6 gives 15, and input 10 gives 23. What is the output for input 7?", "ch": ["17", "19", "18", "16"], "a": 0, "exp": "Each time the input goes up by 1, the output goes up by 2. The rule is multiply by 2, then add 3. For 7: 7 × 2 + 3 = 17."},
+  {"id": "m283", "s": "math", "k": "Algebra & Patterns", "r": 210, "q": "Which expression is equal to 3 × (4 + 6)?", "ch": ["3 × 4 × 6", "3 × 4 + 3 × 6", "3 × 4 + 6", "3 + 4 × 6"], "a": 1, "exp": "Multiply 3 by each number inside the brackets: 3 × 4 + 3 × 6 = 12 + 18 = 30."},
+  {"id": "m284", "s": "math", "k": "Algebra & Patterns", "r": 217, "q": "What is 5 × (8 - 3)?", "ch": ["10", "15", "37", "25"], "a": 3, "exp": "Brackets first: 8 - 3 = 5. Then 5 × 5 = 25."},
+  {"id": "m285", "s": "math", "k": "Algebra & Patterns", "r": 221, "q": "A number is doubled, and then 5 is added. The answer is 29. What is the number?", "ch": ["12", "17", "14", "24"], "a": 0, "exp": "Work backward: 29 - 5 = 24, then 24 ÷ 2 = 12."},
+  {"id": "m286", "s": "math", "k": "Algebra & Patterns", "r": 225, "q": "A number is divided by 4, and then 3 is subtracted. The answer is 5. What is the number?", "ch": ["32", "23", "8", "2"], "a": 0, "exp": "Work backward: 5 + 3 = 8, then 8 × 4 = 32."},
+  {"id": "m287", "s": "math", "k": "Algebra & Patterns", "r": 213, "q": "45 ÷ ? = 9. What is the missing number?", "ch": ["5", "54", "4", "36"], "a": 0, "exp": "9 × 5 = 45, so 45 ÷ 5 = 9."},
+  {"id": "m288", "s": "math", "k": "Algebra & Patterns", "r": 227, "q": "What is the next number? 2, 5, 10, 17, 26, ___", "ch": ["36", "37", "35", "39"], "a": 1, "exp": "The jumps are +3, +5, +7, +9, so the next jump is +11: 26 + 11 = 37."},
+  {"id": "m289", "s": "math", "k": "Algebra & Patterns", "r": 230, "q": "Tickets cost $7 each, plus a $3 booking fee for the whole order. Which expression shows the cost of an order of t tickets?", "ch": ["7 × t + 3", "(7 + 3) × t", "7 + 3 × t", "7 × 3 + t"], "a": 0, "exp": "Each ticket costs 7, so t tickets cost 7 × t. The fee is added once: 7 × t + 3."},
+  {"id": "m290", "s": "math", "k": "Geometry", "r": 207, "q": "Two angles of a triangle are 50° and 70°. What is the third angle?", "ch": ["240°", "60°", "70°", "120°"], "a": 1, "exp": "The angles in a triangle add to 180°. 180 - 50 - 70 = 60°."},
+  {"id": "m291", "s": "math", "k": "Geometry", "r": 213, "q": "A triangle has a right angle and an angle of 35°. What is the third angle?", "ch": ["55°", "125°", "45°", "65°"], "a": 0, "exp": "A right angle is 90°. 180 - 90 - 35 = 55°."},
+  {"id": "m292", "s": "math", "k": "Geometry", "r": 219, "q": "Two angles of a triangle measure 48° and 67°. What is the third angle?", "ch": ["75°", "65°", "55°", "115°"], "a": 1, "exp": "48 + 67 = 115. Then 180 - 115 = 65°."},
+  {"id": "m293", "s": "math", "k": "Geometry", "r": 216, "q": "Two angles together make a straight line. One of them is 65°. What is the other?", "ch": ["125°", "25°", "115°", "295°"], "a": 2, "exp": "Angles on a straight line add to 180°: 180 - 65 = 115°. (25° would be for a right angle.)"},
+  {"id": "m294", "s": "math", "k": "Geometry", "r": 222, "q": "Three angles meet at a point and make a full turn. Two of them are 100° and 120°. What is the third?", "ch": ["140°", "160°", "220°", "40°"], "a": 0, "exp": "A full turn is 360°. 360 - 100 - 120 = 140°."},
+  {"id": "m295", "s": "math", "k": "Geometry", "r": 211, "q": "A rectangle is 7 cm long and 5 cm wide. What is its perimeter?", "ch": ["35 cm", "12 cm", "17 cm", "24 cm"], "a": 3, "exp": "Perimeter = all four sides: 7 + 5 + 7 + 5 = 24 cm. (35 is the area.)"},
+  {"id": "m296", "s": "math", "k": "Geometry", "r": 218, "q": "A square has an area of 49 square cm. What is its perimeter?", "ch": ["49 cm", "28 cm", "14 cm", "196 cm"], "a": 1, "exp": "Find the side first: 7 × 7 = 49, so each side is 7 cm. Perimeter = 4 × 7 = 28 cm."},
+  {"id": "m297", "s": "math", "k": "Geometry", "r": 224, "q": "A rectangle has an area of 60 square m and a length of 10 m. What is its perimeter?", "ch": ["26 m", "32 m", "70 m", "16 m"], "a": 1, "exp": "Width = 60 ÷ 10 = 6 m. Perimeter = 10 + 6 + 10 + 6 = 32 m."},
+  {"id": "m298", "s": "math", "k": "Geometry", "r": 227, "q": "An L-shape is made of two rectangles: one is 6 m by 2 m and the other is 3 m by 4 m. What is the total area?", "ch": ["48 square m", "30 square m", "15 square m", "24 square m"], "a": 3, "exp": "6 × 2 = 12 and 3 × 4 = 12. 12 + 12 = 24 square m."},
+  {"id": "m299", "s": "math", "k": "Geometry", "r": 229, "q": "A rectangle has a perimeter of 30 cm. Its length is twice its width. How long is it?", "ch": ["20 cm", "15 cm", "10 cm", "5 cm"], "a": 2, "exp": "Half the perimeter is 15 = length + width. If the width is 1 part, the length is 2 parts: 3 parts = 15, so 1 part = 5. Length = 10 cm."},
+  {"id": "l158", "s": "language", "k": "Grammar & Usage", "r": 208, "q": "Which sentence is a run-on?", "ch": ["After I finished my homework, I went outside.", "I finished my homework before dinner.", "I finished my homework, and then I went outside.", "I finished my homework I went outside to play."], "a": 3, "exp": "A run-on joins two complete sentences with nothing between them. 'I finished my homework' and 'I went outside to play' both stand alone."},
+  {"id": "l159", "s": "language", "k": "Grammar & Usage", "r": 212, "q": "Which is the best way to fix this run-on? The bell rang we went to lunch.", "ch": ["The bell rang, we went to lunch.", "The bell, rang we went to lunch.", "The bell rang, so we went to lunch.", "The bell rang we, went to lunch."], "a": 2, "exp": "Use a comma AND a joining word (so, and, but). A comma by itself is still not enough."},
+  {"id": "l160", "s": "language", "k": "Grammar & Usage", "r": 216, "q": "Which sentence is written correctly?", "ch": ["My sister likes art, but I like music.", "My sister likes art, I like music.", "My sister likes art I like music.", "Because my sister likes art."], "a": 0, "exp": "Two complete sentences are joined by a comma plus 'but'. The others are a run-on, a comma splice, and a fragment."},
+  {"id": "l161", "s": "language", "k": "Grammar & Usage", "r": 220, "q": "Which sentence is a run-on?", "ch": ["It was raining, so we stayed inside.", "It was raining we stayed inside and played games.", "Since it was raining, we stayed inside.", "We stayed inside because it was raining."], "a": 1, "exp": "'It was raining' and 'we stayed inside' are both complete sentences, and nothing separates them."},
+  {"id": "l162", "s": "language", "k": "Grammar & Usage", "r": 223, "q": "Which shows two complete sentences written correctly?", "ch": ["The puppy was tired it fell asleep on the rug.", "The puppy was tired. Fell asleep on the rug.", "The puppy was tired. It fell asleep on the rug.", "The puppy was tired, it fell asleep on the rug."], "a": 2, "exp": "Each sentence has its own subject and verb and ends with a period."},
+  {"id": "l163", "s": "language", "k": "Grammar & Usage", "r": 218, "q": "Which group of words is a sentence fragment (not a complete sentence)?", "ch": ["We ran.", "The children ran outside.", "Leo ran down the hallway.", "Running down the hallway."], "a": 3, "exp": "'Running down the hallway' has no subject telling who did it."},
+  {"id": "l164", "s": "language", "k": "Grammar & Usage", "r": 225, "q": "How can you fix this sentence? I wanted to play outside it was too cold.", "ch": ["Put a comma after to.", "Put a comma and the word but after outside.", "Put a comma after wanted.", "Take out the word it."], "a": 1, "exp": "I wanted to play outside, but it was too cold. The comma and 'but' join the two complete sentences."},
+  {"id": "l165", "s": "language", "k": "Grammar & Usage", "r": 229, "q": "Which sentence uses a comma correctly to join two sentences?", "ch": ["We packed our bags and, we left early.", "We packed our bags, we left early.", "We packed our bags, and we left early.", "We packed, our bags and we left early."], "a": 2, "exp": "The comma goes right before the joining word 'and'."},
+  {"id": "l166", "s": "language", "k": "Mechanics", "r": 214, "q": "Choose the correct word. ___ raining, so bring an umbrella.", "ch": ["Itis", "Its'", "Its", "It's"], "a": 3, "exp": "It's means 'it is'. Read it as 'It is raining' to check."},
+  {"id": "l167", "s": "language", "k": "Mechanics", "r": 218, "q": "Which sentence shows that the toys belong to more than one boy?", "ch": ["The boys's toys are in the box.", "The boys' toys are in the box.", "The boy's toys are in the box.", "The boys toys are in the box."], "a": 1, "exp": "For a plural that already ends in s, add only an apostrophe: boys'."},
+  {"id": "l168", "s": "language", "k": "Mechanics", "r": 210, "q": "Which sentence uses the comma and spaces correctly?", "ch": ["I was bored at first, but I had fun.", "I was bored at first but, I had fun.", "I was bored at first,but I had fun.", "I was bored at first ,but I had fun."], "a": 0, "exp": "The comma comes right after 'first' and is followed by one space, then 'but'."},
+  {"id": "l169", "s": "language", "k": "Mechanics", "r": 214, "q": "Which word is spelled correctly?", "ch": ["now a days", "nowdays", "nowadays", "nowadayes"], "a": 2, "exp": "Nowadays is one word: n-o-w-a-d-a-y-s."}
+);
 
 const SKILL_SECTION = {};
 DB.forEach(q => { SKILL_SECTION[q.k] = q.s; });
@@ -776,6 +1178,21 @@ function noteMistake(id, correct){
     if(m.streak >= 2) delete state.mistakes[id];
   }
 }
+/* v4: remember which questions were shown, so new sets prefer questions
+   the child has not seen recently. Mistake review still repeats missed ones on purpose. */
+function markSeen(id){
+  state.seen = state.seen || {};
+  const prev = state.seen[id];
+  state.seen[id] = { n: (prev ? prev.n : 0) + 1, t: Date.now() };
+}
+let pickFresh = false;  // true after "Switch paper": strongly avoid anything seen before
+function seenPenalty(id){
+  const sn = state.seen && state.seen[id];
+  if(!sn) return 0;
+  if(pickFresh) return 150 + 5 * Math.min(sn.n, 6);
+  const days = Math.max(0, (Date.now() - sn.t) / 86400000);
+  return 45 * Math.exp(-days / 7) + 5 * Math.min(sn.n, 6);
+}
 function mistakeIds(){
   return Object.keys(state.mistakes || {}).filter(id => DB.some(q => q.id === id));
 }
@@ -792,19 +1209,33 @@ function pickQuestion(section, ability, used){
     const mast = m === null ? 0.5 : m / 100;
     const explore = (state.skills[q.k] && state.skills[q.k].attempts >= 2) ? 0 : 6;
     const samePassage = (q.p && q.p === lastPassage) ? 70 : 0;
-    const score = -diff * 1.55 + (1 - mast) * 42 + explore + samePassage + Math.random() * 16;
+    const score = -diff * 1.55 + (1 - mast) * 42 + explore + samePassage - seenPenalty(q.id) + Math.random() * 16;
     if(score > bestScore){ bestScore = score; best = q; }
   }
   lastPassage = best && best.p ? best.p : null;
-  return shuffled(best);
+  if(!best) return best;
+  const wasSeen = !!(state.seen && state.seen[best.id]);
+  markSeen(best.id);
+  return Object.assign({}, shuffled(best), { seenBefore: wasSeen });
 }
 function pickSkillQuestion(skill, used){
   let pool = DB.filter(q => q.k === skill && !used.has(q.id));
   if(!pool.length){ used.clear(); pool = DB.filter(q => q.k === skill); }
-  const same = pool.filter(q => q.p && q.p === lastPassage);
-  const q = same.length ? same[0] : pool[Math.floor(Math.random() * pool.length)];
+  const same = pool.filter(q => q.p && q.p === lastPassage && !(pickFresh && state.seen && state.seen[q.id]));
+  let q;
+  if(same.length) q = same[0];
+  else {
+    let bestScore = -1e9;
+    for(const c of pool){
+      const sc = -seenPenalty(c.id) + Math.random() * 12;
+      if(sc > bestScore){ bestScore = sc; q = c; }
+    }
+  }
   lastPassage = q && q.p ? q.p : null;
-  return shuffled(q);
+  if(!q) return q;
+  const wasSeen = !!(state.seen && state.seen[q.id]);
+  markSeen(q.id);
+  return Object.assign({}, shuffled(q), { seenBefore: wasSeen });
 }
 function touchStreak(){
   const t = todayKey();
@@ -840,14 +1271,69 @@ function countdownRows(){
   const rows = [];
   let i = 0;
   for(let t = new Date(start); t <= end && i < 21; t.setDate(t.getDate() + 1)){
-    rows.push({date: todayKey(t), focus: COUNTDOWN_FOCUS[i % COUNTDOWN_FOCUS.length], today: todayKey(t) === todayKey()});
+    const tw = TEST_WEEK[todayKey(t)];
+    rows.push({date: todayKey(t), focus: tw ? tw.title : COUNTDOWN_FOCUS[i % COUNTDOWN_FOCUS.length], today: todayKey(t) === todayKey()});
     i++;
   }
   return rows;
 }
+function freshCount(skill){
+  // questions in this skill not shown in the last 4 days
+  const cutoff = Date.now() - 4 * 86400000;
+  return DB.filter(q => q.k === skill && !(state.seen && state.seen[q.id] && state.seen[q.id].t > cutoff)).length;
+}
+function focusSkills(){
+  // Weakest skill first; if it has fewer than 8 fresh questions left, use the next weakest that does.
+  const w = weakest(4);
+  const fresh = w.filter(x => freshCount(x.k) >= 8);
+  return fresh.length ? fresh.concat(w.filter(x => !fresh.includes(x))) : w;
+}
+/* v7: test-week plan built from this child's results (Nov 16-21): weakest areas were
+   statistics, decimals and fractions, number sense, rules/patterns, angles, run-on sentences,
+   and writing conventions. Each day stays around 45 minutes. */
+const TEST_WEEK = {
+  "2026-11-22": {title: "Day 1 of 6 \u00b7 Statistics: range, median, mean, mode, chance", items: [
+    {id: "rev", label: "Mistake review: 12 questions missed before", action: "review"},
+    {id: "dp", label: "Focus drill: Data & Probability. Before answering, say which one is asked: range, median, mean, or mode", action: "drill", skill: "Data & Probability"},
+    {id: "write", label: "Writing: one 25-minute story. Then check: a space after every comma, and it's = it is", action: "writing"}]},
+  "2026-11-23": {title: "Day 2 of 6 \u00b7 Decimals and fractions", items: [
+    {id: "warm", label: "Warm-up: 12 questions across all subjects", action: "daily"},
+    {id: "ops", label: "Focus drill: Operations & Fractions. Line up decimal points; change fractions to the same bottom number", action: "drill", skill: "Operations & Fractions"},
+    {id: "oral", label: "Speaking: answer 2 interview questions. Give one real example and end with a closing sentence", action: "oral"}]},
+  "2026-11-24": {title: "Day 3 of 6 \u00b7 Number sense and run-on sentences", items: [
+    {id: "ns", label: "Focus drill: Number Sense (primes, factors, multiples, negative numbers)", action: "drill", skill: "Number Sense"},
+    {id: "gu", label: "Focus drill: Grammar & Usage (run-on sentences, verb agreement)", action: "drill", skill: "Grammar & Usage"},
+    {id: "rev", label: "Mistake review: 12 questions missed before", action: "review"}]},
+  "2026-11-25": {title: "Day 4 of 6 \u00b7 Final full mock exam", items: [
+    {id: "mock", label: "Full mock exam. Read every question twice; use scratch paper for every math question", action: "exam"},
+    {id: "rest", label: "Rest afterward. Mistakes from the mock go into the mistake book for tomorrow", action: "none"}]},
+  "2026-11-26": {title: "Day 5 of 6 \u00b7 Patterns, angles, and writing", items: [
+    {id: "rev", label: "Mistake review: go over yesterday's mock mistakes", action: "review"},
+    {id: "alg", label: "Focus drill: Algebra & Patterns. Check a rule against EVERY input, not just the first", action: "drill", skill: "Algebra & Patterns"},
+    {id: "geo", label: "Focus drill: Geometry (triangle = 180\u00b0, straight line = 180\u00b0, full turn = 360\u00b0)", action: "drill", skill: "Geometry"},
+    {id: "write", label: "Writing: one 25-minute opinion piece with 3 paragraphs and transition words", action: "writing"}]},
+  "2026-11-27": {title: "Day 6 of 6 \u00b7 Light review and rest", items: [
+    {id: "warm", label: "Warm-up: 12 questions across all subjects", action: "daily"},
+    {id: "rev", label: "Mistake review: one last set", action: "review"},
+    {id: "oral", label: "Speaking: practise 3 interview questions out loud", action: "oral"},
+    {id: "sleep", label: "Pack the bag tonight and go to bed early", action: "none"}]},
+  "2026-11-28": {title: "Test day", items: [
+    {id: "calm", label: "Eat breakfast, arrive early, read each question twice, and check your work", action: "none"}]}
+};
+function markPlanAction(action, skill){
+  const p = getPlan();
+  const it = p.items.find(x => x.action === action && !p.done[x.id] && (!skill || !x.skill || x.skill === skill));
+  if(it){ p.done[it.id] = true; save(); }
+}
 function getPlan(){  const t = todayKey();
+  const tw = TEST_WEEK[t];
+  if(tw && (!state.plan || state.plan.date !== t || !state.plan.tw)){
+    state.plan = { date: t, tw: 1, title: tw.title, items: tw.items.map(x => Object.assign({}, x)), done: {} };
+    save();
+    return state.plan;
+  }
   if(!state.plan || state.plan.date !== t){
-    const w = weakest(2);
+    const w = focusSkills();
     state.plan = {
       date: t,
       items: [
@@ -927,6 +1413,7 @@ function saveSession(){
       if(ta && currentPart().type === "writing") currentPart().text = ta.value;
       out.exam = {
         part: exam.part,
+        fresh: !!exam.fresh,
         elapsed: (exam.pausedAt || now) - exam.started,
         parts: exam.parts.map(p => Object.assign({}, p, { used: Array.from(p.used) }))
       };
@@ -958,6 +1445,7 @@ function restoreSession(){
       exam = {
         parts: d.exam.parts.map(p => Object.assign({}, p, { used: new Set(p.used || []), answers: p.answers || [], ratings: p.ratings || [] })),
         part: Math.min(Math.max(0, d.exam.part|0), d.exam.parts.length - 1),
+        fresh: !!d.exam.fresh,
         started: now - (d.exam.elapsed || 0),
         pausedAt: now,
         endAt: now + 150*60000,
@@ -1099,6 +1587,7 @@ function viewHome(){
   <div class="grid g2" style="margin-top:16px">
     <div class="card">
       <h2>Today's plan</h2>
+      ${plan.title ? `<div class="kicker" style="margin:2px 0 6px">${esc(plan.title)}</div>` : ""}
       <p style="margin-bottom:10px">A short, focused routine keeps momentum without tiring your child.</p>
       ${plan.items.map(it => `
         <div class="planitem ${plan.done[it.id] ? 'done' : ''}">
@@ -1107,6 +1596,9 @@ function viewHome(){
           ${it.action === 'daily' ? `<button class="go" data-action="startDaily">Start</button>` : ''}
           ${it.action === 'drill' ? `<button class="go" data-action="startDrill" data-skill="${esc(it.skill)}">Start</button>` : ''}
           ${it.action === 'writing' ? `<button class="go" data-action="nav" data-route="writing">Open</button>` : ''}
+          ${it.action === 'review' ? `<button class="go" data-action="startReview">Start</button>` : ''}
+          ${it.action === 'exam' ? `<button class="go" data-action="startExam">Start</button>` : ''}
+          ${it.action === 'oral' ? `<button class="go" data-action="nav" data-route="oral">Open</button>` : ''}
         </div>`).join("")}
     </div>
     <div class="card">
@@ -1228,6 +1720,7 @@ function startPractice(kind, skill){
 }
 function loadPracticeQuestion(){
   if(practice.idx >= practice.count){ finishPractice(); return; }
+  pickFresh = !!practice.fresh;
   let q;
   if(practice.mode === "review"){
     q = shuffled(DB.find(x => x.id === practice.plan[practice.idx]));
@@ -1248,6 +1741,51 @@ function loadPracticeQuestion(){
   practice.used.add(q.id);
   focusQid = q.id;
 }
+function excludeWithPassage(q, used){
+  used.add(q.id);
+  if(q.p) DB.forEach(x => { if(x.p === q.p) used.add(x.id); });
+  lastPassage = null;
+}
+function canSwapPractice(){
+  return practiceActive() && practice.mode !== "review" && !practice.checked && practice.tries === 0 && practice.current;
+}
+function swapPracticeQuestion(){
+  if(!canSwapPractice()) return;
+  excludeWithPassage(practice.current, practice.used);
+  loadPracticeQuestion();
+  render();
+}
+function switchPracticePaper(){
+  if(!canSwapPractice()) return;
+  if(!confirm("Switch to a different paper?\n\nAnswers you already gave in this set still count. The rest of this set will use questions you have not seen before, as far as the question bank allows.")) return;
+  practice.fresh = true;
+  swapPracticeQuestion();
+}
+function canSwapExam(){
+  if(!examActive()) return false;
+  const part = currentPart();
+  return part.type === "mc" && !part.done && part.current;
+}
+function swapExamQuestion(){
+  if(!canSwapExam()) return;
+  const part = currentPart();
+  excludeWithPassage(part.current, part.used);
+  loadExamQuestion(part);
+  render();
+}
+function switchExamPaper(){
+  if(!canSwapExam()) return;
+  if(!confirm("Switch to a different paper?\n\nAnswers you already gave still count. The rest of this mock exam will use questions you have not seen before, as far as the question bank allows.")) return;
+  exam.fresh = true;
+  swapExamQuestion();
+}
+function seenNotice(q, action){
+  if(!q || !q.seenBefore) return "";
+  return `<div class="note" style="margin:0 0 10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <span><b>You have seen this question before.</b> Answer it again, or swap it for a new one.</span>
+    <button class="btn soft small" data-action="${action}">New question</button>
+  </div>`;
+}
 function viewPractice(){
   if(practice.done) return viewResult();
   const q = practice.current;
@@ -1263,6 +1801,7 @@ function viewPractice(){
     </div>
     <div style="display:flex;gap:8px;align-items:center">
       <span class="pill green">Elapsed ${elapsed}</span>
+      ${canSwapPractice() ? `<button class="btn ghost small" data-action="switchPracticePaper">Switch paper</button>` : ""}
       <button class="btn ghost small" data-action="pausePractice">Save &amp; exit</button>
       <button class="btn ghost small" data-action="exitPractice">End set</button>
     </div>
@@ -1272,6 +1811,7 @@ function viewPractice(){
     <span class="qtag">${esc(q.k)}</span>
     <span class="qnum">Question ${practice.idx + 1} of ${practice.count}</span>
   </div>
+  ${canSwapPractice() ? seenNotice(q, "swapPracticeQuestion") : ""}
   ${q.p ? `<div class="passage ${(q.poem||["r21","r30"].includes(q.id))?`poem`:``}">${esc(q.p)}</div>` : ""}
   <div class="qcard">
     <div class="qtext" tabindex="-1">${esc(q.q)}</div>
@@ -1339,8 +1879,9 @@ function nextPractice(){
 function finishPractice(){
   practice.done = true;
   touchStreak();
-  if(practice.mode === "daily") markPlan("warm");
-  if(practice.mode === "drill") markPlan("focus");
+  if(practice.mode === "daily") markPlanAction("daily");
+  if(practice.mode === "drill") markPlanAction("drill", practice.skill);
+  if(practice.mode === "review") markPlanAction("review");
   const res = buildResult("practice", practice.answers, practice.mode === "drill" ? "Targeted drill: " + practice.skill : (practice.mode === "review" ? "Mistake review" : "Daily adaptive set"), null);
   lastResult = res;
   state.history.push({date:todayKey(), type:"practice", rit:res.overallRit, correct:res.totalCorrect, total:res.total, label:res.title});
@@ -1523,6 +2064,7 @@ function viewMockIntro(){
 }
 function startExam(){
   lastPassage = null;
+  pickFresh = false;
   const first = pickQuestion("reading", state.ability.reading, new Set());
   exam = {
     parts: EXAM_PARTS.map(p => ({
@@ -1559,6 +2101,7 @@ function updateExamTimer(){
 }
 function currentPart(){ return exam.parts[exam.part]; }
 function loadExamQuestion(part){
+  pickFresh = !!(exam && exam.fresh);
   const sec = part.section;
   part.current = pickQuestion(sec, state.ability[sec], part.used);
   part.used.add(part.current.id);
@@ -1578,6 +2121,7 @@ function viewExam(){
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <span class="timer" id="examTimer">Time used ${fmtClock(Date.now() - exam.started)}</span>
+        ${canSwapExam() ? `<button class="btn ghost small" data-action="switchExamPaper">Switch paper</button>` : ""}
         <button class="btn ghost small" data-action="exitExam">Save &amp; exit</button>
       </div>
     </div>`;
@@ -1601,6 +2145,7 @@ function viewExam(){
       <span class="qtag">${esc(q.k)}</span>
       <span class="qnum">${esc(part.label)} question ${part.idx + 1} of ${part.count}</span>
     </div>
+    ${seenNotice(q, "swapExamQuestion")}
     ${q.p ? `<div class="passage ${(q.poem||["r21","r30"].includes(q.id))?`poem`:``}">${esc(q.p)}</div>` : ""}
     <div class="qcard">
       <div class="qtext" tabindex="-1">${esc(q.q)}</div>
@@ -1708,6 +2253,7 @@ function finishExam(timeUp){
   lastResult = res;
   exam.finished = true;
   state.history.push({date:todayKey(), type:"exam", rit:res.overallRit, correct:res.totalCorrect, total:res.total, label:"Mock exam"});
+  markPlanAction("exam");
   if(info.writing && info.writing.words) state.writingDone++;
   touchStreak();
   save();
@@ -1837,7 +2383,7 @@ function markWriting(){
     state.writingLog[key] = true;
     state.writingDone++;
     touchStreak();
-    markPlan("write");
+    markPlanAction("writing");
   }
   save();
   const btn = document.querySelector('[data-action="markWriting"]');
@@ -1997,6 +2543,7 @@ function ensureOralEntry(idx){
 function saveOral(){
   touchStreak();
   ensureOralEntry(oralState.index);
+  markPlanAction("oral");
   save();
   alert("Saved. Next time, try to add one more detail and a stronger closing sentence.");
 }
@@ -2090,6 +2637,8 @@ function viewReport(){
     </table>
     <div class="actions" style="justify-content:flex-start;margin-top:14px">
       <button class="btn ghost small" data-action="exportData">Export progress</button>
+      <button class="btn ghost small" data-action="importData">Import progress</button>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none">
       <button class="btn ghost small" data-action="printReport">Print report</button>
       <button class="btn ghost small" data-action="resetData">Reset data</button>
     </div>
@@ -2207,6 +2756,10 @@ document.addEventListener("click", (e) => {
     return;
   }
   if(action === "pausePractice"){ navigate("home"); return; }
+  if(action === "swapPracticeQuestion"){ swapPracticeQuestion(); return; }
+  if(action === "switchPracticePaper"){ switchPracticePaper(); return; }
+  if(action === "swapExamQuestion"){ swapExamQuestion(); return; }
+  if(action === "switchExamPaper"){ switchExamPaper(); return; }
   if(action === "resumePractice"){ if(practiceActive()){ route = "practice"; render(); window.scrollTo(0,0); } return; }
   if(action === "resumeExam"){ if(examActive()){ startExamTimer(); route = "mock"; render(); window.scrollTo(0,0); } return; }
   if(action === "discardPractice"){
@@ -2280,6 +2833,11 @@ document.addEventListener("click", (e) => {
     a.click();
     return;
   }
+  if(action === "importData"){
+    const inp = document.getElementById("importFile");
+    if(inp){ inp.value = ""; inp.click(); }
+    return;
+  }
   if(action === "printReport"){ window.print(); return; }
   if(action === "resetData"){
     if(confirm("Reset all progress? This cannot be undone.")){
@@ -2289,8 +2847,39 @@ document.addEventListener("click", (e) => {
   }
 });
 
+function importProgressFile(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try{ data = JSON.parse(reader.result); }catch(err){ alert("This file could not be read. Please choose the .json file made by Export progress."); return; }
+    const ok = data && typeof data === "object" && !Array.isArray(data) &&
+      data.skills && typeof data.skills === "object" &&
+      data.ability && typeof data.ability === "object" && Array.isArray(data.history);
+    if(!ok){ alert("This does not look like a practice-lab progress file, so nothing was changed."); return; }
+    const sessions = data.history.length;
+    const mocks = data.history.filter(h => h && h.type === "exam").length;
+    const mistakes = Object.keys(data.mistakes || {}).length;
+    const mine = state.history.length;
+    const msg = "Import this progress file?\n\n" +
+      "It has " + sessions + " practice sessions (" + mocks + " mock exams) and " + mistakes + " saved mistakes.\n\n" +
+      (mine ? "It will REPLACE the progress currently saved in this browser (" + mine + " sessions). Use Export progress first if you want to keep it." : "Nothing is saved in this browser yet.");
+    if(!confirm(msg)) return;
+    try{
+      localStorage.setItem(STORE_KEY, JSON.stringify(data));
+    }catch(err){ alert("This browser would not save the file (storage may be blocked or full)."); return; }
+    state = loadState();
+    practice = null; exam = null; lastResult = null;
+    saveSession();
+    alert("Progress imported: " + sessions + " sessions and " + mistakes + " saved mistakes.");
+    navigate("report");
+  };
+  reader.onerror = () => alert("This file could not be read.");
+  reader.readAsText(file);
+}
+
 document.addEventListener("change", (e) => {
   const el = e.target;
+  if(el.id === "importFile"){ if(el.files && el.files[0]) importProgressFile(el.files[0]); return; }
   if(el.id === "promptSelect"){ changePrompt(el.value); return; }
   if(el.id === "oralSelect"){ changeOral(el.value); return; }
   if(el.id === "testDateInput"){
